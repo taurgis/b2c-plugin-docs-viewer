@@ -2,6 +2,14 @@
   "name": "b2c-plugin-help-docs-viewer",
   "version": "0.1.0",
   "description": "B2C CLI plugin for Salesforce Help search and article details.",
+  "homepage": "https://github.com/taurgis/b2c-plugin-docs-viewer#readme",
+  "bugs": {
+    "url": "https://github.com/taurgis/b2c-plugin-docs-viewer/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/taurgis/b2c-plugin-docs-viewer.git"
+  },
   "license": "MIT",
   "main": "dist/index.js",
   "files": [
