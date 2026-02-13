@@ -5,10 +5,10 @@ import { getHelpDetails } from "../../lib/helpScraper";
 import { loadLatestSearch } from "../../lib/latestSearch";
 
 export default class DocsHelpSiteArticle extends Command {
-  static description = "Fetch a Salesforce Help article and return the details.";
+  static description = "Fetch a Salesforce Help or Developer doc page and return the details.";
 
   static longDescription =
-    "Accepts a full Help article URL or a numeric ID from the latest search results. " +
+    "Accepts a full Help/Developer docs URL or a numeric ID from the latest search results. " +
     "Run 'b2c docs search-help-site <query>' first if you want to use the ID shortcut.";
 
   static examples = [
@@ -19,7 +19,7 @@ export default class DocsHelpSiteArticle extends Command {
 
   static args = {
     reference: Args.string({
-      description: "Help article URL or result ID from the latest search",
+      description: "Help/Developer docs URL or result ID from the latest search",
       required: true,
     }),
   };
@@ -81,7 +81,7 @@ export default class DocsHelpSiteArticle extends Command {
     }
 
     if (showStatus) {
-      this.log("-> Fetching Help article...");
+      this.log("-> Fetching documentation page...");
     }
 
     const result = await getHelpDetails({

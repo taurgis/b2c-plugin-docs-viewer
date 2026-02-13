@@ -5,10 +5,10 @@ import { searchHelp } from "../../lib/helpSearch";
 import { getHelpDetails } from "../../lib/helpScraper";
 
 export default class DocsFetchResultsHelpSite extends Command {
-  static description = "Search Salesforce Help and immediately fetch details.";
+  static description = "Search Salesforce Help and fetch Help/Developer docs details.";
 
   static longDescription =
-    "Runs a search and then fetches each matching Help article. " +
+    "Runs a search and then fetches each matching Help or Developer docs page. " +
     "Use --out to save results to a file and --json for structured output.";
 
   static examples = [
@@ -42,7 +42,7 @@ export default class DocsFetchResultsHelpSite extends Command {
       description: "Write output to a file",
     }),
     includeNonHelp: Flags.boolean({
-      description: "Include results outside help.salesforce.com",
+      description: "Include results outside help.salesforce.com and developer.salesforce.com",
       default: false,
     }),
     cache: Flags.boolean({

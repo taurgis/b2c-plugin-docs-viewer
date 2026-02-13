@@ -27,7 +27,10 @@ const SKIP_URLS = new Set([
   "https://help.salesforce.com/s/",
   "https://help.salesforce.com/s/login",
 ]);
-const DEFAULT_ALLOWED_HOSTS = new Set(["help.salesforce.com"]);
+const DEFAULT_ALLOWED_HOSTS = new Set([
+  "help.salesforce.com",
+  "developer.salesforce.com",
+]);
 
 export type SearchResult = {
   url: string;
@@ -93,7 +96,7 @@ async function acceptOneTrust(page: Page, timeoutMs: number): Promise<void> {
   }
 }
 
-function normalizeHelpDocContentUrl(rawUrl: string): string {
+export function normalizeHelpDocContentUrl(rawUrl: string): string {
   let url: URL;
   try {
     url = new URL(rawUrl);
@@ -121,7 +124,7 @@ function normalizeHelpDocContentUrl(rawUrl: string): string {
   return articleUrl.toString();
 }
 
-function extractResults(data: any, options: { includeNonHelp: boolean; limit: number }): SearchResult[] {
+export function extractResults(data: any, options: { includeNonHelp: boolean; limit: number }): SearchResult[] {
   const results = Array.isArray(data?.results) ? data.results : [];
   const items: SearchResult[] = [];
   const seen = new Set<string>();

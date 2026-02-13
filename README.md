@@ -1,12 +1,12 @@
 # B2C Plugin: Salesforce Help Search
 
-Search Salesforce Help and fetch article details with caching and secure token storage.
+Search Salesforce Help and fetch Help/Developer docs details with caching and secure token storage.
 
 Highlights:
 
 - Search Salesforce Help with boxed, column-aligned results.
-- Fetch a single article by URL or by ID from the latest search.
-- Fetch search results + content in one command.
+- Fetch a single Help or Developer docs page by URL or by ID from the latest search.
+- Fetch search results + content in one command (supports Help and Developer docs URLs).
 - Cached results are reused for up to 5 days (opt out with `--no-cache`).
 
 ## Install (local development)
@@ -23,7 +23,7 @@ b2c plugins link /path/to/b2c-plugin-help-docs-viewer
 Command overview:
 
 - `b2c docs search-help-site <query>`: Search Help and return a boxed table.
-- `b2c docs help-site-article <url|id>`: Fetch a Help article by URL or by ID.
+- `b2c docs help-site-article <url|id>`: Fetch a Help or Developer docs page by URL or by ID.
 - `b2c docs fetch-results-help-site <query>`: Search and immediately fetch content.
 
 Search for articles:
@@ -89,6 +89,11 @@ b2c docs help-site-article #3
 - Search and detail results are cached under the system temp directory.
 - Cached items are reused for up to 5 days.
 - Use `--no-cache` to bypass cached items and refresh results.
+
+## Testing
+
+- Run unit tests once: `npm test`
+- Run tests in watch mode: `npm run test:watch`
 
 ## Output formats
 

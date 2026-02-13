@@ -2,7 +2,7 @@ import { Args, Command, Flags } from "@oclif/core";
 import { searchHelp } from "../../lib/helpSearch";
 
 export default class DocsSearchHelpSite extends Command {
-  static description = "Search Salesforce Help for matching articles.";
+  static description = "Search Salesforce Help for matching Help and Developer docs pages.";
 
   static longDescription =
     "Queries the Salesforce Help search service and returns a boxed table of results. " +
@@ -36,7 +36,7 @@ export default class DocsSearchHelpSite extends Command {
       default: false,
     }),
     includeNonHelp: Flags.boolean({
-      description: "Include results outside help.salesforce.com",
+      description: "Include results outside help.salesforce.com and developer.salesforce.com",
       default: false,
     }),
     cache: Flags.boolean({
