@@ -1,0 +1,44 @@
+{
+  "fixture": {
+    "id": "help-agentforce-enable",
+    "kind": "help",
+    "url": "https://help.salesforce.com/s/articleView?id=cc.b2c_shopping_agent_enable_agentforce.htm&type=5&release=2.0.1&language=en_us",
+    "focus": [
+      "step-guide",
+      "images",
+      "inline-formatting"
+    ]
+  },
+  "detail": {
+    "url": "https://help.salesforce.com/s/articleView?id=cc.b2c_shopping_agent_enable_agentforce.htm&type=5&release=2.0.1&language=en_us",
+    "title": "Enable Agentforce for Guided Shopping",
+    "markdown": "# Enable Agentforce for Guided Shopping\n\nTurn on Agentforce for Guided Shopping for your B2C storefront.\n\n1.  In your Salesforce org, at the top of the page, click ![Setup](https://sf-zdocs-cdn-prod.zoominsoftware.com/tdta-b2c_merchandiser_administrator-2-production-enus/beac8152-03cc-40b1-b594-e8ed108b8b62/images/setup_icon_no_border.png) and select **Setup**.\n2.  In the Quick Find box, enter and select **Commerce Agentforce Settings**.\n3.  Turn on **Agentforce for Guided Shopping — B2C**, then refresh your browser.\n\n    ![Commerce Agentforce Settings in setup](https://sf-zdocs-cdn-prod.zoominsoftware.com/tdta-b2c_merchandiser_administrator-2-production-enus/beac8152-03cc-40b1-b594-e8ed108b8b62/images/b2c_commerce_agentforce_settings.png)\n\n4.  In the Quick Find box, enter and select **Agentforce Agents**.\n\n    If you don't see this option, check if Einstein Generative AI is turned on. Make sure that you have the correct license and required user permissions for your agent type.\n\n5.  Turn on Agentforce, and then refresh the page.\n6.  Confirm that you can see the **New Agent** button.\n\n    ![Agentforce Agents setting](https://sf-zdocs-cdn-prod.zoominsoftware.com/tdta-b2c_merchandiser_administrator-2-production-enus/beac8152-03cc-40b1-b594-e8ed108b8b62/images/b2c_agentforce_agents_setting.png)\n\n    If you don't see the button, make sure that you have permissions for at least one agent type other than Agentforce (Default)."
+  },
+  "analysis": {
+    "id": "help-agentforce-enable",
+    "kind": "help",
+    "url": "https://help.salesforce.com/s/articleView?id=cc.b2c_shopping_agent_enable_agentforce.htm&type=5&release=2.0.1&language=en_us",
+    "title": "Enable Agentforce for Guided Shopping",
+    "focus": [
+      "step-guide",
+      "images",
+      "inline-formatting"
+    ],
+    "fetchedAt": "2026-02-13T12:50:49.970Z",
+    "current": {
+      "chars": 1443,
+      "codeBlocks": 0,
+      "tables": 0,
+      "images": 3,
+      "orderedSteps": 6,
+      "bullets": 0,
+      "headings": 1
+    },
+    "baseline": null,
+    "exactMatch": null,
+    "charDelta": null,
+    "charDeltaPct": null,
+    "baselineExists": false,
+    "error": null
+  }
+}

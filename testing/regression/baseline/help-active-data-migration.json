@@ -1,0 +1,44 @@
+{
+  "fixture": {
+    "id": "help-active-data-migration",
+    "kind": "help",
+    "url": "https://help.salesforce.com/s/articleView?language=en_US&id=000394720&type=1",
+    "focus": [
+      "article-body",
+      "links",
+      "basic-sections"
+    ]
+  },
+  "detail": {
+    "url": "https://help.salesforce.com/s/articleView?language=en_US&id=000394720&type=1",
+    "title": "Migration of Active Data in B2C Commerce",
+    "markdown": "# Migration of Active Data in B2C Commerce\n\nPublish Date: Nov 25, 2025\n\nDescription\n\nActive Data from environments other than B2C Commerce cannot be imported into your B2C Commerce Production instance.\n\nResolution\n\nIf you are migrating Active Data from sites on the same realm, you can follow the steps in [Manually Migrate Active Data to a New Site](https://help.salesforce.com/s/articleView?id=cc.b2c_manually_migrate_active_data.htm&type=5&language=en_US).\n\nIf you would like to migrate Active Data from a site on one B2C Commerce realm to a site on another B2C Commerce realm, please reach out to Commerce Cloud Support for further assistance as outlined in [How to engage Commerce Cloud Support via the Salesforce Help portal](https://help.salesforce.com/s/articleView?type=1&id=Updated-experience-when-engaging-Commerce-Cloud-Support-in-the-Salesforce-Help-portal&language=en_US). Please note that the migration will take a few days so please reach out at least **ten days** before you put your legacy site into Maintenance Status, and before the Go-Live of your new site. \n\nKnowledge Article Number\n\n000394720"
+  },
+  "analysis": {
+    "id": "help-active-data-migration",
+    "kind": "help",
+    "url": "https://help.salesforce.com/s/articleView?language=en_US&id=000394720&type=1",
+    "title": "Migration of Active Data in B2C Commerce",
+    "focus": [
+      "article-body",
+      "links",
+      "basic-sections"
+    ],
+    "fetchedAt": "2026-02-13T12:50:39.049Z",
+    "current": {
+      "chars": 1116,
+      "codeBlocks": 0,
+      "tables": 0,
+      "images": 0,
+      "orderedSteps": 0,
+      "bullets": 0,
+      "headings": 1
+    },
+    "baseline": null,
+    "exactMatch": null,
+    "charDelta": null,
+    "charDeltaPct": null,
+    "baselineExists": false,
+    "error": null
+  }
+}

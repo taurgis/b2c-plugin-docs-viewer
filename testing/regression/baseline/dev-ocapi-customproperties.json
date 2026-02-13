@@ -1,0 +1,44 @@
+{
+  "fixture": {
+    "id": "dev-ocapi-customproperties",
+    "kind": "developer",
+    "url": "https://developer.salesforce.com/docs/commerce/b2c-commerce/references/b2c-commerce-ocapi/customproperties.html",
+    "focus": [
+      "schema-details",
+      "tables",
+      "examples"
+    ]
+  },
+  "detail": {
+    "url": "https://developer.salesforce.com/docs/commerce/b2c-commerce/references/b2c-commerce-ocapi/customproperties.html",
+    "title": "OCAPI Custom Properties",
+    "markdown": "# OCAPI Custom Properties\n\nThe Open Commerce API allows you to set custom properties of business objects in input documents and to read custom properties in output documents. Whether a business object supports custom properties can be found in the [tables below](#document-types-supporting-custom-properties). Custom properties are always marked with the prefix `c_` and have therefore their own namespace.\n\nThe example below shows a document response including some custom properties in OCAPI:\n\nThe following value types are supported in OCAPI for input and output of custom properties.\n\n-   Text\n-   String\n-   Enum of Strings\n-   Set of Strings\n-   Integer\n-   Enum of Integers\n-   Set of Integers\n-   Double\n-   Set of Doubles\n-   Boolean\n-   EMail\n-   Password\n-   Date\n-   Date+Time\n\nThe value types **HTML** and **Image** are only supported as output, but not as input value type for custom properties in OCAPI.\n\nThe tables below lists the document types that support custom properties in OCAPI SHOP and DATA APIs. OCAPI `modify...` hooks that used the referenced document types can add custom properties using the `c_` prefix. See [Customization With Hooks](https://developer.salesforce.com/docs/commerce/commerce-api/guide/extensibility_via_hooks.html), [Hooks for SHOP API](https://developer.salesforce.com/docs/commerce/b2c-commerce/references/b2c-commerce-ocapi/hooks-shop.html), and [Hooks for DATA API](https://developer.salesforce.com/docs/commerce/b2c-commerce/references/b2c-commerce-ocapi/hooks-data.html) for more information.\n\nThe following shop API documents support custom properties.\n\n| Document Type | Reference |\n| --- | --- |\n| ApproachingDiscount | approaching_discount |\n| Basket | basket |\n| BasketPaymentInstrumentRequest | basket_payment_instrument_request |\n| BonusDiscountLineItem | bonus_discount_line_item |\n| BundledProductItem | bundled_product_item |\n| Category | category |\n| Content | content |\n| ContentFolder | content_folder |\n| CouponItem | coupon_item |\n| CustomObject | custom_object |\n| Customer | customer |\n| CustomerAddress | customer_address |\n| CustomerInfo | customer_info |\n| CustomerPaymentInstrument | customer_payment_instrument |\n| CustomerPaymentInstrumentRequest | customer_payment_instrument_request |\n| CustomerProductList | customer_product_list |\n| CustomerProductListItem | customer_product_list_item |\n| CustomerProductListItemPurchase | customer_product_list_item_purchase |\n| GiftCertificate | gift_certificate |\n| GiftCertificateItem | gift_certificate_item |\n| OptionItem | option_item |\n| Order | order |\n| OrderAddress | order_address |\n| OrderPaymentInstrument | order_payment_instrument |\n| OrderPaymentInstrumentRequest | order_payment_instrument_request |\n| PathRecord | path_record |\n| PaymentCardSpec | payment_card_spec |\n| PaymentMethod | payment_method |\n| PriceAdjustment | price_adjustment |\n| PriceAdjustmentRequest | price_adjustment_request |\n| Product | product |\n| ProductItem | product_item |\n| ProductListItem | product_list_item |\n| ProductListItemReference | product_list_item_reference |\n| ProductListLink | product_list_link |\n| ProductSearchHit | product_search_hit |\n| Promotion | promotion |\n| PublicProductList | public_product_list |\n| PublicProductListItem | public_product_list_item |\n| PublicProductListLink | public_product_list_link |\n| Recommendation | recommendation |\n| Shipment | shipment |\n| ShippingItem | shipping_item |\n| ShippingMethod | shipping_method |\n| ShippingPromotion | shipping_promotion |\n| Store | store |\n| SuggestedCategory | suggested_category |\n| SuggestedContent | suggested_content |\n| SuggestedPhrase | suggested_phrase |\n| SuggestedProduct | suggested_product |\n| Suggestion | suggestion |\n\nThe following DATA API documents support custom properties.\n\n| Document Type | Reference |\n| --- | --- |\n| Campaign | campaign |\n| Catalog | catalog |\n| Category | category |\n| ContentAsset | content_asset |\n| ContentFolder | content_folder |\n| Coupon | coupon |\n| CustomObject | custom_object |\n| Customer | customer |\n| CustomerAddress | customer_address |\n| CustomerGroup | customer_group |\n| GiftCertificate | gift_certificate |\n| OrderUpdateRequest | order_update_request |\n| OrganizationPreferences | organization_preferences |\n| PathRecord | path_record |\n| PaymentInstrumentUpdateRequest | payment_instrument_update_request |\n| PaymentTransactionUpdateRequest | payment_transaction_update_request |\n| Product | product |\n| ProductInventoryRecord | product_inventory_record |\n| Promotion | promotion |\n| PromotionCampaignAssignment | promotion_campaign_assignment |\n| RedemptionLimitPerPeriod | redemption_limit_per_period |\n| RedemptionLimits | redemption_limits |\n| ShippingAddressUpdateRequest | shipping_address_update_request |\n| SitePreferences | site_preferences |\n| SlotConfiguration | slot_configuration |\n| SortingRule | sorting_rule |\n| SortingRuleStep | sorting_rule_step |\n| Store | store |\n\n```txt\nREQUEST: GET /dw/shop/v24_5/products/creative-zen-v HTTP/1.1\nHost: example.com\nAccept: application/json\n\nRESPONSE: HTTP/1.1 200 OK\nContent-Type:  application/json; charset=UTF-8\nCache-Control:  max-age=900,must-revalidate\n{\n   ...\n   \"c_mediaFormat\" : [ \"0010\", \"0020\", \"0030\", \"0040\" ],\n   \"c_memorySize\" : \"1GB\",\n   \"c_tabDescription\" : \"The ZEN V player was designed for people like you those who walk a step or two ahead of the pack.\"\n}\n```"
+  },
+  "analysis": {
+    "id": "dev-ocapi-customproperties",
+    "kind": "developer",
+    "url": "https://developer.salesforce.com/docs/commerce/b2c-commerce/references/b2c-commerce-ocapi/customproperties.html",
+    "title": "OCAPI Custom Properties",
+    "focus": [
+      "schema-details",
+      "tables",
+      "examples"
+    ],
+    "fetchedAt": "2026-02-13T12:53:04.450Z",
+    "current": {
+      "chars": 5386,
+      "codeBlocks": 1,
+      "tables": 2,
+      "images": 0,
+      "orderedSteps": 0,
+      "bullets": 14,
+      "headings": 1
+    },
+    "baseline": null,
+    "exactMatch": null,
+    "charDelta": null,
+    "charDeltaPct": null,
+    "baselineExists": false,
+    "error": null
+  }
+}

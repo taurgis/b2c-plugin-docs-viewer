@@ -1,0 +1,44 @@
+{
+  "fixture": {
+    "id": "dev-ocapi-propertyselection",
+    "kind": "developer",
+    "url": "https://developer.salesforce.com/docs/commerce/b2c-commerce/references/b2c-commerce-ocapi/propertyselection.html",
+    "focus": [
+      "selector-syntax",
+      "tables",
+      "code-samples"
+    ]
+  },
+  "detail": {
+    "url": "https://developer.salesforce.com/docs/commerce/b2c-commerce/references/b2c-commerce-ocapi/propertyselection.html",
+    "title": "OCAPI Property Selection",
+    "markdown": "# OCAPI Property Selection\n\nProperty selectors reduce the number of resource properties retrieved by the API, so you can get only those properties you care about, while reducing network bandwidth.\n\nYou can specify property selectors for all resource types; to do so, you set the `select` parameter on the request. The actual selector value must be enclosed within parentheses. The following table lists the different capabilities of property selectors for different `select` parameter values:\n\n| Capability | Value of select parameter |\n| --- | --- |\n| Include properties of all levels, including complex properties. | (**) |\n| Include properties of top level, except complex properties. | (*) |\n| Include a single property. | (price) (+price) |\n| Exclude a single property. | (-price) |\n| Include the child document properties. | (variation_attributes.(**)) |\n| Return only the first document in array. Index starts with 0. | (variation_attributes[0].(**)) |\n| Return only the first 5 documents in array. Index starts with 0. | (variation_attributes[0:4].(**)) |\n| Return only the second, fourth, and sixth document in array. Index starts with 0. | (variation_attributes[1,3,5].(**)) |\n| Return only documents in array that match the filter. Filter expression syntax is ?(_boolean_expression_). Supported Operators: ==, !=, <=, >=, <, > | (variation_attributes[?(@.name=='color')].(**)) |\n| Combine OR (\\|\\|) and AND (&&) in a filter. | (variation_attributes[?(@.name=='color' && @.id=='size')].(**)) |\n\nYou can specify a single property name or a comma-separated list of property names enclosed by parentheses. The following example shows how you can select the `name`, `id`, and `variation_attributes` properties of the product resource instance:\n\nTo select a child property, remember to accurately specify all of the result levels. The following example shows a filtered order search with a select that goes three levels deep to select and sort by fields on the retrieved order records.\n\nThere are two types of properties, where an extra selector element is required: *Localized\\_ and \\_SiteSpecific*.\n\nValues of *Localized* properties depend on the locale, therefore a valid locale has to be included in the selector. An example of such a property is a product name. Whether a property is localized is typically noted in the property description.\n\nFor instance, this selector chooses all results with a certain name in the *default* locale.\n\n*SiteSpecific* properties are attributes where a value of the property depends on the selected site. The site-specific value is to be accessed with *default@Site.* As an example, a product’s validity dates are a site-specific date-time property.\n\nThis is an example of a selector that queries for results with a site-specific property being equal to a value for the site *SiteGenesis*:\n\n```txt\nREQUEST:\nGET /dw/shop/v24_5/products/123/variations?select=(name,id,variation_attributes.(**)) HTTP/1.1\nHost: example.com\nAccept: application/json\n\nRESPONSE:\nHTTP/1.1 200 OK\nContent-Length: 29\nContent-Type: application/json; charset=UTF-8\n\n{\n  \"_v\" : \"24.5\",\n  \"name\":\"foo\",\n  \"id\":\"123\",\n  \"variation_attributes\":[{\n    \"id\":\"color\",\n    \"name\":\"Color\",\n    \"values\":[{\n       \"value\":\"red\",\n       \"name\":\"Red\",\n       \"description\":\"\"\n    },\n    {\n       \"value\":\"blue\",\n       \"name\":\"Blue\",\n       \"description\":\"\"\n    }]\n  },\n  {\n    \"id\":\"size\",\n    \"name\":\"Size\",\n    \"values\":[{\n       \"value\":\"M\",\n       \"name\":\"Medium\",\n       \"description\":\"\"\n    },\n    {\n       \"value\":\"L\",\n       \"name\":\"Large\",\n       \"description\":\"\"\n    }]\n  }]\n}\n```\n\n```txt\nREQUEST:\nPOST /dw/shop/v24_5/order_search HTTP/1.1\nHost: example.com\nAccept: application/json\n{\n  \"query\" : {\n    \"filtered_query\": {\n      \"filter\": {\n        \"range_filter\": {\n          \"field\": \"creation_date\",\n          \"from\": \"2020-03-08T00:00:00.000Z\",\n          \"to\": \"2020-03-10T00:00:00.000Z\"\n        }\n      },\n      \"query\" : {\n        \"match_all_query\": {}\n      }\n    }\n  },\n  \"select\" : \"(hits.(data.(creation_date,confirmation_status,total)))\",\n  \"sorts\" : [{\"field\":\"creation_date\", \"sort_order\":\"asc\"}]\n}\n\nRESPONSE:\nHTTP/1.1 200 OK\nContent-Length: 29\nContent-Type: application/json; charset=UTF-8\n\n{\n  \"_v\":\"24.5\",\n  \"_type\":\"order_search_result\",\n  \"hits\": [\n    {\n      \"_type\":\"order_search_hit\",\n      \"data\": {\n        \"_type\":\"order\",\n        \"creation_date\":\"2020-03-08T04:15:00.000Z\",\n        \"confirmation_status\":\"confirmed\",\n        \"total\":19.95\n      }\n    },\n    {\n      \"_type\":\"order_search_hit\",\n      \"data\": {\n        \"_type\":\"order\",\n        \"creation_date\":\"2020-03-08T07:30:00.000Z\",\n        \"confirmation_status\":\"confirmed\",\n        \"total\":75.29\n      }\n    }\n  ]\n}\n```\n\n```text\n(data[?(@.name.default=='Product+Name')].(**))\n```\n\n```text\n(data[?(@.valid_from.default@SiteGenesis=='2016-02-21T04:00:00.000Z')].(**))\n```"
+  },
+  "analysis": {
+    "id": "dev-ocapi-propertyselection",
+    "kind": "developer",
+    "url": "https://developer.salesforce.com/docs/commerce/b2c-commerce/references/b2c-commerce-ocapi/propertyselection.html",
+    "title": "OCAPI Property Selection",
+    "focus": [
+      "selector-syntax",
+      "tables",
+      "code-samples"
+    ],
+    "fetchedAt": "2026-02-13T12:52:59.285Z",
+    "current": {
+      "chars": 4865,
+      "codeBlocks": 4,
+      "tables": 1,
+      "images": 0,
+      "orderedSteps": 0,
+      "bullets": 0,
+      "headings": 1
+    },
+    "baseline": null,
+    "exactMatch": null,
+    "charDelta": null,
+    "charDeltaPct": null,
+    "baselineExists": false,
+    "error": null
+  }
+}

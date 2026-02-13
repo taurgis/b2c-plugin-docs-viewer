@@ -1,6 +1,6 @@
 {
   "name": "b2c-plugin-help-docs-viewer",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "B2C CLI plugin for Salesforce Help search and article details.",
   "homepage": "https://github.com/taurgis/b2c-plugin-docs-viewer#readme",
   "bugs": {
@@ -19,7 +19,10 @@
     "build": "tsc -p tsconfig.json",
     "clean": "rm -rf dist",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "regression:suite": "node testing/regression/run-suite.mjs",
+    "regression:promote": "node testing/regression/run-suite.mjs --promote",
+    "regression:check": "node testing/regression/run-suite.mjs --strict"
   },
   "keywords": [
     "b2c",

@@ -105,6 +105,21 @@ b2c docs help-site-article #3
 - Run unit tests once: `npm test`
 - Run tests in watch mode: `npm run test:watch`
 
+### Regression suite (real pages)
+
+- Fixture list: `testing/regression/fixtures.json`
+- Scrape + compare against baseline: `npm run regression:suite`
+- Refresh baseline from latest scrape: `npm run regression:promote`
+- Fail on drift (CI mode): `npm run regression:check`
+
+Notes:
+
+- The regression scripts use `dist/lib/helpScraper.js`, so run `npm run build` first.
+- The regression suite config/scripts are tracked in git under `testing/regression/`.
+- Current run outputs are written to `testing/regression/current/`.
+- Baseline snapshots are stored in `testing/regression/baseline/`.
+- Comparison report: `testing/regression/current/report.json`.
+
 ## Output formats
 
 - Default output is a boxed table for search results and markdown for article content.

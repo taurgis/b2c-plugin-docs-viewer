@@ -1,0 +1,42 @@
+{
+  "fixture": {
+    "id": "dev-ocapi-exportglobaldata",
+    "kind": "developer",
+    "url": "https://developer.salesforce.com/docs/commerce/b2c-commerce/references/b2c-commerce-ocapi/exportglobaldataconfiguration.html",
+    "focus": [
+      "schema-table",
+      "property-list"
+    ]
+  },
+  "detail": {
+    "url": "https://developer.salesforce.com/docs/commerce/b2c-commerce/references/b2c-commerce-ocapi/exportglobaldataconfiguration.html",
+    "title": "ExportGlobalDataConfiguration document",
+    "markdown": "# ExportGlobalDataConfiguration document\n\nDocument representing a configuration for the global data units which should be exported.\n\n| Property | Type | Constraints | Description |\n| --- | --- | --- | --- |\n| access_roles | Boolean |  | Access roles of the organization. |\n| all | Boolean |  | Flag, if all Global Data should be exported. |\n| csc_settings | Boolean |  | Settings for Customer Service Center customization. |\n| csrf_whitelists | Boolean |  | CSRF Allowlists. Where possible, we changed noninclusive terms to align with our company value of Equality. Because changing terms in our code can break current implementations, we maintained this object name. |\n| custom_preference_groups | Boolean |  | Custom Preference Groups (Meta Data). |\n| custom_quota_settings | Boolean |  | Custom quota settings of the instance. |\n| custom_types | Boolean |  | Custom Types (Meta Data). |\n| geolocations | Boolean |  | Geolocations of the organization. |\n| global_custom_objects | Boolean |  | Global custom objects. |\n| job_schedules | Boolean |  | Scheduled job definitions. |\n| job_schedules_deprecated | Boolean |  | Deprecated scheduled job definitions. |\n| locales | Boolean |  | Locales. |\n| meta_data | Boolean |  | System object type extensions and custom object type extensions. |\n| oauth_providers | Boolean |  | OAuth providers. |\n| ocapi_settings | Boolean |  | Global OCAPI settings. |\n| page_meta_tags | Boolean |  | Page meta tag definitions. |\n| preferences | Boolean |  | Global preferences. |\n| price_adjustment_limits | Boolean |  | Price adjustment limits for all roles. |\n| services | Boolean |  | Service definitions from the service framework. |\n| sorting_rules | Boolean |  | Global sorting rules. |\n| static_resources | Boolean |  | Global static resources. |\n| system_type_definitions | Boolean |  | System Type Definitions (Meta Data). |\n| users | Boolean |  | Users of the organization. |\n| webdav_client_permissions | Boolean |  | Global WebDAV Client Permissions. |"
+  },
+  "analysis": {
+    "id": "dev-ocapi-exportglobaldata",
+    "kind": "developer",
+    "url": "https://developer.salesforce.com/docs/commerce/b2c-commerce/references/b2c-commerce-ocapi/exportglobaldataconfiguration.html",
+    "title": "ExportGlobalDataConfiguration document",
+    "focus": [
+      "schema-table",
+      "property-list"
+    ],
+    "fetchedAt": "2026-02-13T12:51:59.435Z",
+    "current": {
+      "chars": 1997,
+      "codeBlocks": 0,
+      "tables": 1,
+      "images": 0,
+      "orderedSteps": 0,
+      "bullets": 0,
+      "headings": 1
+    },
+    "baseline": null,
+    "exactMatch": null,
+    "charDelta": null,
+    "charDeltaPct": null,
+    "baselineExists": false,
+    "error": null
+  }
+}

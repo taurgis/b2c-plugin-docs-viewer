@@ -1,0 +1,44 @@
+{
+  "fixture": {
+    "id": "help-site-import-export-copy-instances",
+    "kind": "help",
+    "url": "https://help.salesforce.com/s/articleView?id=cc.b2c_using_site_import_export_to_copy_instances.htm&type=5&release=2.0.1&language=en_us",
+    "focus": [
+      "procedural-steps",
+      "tables",
+      "image-guidance"
+    ]
+  },
+  "detail": {
+    "url": "https://help.salesforce.com/s/articleView?id=cc.b2c_using_site_import_export_to_copy_instances.htm&type=5&release=2.0.1&language=en_us",
+    "title": "Using Site Import/Export to Copy Instances and Development Testing in B2C Commerce",
+    "markdown": "# Using Site Import/Export to Copy Instances and Development Testing in B2C Commerce\n\nYou can use site import and export to populate a new sandbox instance with data from an existing instance. This topic applies to B2C Commerce.\n\nYou can use Site Import/Export to export SiteGenesis from one instance and then import it into a sandbox. You can then view the site as you customize the code or change configuration settings. Even if you don't intend to use most of the pages in SiteGenesis, you can export the site configuration settings so that you don't have to set them all manually. It's now possible to export portions of site-specific data, such as job schedules, through Site Import/Export. However, this data can only be imported into a site with the same name on another instance, not into a different site on the same instance.\n\nSite Import/Export is only intended for setting up identical sites (same names and IDs) and the same organization-level data across instances. However, the Business Manager UI also lets you export a subset of the instance data.\n\n![Note](https://sf-zdocs-cdn-prod.zoominsoftware.com/tdta-b2c_merchandiser_administrator-2-production-enus/beac8152-03cc-40b1-b594-e8ed108b8b62/images/icon_note.png)\n\nNote Scheduled execution of custom jobs is disabled for sandboxes. If you export a production or staging instance and import it into a sandbox, you can prevent accidentally running jobs that affect staging or production systems. However, you can run jobs manually on sandboxes. We recommend caution if you haven’t examined the job configuration to make sure it doesn't affect other instances.\n\n## Export a Site\n\nExport a site from an existing instance to populate a sandbox with data from the instance.\n\n### Required Editions\n\n| Available in: B2C Commerce |\n| --- |\n\n1.  Log in to Business Manager with an account that has import/export privileges for the site.\n\n    Administrators can check account privileges by selecting **Administration** | **Organization** | **Roles and Permissions**\n\n2.  Select **Administration** | **Site Development** | **Site Import & Export**.\n3.  In the Export field, enter a name for your export file.\n\n    Enter a name, not a path. We recommend that you use the following syntax:\n\n    Full Version:\n\n    `*yyyymmdd*-Full-*version*`\n\n    For example: `20120103-Full-12.1`\n\n    Modules:\n\n    `*yyyymmdd*-ModuleNames-*version*`\n\n    For example: `20120103-Full-12.1`\n\n4.  Select the data you want to export. If you’re exporting SiteGenesis, select all data except users, so that you don't overwrite the users and permissions in the sandboxes.\n\n    ![Note](https://sf-zdocs-cdn-prod.zoominsoftware.com/tdta-b2c_merchandiser_administrator-2-production-enus/beac8152-03cc-40b1-b594-e8ed108b8b62/images/icon_note.png)\n\n    Note If you select the option Save in Global Export Directory, be aware that for Sandboxes, data is available to other Sandboxes in the SIG. For Production, Development, or Staging, data is available to other instances in the PIG.\n\n    1.  Under Data Units to Export, select all categories except Global data of Sites.\n    2.  Under Global data of Sites, select all categories except Users and Access Roles.\n\n        If you don't deselect the categories described, you can overwrite the users and permissions of the target site with those of the site you exported from.\n\n5.  In the Export field, click **Export.**\n6.  Log out of the instance and log in to the instance where you want to import the data.\n\nThe system generates a .zip file containing the site export. If an instance export or backup fails for any reason, the system generates a .zip file, but appends the suffix \"-invalid\" to the filename. We recommend that you establish a mechanism to detect when an invalid file is produced.\n\nSee Also: [Global exports from Commerce Cloud B2C platform PIG instances do not appear in SIG instances](https://help.salesforce.com/s/articleView?id=002326272&language=en_US&type=1)\n\n## Import a Site\n\nTo import a site, first upload the .zip file onto B2C Commerce and then import it into the instance database.\n\n### Required Editions\n\n| Available in: B2C Commerce |\n| --- |\n\n![Note](https://sf-zdocs-cdn-prod.zoominsoftware.com/tdta-b2c_merchandiser_administrator-2-production-enus/beac8152-03cc-40b1-b594-e8ed108b8b62/images/icon_note.png)\n\nNote You can import orders during site import on sandboxes. To use this feature, save a file called order.xml in the site's import folder. The file structure must conform to order.xsd. This feature is only available on sandboxes and is intended for (automatic) testing purposes.\n\n1.  Log in to Business Manager with an account that has import and export privileges for the site. Administrators can check account privileges by selecting **Administration** | **Organization** | **Roles and Permissions**.\n2.  Select **Administration** | **Site Development** | **Site Import & Export**.\n3.  In the Import section, select where you’re importing the site from.\n\n    -   **Local:** upload the site .zip file from your local machine.\n    -   **Remote:** upload the site .zip file from a remote networked machine.\n\n        The remote import supports archive sizes up to 50 GB.\n\n4.  Click **Choose File,** select the site zip file you want to upload, click **Open** and click **Upload.**\n\n    The name of the .zip file appears in the grid when the zip file is successfully uploaded.\n\n5.  In the Select column, select the .zip file and click **Import.**\n6.  To import the selected archive, click **OK.**\n\nTo check the status in the Status section of the page. If the site has imported successfully, the status is set to Success. Otherwise, the status indicates if there are errors. Click the process link to see a log with information on any errors.\n\nSee Also: [Global exports from Commerce Cloud B2C platform PIG instances do not appear in SIG instances](https://help.salesforce.com/s/articleView?id=002326272&language=en_US&type=1)"
+  },
+  "analysis": {
+    "id": "help-site-import-export-copy-instances",
+    "kind": "help",
+    "url": "https://help.salesforce.com/s/articleView?id=cc.b2c_using_site_import_export_to_copy_instances.htm&type=5&release=2.0.1&language=en_us",
+    "title": "Using Site Import/Export to Copy Instances and Development Testing in B2C Commerce",
+    "focus": [
+      "procedural-steps",
+      "tables",
+      "image-guidance"
+    ],
+    "fetchedAt": "2026-02-13T12:52:32.317Z",
+    "current": {
+      "chars": 5940,
+      "codeBlocks": 0,
+      "tables": 2,
+      "images": 3,
+      "orderedSteps": 12,
+      "bullets": 0,
+      "headings": 5
+    },
+    "baseline": null,
+    "exactMatch": null,
+    "charDelta": null,
+    "charDeltaPct": null,
+    "baselineExists": false,
+    "error": null
+  }
+}

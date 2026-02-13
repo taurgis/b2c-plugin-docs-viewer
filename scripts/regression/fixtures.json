@@ -1,0 +1,128 @@
+[
+  {
+    "id": "help-active-data-migration",
+    "kind": "help",
+    "url": "https://help.salesforce.com/s/articleView?language=en_US&id=000394720&type=1",
+    "focus": ["article-body", "links", "basic-sections"]
+  },
+  {
+    "id": "help-agentforce-enable",
+    "kind": "help",
+    "url": "https://help.salesforce.com/s/articleView?id=cc.b2c_shopping_agent_enable_agentforce.htm&type=5&release=2.0.1&language=en_us",
+    "focus": ["step-guide", "images", "inline-formatting"]
+  },
+  {
+    "id": "help-agentforce-b2b-create",
+    "kind": "help",
+    "url": "https://help.salesforce.com/s/articleView?id=commerce.comm_agent_guided_shopping_create_agent.htm&type=5&release=260.0.0&language=en_us",
+    "focus": ["long-step-guide", "images", "tables"]
+  },
+  {
+    "id": "help-agentforce-b2b-considerations",
+    "kind": "help",
+    "url": "https://help.salesforce.com/s/articleView?id=commerce.comm_agent_guided_shopping_considerations.htm&type=5&release=260.0.0&language=en_us",
+    "focus": ["tables", "notes", "section-headings"]
+  },
+  {
+    "id": "help-roles-create",
+    "kind": "help",
+    "url": "https://help.salesforce.com/s/articleView?id=cc.b2c_creating_roles.htm&type=5&release=2.0.1&language=en_us",
+    "focus": ["dense-steps", "tables", "code-snippet"]
+  },
+  {
+    "id": "help-roles-admin",
+    "kind": "help",
+    "url": "https://help.salesforce.com/s/articleView?id=cc.b2c_administrator_role.htm&type=5&release=2.0.1&language=en_us",
+    "focus": ["tables", "role-matrix", "ordered-lists"]
+  },
+  {
+    "id": "dev-ocapi-systemjobs",
+    "kind": "developer",
+    "url": "https://developer.salesforce.com/docs/commerce/b2c-commerce/references/b2c-commerce-ocapi/systemjobs.html",
+    "focus": ["dx-code-block", "request-response-example"]
+  },
+  {
+    "id": "dev-ocapi-exceptions",
+    "kind": "developer",
+    "url": "https://developer.salesforce.com/docs/commerce/b2c-commerce/references/b2c-commerce-ocapi/exceptions.html",
+    "focus": ["large-table", "long-rows"]
+  },
+  {
+    "id": "dev-ocapi-ocapi-settings",
+    "kind": "developer",
+    "url": "https://developer.salesforce.com/docs/commerce/b2c-commerce/references/b2c-commerce-ocapi/ocapisettings.html",
+    "focus": ["mixed-content", "tables", "code"]
+  },
+  {
+    "id": "dev-ocapi-customization",
+    "kind": "developer",
+    "url": "https://developer.salesforce.com/docs/commerce/b2c-commerce/references/b2c-commerce-ocapi/customization.html",
+    "focus": ["code", "images", "examples"]
+  },
+  {
+    "id": "dev-ocapi-exportglobaldata",
+    "kind": "developer",
+    "url": "https://developer.salesforce.com/docs/commerce/b2c-commerce/references/b2c-commerce-ocapi/exportglobaldataconfiguration.html",
+    "focus": ["schema-table", "property-list"]
+  },
+  {
+    "id": "dev-ocapi-batchrequests",
+    "kind": "developer",
+    "url": "https://developer.salesforce.com/docs/commerce/b2c-commerce/references/b2c-commerce-ocapi/batchrequests.html",
+    "focus": ["multiple-code-samples", "batch-format", "request-examples"]
+  },
+  {
+    "id": "dev-ocapi-httpmethods",
+    "kind": "developer",
+    "url": "https://developer.salesforce.com/docs/commerce/b2c-commerce/references/b2c-commerce-ocapi/httpmethods.html",
+    "focus": ["dense-code-reference", "method-examples", "long-markdown"]
+  },
+  {
+    "id": "help-site-import-export",
+    "kind": "help",
+    "url": "https://help.salesforce.com/s/articleView?id=cc.b2c_site_import_export.htm&type=5&release=2.0.1&language=en_us",
+    "focus": ["tables", "steps", "images", "admin-workflow"]
+  },
+  {
+    "id": "help-site-import-export-copy-instances",
+    "kind": "help",
+    "url": "https://help.salesforce.com/s/articleView?id=cc.b2c_using_site_import_export_to_copy_instances.htm&type=5&release=2.0.1&language=en_us",
+    "focus": ["procedural-steps", "tables", "image-guidance"]
+  },
+  {
+    "id": "help-coupons-import-export",
+    "kind": "help",
+    "url": "https://help.salesforce.com/s/articleView?id=cc.b2c_coupons_and_coupon_code_object_import_export.htm&type=5&release=2.0.1&language=en_us",
+    "focus": ["complex-tables", "many-code-snippets", "data-import-export"]
+  },
+  {
+    "id": "dev-ocapi-oauth",
+    "kind": "developer",
+    "url": "https://developer.salesforce.com/docs/commerce/b2c-commerce/references/b2c-commerce-ocapi/oauth.html",
+    "focus": ["auth-flows", "code-samples", "procedural-steps"]
+  },
+  {
+    "id": "dev-ocapi-jwt",
+    "kind": "developer",
+    "url": "https://developer.salesforce.com/docs/commerce/b2c-commerce/references/b2c-commerce-ocapi/jwt.html",
+    "focus": ["token-examples", "code", "request-sequences"]
+  },
+  {
+    "id": "dev-ocapi-propertyselection",
+    "kind": "developer",
+    "url": "https://developer.salesforce.com/docs/commerce/b2c-commerce/references/b2c-commerce-ocapi/propertyselection.html",
+    "focus": ["selector-syntax", "tables", "code-samples"]
+  },
+  {
+    "id": "dev-ocapi-customproperties",
+    "kind": "developer",
+    "url": "https://developer.salesforce.com/docs/commerce/b2c-commerce/references/b2c-commerce-ocapi/customproperties.html",
+    "focus": ["schema-details", "tables", "examples"]
+  },
+  {
+    "id": "help-site-import-export-development-testing",
+    "kind": "help",
+    "url": "https://help.salesforce.com/s/articleView?id=cc.b2c_using_site_import_export_for_development_testing.htm&type=5&release=2.0.1&language=en_us",
+    "focus": ["development-workflow", "ordered-steps", "images"]
+  }
+]

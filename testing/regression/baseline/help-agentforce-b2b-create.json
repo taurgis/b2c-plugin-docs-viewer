@@ -1,0 +1,44 @@
+{
+  "fixture": {
+    "id": "help-agentforce-b2b-create",
+    "kind": "help",
+    "url": "https://help.salesforce.com/s/articleView?id=commerce.comm_agent_guided_shopping_create_agent.htm&type=5&release=260.0.0&language=en_us",
+    "focus": [
+      "long-step-guide",
+      "images",
+      "tables"
+    ]
+  },
+  "detail": {
+    "url": "https://help.salesforce.com/s/articleView?id=commerce.comm_agent_guided_shopping_create_agent.htm&type=5&release=260.0.0&language=en_us",
+    "title": "Create a Guided Shopping Agent for a B2B Store",
+    "markdown": "# Create a Guided Shopping Agent for a B2B Store\n\nCreate a Guided Shopping Agent to unlock agent capabilities in your store. Guided Shopping Agent includes standard topics, which are preconfigured categories of actions that help the agent recognize how to behave and respond for different jobs.\n\n### Required Editions\n\n| View supported editions. |\n| --- |\n\n1.  In your Salesforce org, click ![Setup icon](https://sf-zdocs-cdn-prod.zoominsoftware.com/tdta-comm-260-0-0-production-enus/29108d7d-c8f2-43fe-8a99-16280680c1bb/comm/images/comm_setup_icon_no_border.png) at the top of the page, and then select **Setup**.\n2.  In the Quick Find box, enter Agentforce Agents, and select **Agentforce Agents**.\n3.  To create an agent, click **New Agent**.\n4.  Select the Agentforce for **Guided Shopping - B2B template**, and then click **Next**.\n\n    ![Select an agent window with Agentforce for Guided Shopping - B2B template selected.](https://sf-zdocs-cdn-prod.zoominsoftware.com/tdta-comm-260-0-0-production-enus/29108d7d-c8f2-43fe-8a99-16280680c1bb/comm/images/comm_agent_template.jpg)\n\n5.  On the Review Topics page, review the topics included in this template. Salesforce suggests keeping all default topics.\n\n    The Guided Shopping Agent - B2B template includes standard topics, such as Commerce User Verification and Commerce Product Search Assistant, that you can use as a starting point for common use cases. After creating your agent, you can customize or create custom topics in Agent Builder.\n\n6.  Click **Next**.\n7.  Enter the details for your agent.\n\n    | Name | Guided Shopping Agent |\n    | --- | --- |\n    | API Name | Guided_Shopping_Agent |\n    | Description | Enter a description for the agent.<br>For example, Deliver personalized customer interactions with an autonomous AI agent. Agentforce Guided Shopping Agent intelligently supports your customers with common inquiries related to product and order. |\n    | Role | Enter a job description for the agent. |\n    | Company | Enter a description for the company that the agent represents. |\n    | Agent User | Select a user or create one specifically for your agent.<br>Assign the user a permission set that contains the Agent User license. For example, if you’re creating a Service Agent, you can assign the user to the Agentforce Service Agent User permission set. |\n\n8.  Click **Keep a record of conversations with Enhanced Event Logs to review agent behavior** so you can review and troubleshoot agent sessions. See [Enable Enhanced Event Logs](https://help.salesforce.com/s/articleView?id=ai.copilot_setup_enhanced_event_logs.htm&language=en_US&type=5).\n9.  Click **Next**.\n10.  Click **Create**.\n\n     ![Customize your agent window with information for Guided Shopping Agent entered](https://sf-zdocs-cdn-prod.zoominsoftware.com/tdta-comm-260-0-0-production-enus/29108d7d-c8f2-43fe-8a99-16280680c1bb/comm/images/comm_agent_customize_agent.jpg)\n\n11.  (Optional). To add Guided Shopping topics to a pre-existing agent, select the agent and then click **Open in Builder**. If the agent is active, click **Deactivate**. Click **New** | **Add From Asset Library**. Select the Topics to add, and then click **Finish**.\n\n     The B2B topics are Commerce User Verification, Commerce Order, Commerce Effective Accounts, Commerce Global Instructions, and Commerce Product Search Assistant.\n\n12.  In Agent Builder, select the **Commerce Global Instructions** topic.\n13.  Click **New Version**.\n14.  Locate the instruction that begins with Always use the hardcoded value. Change the webStoreIdValue value to your store's webstore ID.\n\n     This ID is a 15-character record ID beginning with OZE. Always use the hardcoded value '0ZExxxxxxxxxxxx' for the input webStoreId parameter in any action that requires this identifier.\n\n     ![Commerce Global Instructions topic instruction with replaced webstore ID value](https://sf-zdocs-cdn-prod.zoominsoftware.com/tdta-comm-260-0-0-production-enus/29108d7d-c8f2-43fe-8a99-16280680c1bb/comm/images/comm_agent_global_instructions_replace_value.jpg)\n\n     ![Note](https://sf-zdocs-cdn-prod.zoominsoftware.com/tdta-comm-260-0-0-production-enus/29108d7d-c8f2-43fe-8a99-16280680c1bb/images/icon_note.png)\n\n     Note Locate the webStoreUrl on the store's setup page in the URL. ![Location within store setup to find the store's webstore ID.](https://sf-zdocs-cdn-prod.zoominsoftware.com/tdta-comm-260-0-0-production-enus/29108d7d-c8f2-43fe-8a99-16280680c1bb/comm/images/comm_agent_webstore_id_location.jpg)\n\n15.  Save your work.\n16.  In Agent Builder, select the **Commerce Order** topic.\n17.  Click **New Version**.\n18.  Locate the instruction that begins with For the cart URL. Replace {loginPageUrl}?startURL={cartPageUrl}/cart with webStoreUrl/cart, where webStoreUrl is your store's URL. For example, https://mydomain.com/store/cart.\n\n     ![Commerce Order cart URL topic instruction replaced text with example webstore ID](https://sf-zdocs-cdn-prod.zoominsoftware.com/tdta-comm-260-0-0-production-enus/29108d7d-c8f2-43fe-8a99-16280680c1bb/comm/images/comm_agent_cart_url_replace.jpg)\n\n19.  Locate the instruction that begins with For the Order Url. Replace {loginPageUrl}?startURL={orderSummaryPageUrl}/orderId with webStoreUrl/orderSummary/{orderId}, where webStoreUrl is your store's URL. For example, https://mydomain.com/store/orderSummary/{orderId}.\n\n     ![Commerce Order order URL topic instruction replaced fields with webstore ID.](https://sf-zdocs-cdn-prod.zoominsoftware.com/tdta-comm-260-0-0-production-enus/29108d7d-c8f2-43fe-8a99-16280680c1bb/comm/images/comm_agent_replace_commerce_order_instruction_order_url.jpg)\n\n20.  Save your work.\n\n![Example](https://sf-zdocs-cdn-prod.zoominsoftware.com/tdta-comm-260-0-0-production-enus/29108d7d-c8f2-43fe-8a99-16280680c1bb/images/icon_example.png)\n\nExample A Guided Shopping agent with all the B2B Commerce topics added.\n\n![A B2B store with all Commerce Topics added.](https://sf-zdocs-cdn-prod.zoominsoftware.com/tdta-comm-260-0-0-production-enus/29108d7d-c8f2-43fe-8a99-16280680c1bb/comm/images/comm_agent_all_topics.jpg)\n\n#### See Also\n\n-   [Customize Your Agents with Topics and Actions](https://help.salesforce.com/s/articleView?id=ai.copilot_topics_actions.htm&language=en_US&type=5)\n-   [Explore Standard Agent Topics and Actions](https://help.salesforce.com/s/articleView?id=ai.copilot_ref.htm&language=en_US&type=5)\n-   [Add a Topic from the Asset Library](https://help.salesforce.com/s/articleView?id=ai.copilot_topics_add_standard.htm&language=en_US&type=5)\n-   [Agentforce Commerce Agent Topics](https://help.salesforce.com/s/articleView?id=ai.copilot_topics_ref_agentforce_commerce_agents.htm&language=en_US&type=5)\n-   [Agentforce Commerce Agent Actions](https://help.salesforce.com/s/articleView?id=ai.copilot_actions_ref_commerce_parent.htm&language=en_US&type=5)"
+  },
+  "analysis": {
+    "id": "help-agentforce-b2b-create",
+    "kind": "help",
+    "url": "https://help.salesforce.com/s/articleView?id=commerce.comm_agent_guided_shopping_create_agent.htm&type=5&release=260.0.0&language=en_us",
+    "title": "Create a Guided Shopping Agent for a B2B Store",
+    "focus": [
+      "long-step-guide",
+      "images",
+      "tables"
+    ],
+    "fetchedAt": "2026-02-13T12:50:59.906Z",
+    "current": {
+      "chars": 6840,
+      "codeBlocks": 0,
+      "tables": 1,
+      "images": 10,
+      "orderedSteps": 20,
+      "bullets": 5,
+      "headings": 3
+    },
+    "baseline": null,
+    "exactMatch": null,
+    "charDelta": null,
+    "charDeltaPct": null,
+    "baselineExists": false,
+    "error": null
+  }
+}

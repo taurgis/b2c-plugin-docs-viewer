@@ -1,0 +1,581 @@
+{
+  "summary": {
+    "startedAt": "2026-02-13T12:50:28.429Z",
+    "finishedAt": "2026-02-13T12:53:15.273Z",
+    "fixtureCount": 21,
+    "ok": 21,
+    "failed": 0,
+    "compared": 0,
+    "changed": 0,
+    "unchanged": 0,
+    "newBaselineCandidates": 21,
+    "promoted": true
+  },
+  "results": [
+    {
+      "id": "help-active-data-migration",
+      "kind": "help",
+      "url": "https://help.salesforce.com/s/articleView?language=en_US&id=000394720&type=1",
+      "title": "Migration of Active Data in B2C Commerce",
+      "focus": [
+        "article-body",
+        "links",
+        "basic-sections"
+      ],
+      "fetchedAt": "2026-02-13T12:50:39.049Z",
+      "current": {
+        "chars": 1116,
+        "codeBlocks": 0,
+        "tables": 0,
+        "images": 0,
+        "orderedSteps": 0,
+        "bullets": 0,
+        "headings": 1
+      },
+      "baseline": null,
+      "exactMatch": null,
+      "charDelta": null,
+      "charDeltaPct": null,
+      "baselineExists": false,
+      "error": null
+    },
+    {
+      "id": "help-agentforce-enable",
+      "kind": "help",
+      "url": "https://help.salesforce.com/s/articleView?id=cc.b2c_shopping_agent_enable_agentforce.htm&type=5&release=2.0.1&language=en_us",
+      "title": "Enable Agentforce for Guided Shopping",
+      "focus": [
+        "step-guide",
+        "images",
+        "inline-formatting"
+      ],
+      "fetchedAt": "2026-02-13T12:50:49.970Z",
+      "current": {
+        "chars": 1443,
+        "codeBlocks": 0,
+        "tables": 0,
+        "images": 3,
+        "orderedSteps": 6,
+        "bullets": 0,
+        "headings": 1
+      },
+      "baseline": null,
+      "exactMatch": null,
+      "charDelta": null,
+      "charDeltaPct": null,
+      "baselineExists": false,
+      "error": null
+    },
+    {
+      "id": "help-agentforce-b2b-create",
+      "kind": "help",
+      "url": "https://help.salesforce.com/s/articleView?id=commerce.comm_agent_guided_shopping_create_agent.htm&type=5&release=260.0.0&language=en_us",
+      "title": "Create a Guided Shopping Agent for a B2B Store",
+      "focus": [
+        "long-step-guide",
+        "images",
+        "tables"
+      ],
+      "fetchedAt": "2026-02-13T12:50:59.906Z",
+      "current": {
+        "chars": 6840,
+        "codeBlocks": 0,
+        "tables": 1,
+        "images": 10,
+        "orderedSteps": 20,
+        "bullets": 5,
+        "headings": 3
+      },
+      "baseline": null,
+      "exactMatch": null,
+      "charDelta": null,
+      "charDeltaPct": null,
+      "baselineExists": false,
+      "error": null
+    },
+    {
+      "id": "help-agentforce-b2b-considerations",
+      "kind": "help",
+      "url": "https://help.salesforce.com/s/articleView?id=commerce.comm_agent_guided_shopping_considerations.htm&type=5&release=260.0.0&language=en_us",
+      "title": "Considerations for Agentforce Guided Shopping for B2B Commerce",
+      "focus": [
+        "tables",
+        "notes",
+        "section-headings"
+      ],
+      "fetchedAt": "2026-02-13T12:51:10.168Z",
+      "current": {
+        "chars": 11825,
+        "codeBlocks": 0,
+        "tables": 5,
+        "images": 1,
+        "orderedSteps": 0,
+        "bullets": 12,
+        "headings": 10
+      },
+      "baseline": null,
+      "exactMatch": null,
+      "charDelta": null,
+      "charDeltaPct": null,
+      "baselineExists": false,
+      "error": null
+    },
+    {
+      "id": "help-roles-create",
+      "kind": "help",
+      "url": "https://help.salesforce.com/s/articleView?id=cc.b2c_creating_roles.htm&type=5&release=2.0.1&language=en_us",
+      "title": "Create a Role in B2C Commerce",
+      "focus": [
+        "dense-steps",
+        "tables",
+        "code-snippet"
+      ],
+      "fetchedAt": "2026-02-13T12:51:20.997Z",
+      "current": {
+        "chars": 7916,
+        "codeBlocks": 1,
+        "tables": 6,
+        "images": 1,
+        "orderedSteps": 36,
+        "bullets": 0,
+        "headings": 12
+      },
+      "baseline": null,
+      "exactMatch": null,
+      "charDelta": null,
+      "charDeltaPct": null,
+      "baselineExists": false,
+      "error": null
+    },
+    {
+      "id": "help-roles-admin",
+      "kind": "help",
+      "url": "https://help.salesforce.com/s/articleView?id=cc.b2c_administrator_role.htm&type=5&release=2.0.1&language=en_us",
+      "title": "Administrator Role in B2C Commerce",
+      "focus": [
+        "tables",
+        "role-matrix",
+        "ordered-lists"
+      ],
+      "fetchedAt": "2026-02-13T12:51:32.218Z",
+      "current": {
+        "chars": 16473,
+        "codeBlocks": 1,
+        "tables": 5,
+        "images": 1,
+        "orderedSteps": 13,
+        "bullets": 10,
+        "headings": 14
+      },
+      "baseline": null,
+      "exactMatch": null,
+      "charDelta": null,
+      "charDeltaPct": null,
+      "baselineExists": false,
+      "error": null
+    },
+    {
+      "id": "dev-ocapi-systemjobs",
+      "kind": "developer",
+      "url": "https://developer.salesforce.com/docs/commerce/b2c-commerce/references/b2c-commerce-ocapi/systemjobs.html",
+      "title": "OCAPI System Jobs",
+      "focus": [
+        "dx-code-block",
+        "request-response-example"
+      ],
+      "fetchedAt": "2026-02-13T12:51:38.051Z",
+      "current": {
+        "chars": 1979,
+        "codeBlocks": 2,
+        "tables": 0,
+        "images": 0,
+        "orderedSteps": 0,
+        "bullets": 0,
+        "headings": 1
+      },
+      "baseline": null,
+      "exactMatch": null,
+      "charDelta": null,
+      "charDeltaPct": null,
+      "baselineExists": false,
+      "error": null
+    },
+    {
+      "id": "dev-ocapi-exceptions",
+      "kind": "developer",
+      "url": "https://developer.salesforce.com/docs/commerce/b2c-commerce/references/b2c-commerce-ocapi/exceptions.html",
+      "title": "OCAPI Global Exceptions",
+      "focus": [
+        "large-table",
+        "long-rows"
+      ],
+      "fetchedAt": "2026-02-13T12:51:43.474Z",
+      "current": {
+        "chars": 9068,
+        "codeBlocks": 0,
+        "tables": 1,
+        "images": 0,
+        "orderedSteps": 0,
+        "bullets": 0,
+        "headings": 1
+      },
+      "baseline": null,
+      "exactMatch": null,
+      "charDelta": null,
+      "charDeltaPct": null,
+      "baselineExists": false,
+      "error": null
+    },
+    {
+      "id": "dev-ocapi-ocapi-settings",
+      "kind": "developer",
+      "url": "https://developer.salesforce.com/docs/commerce/b2c-commerce/references/b2c-commerce-ocapi/ocapisettings.html",
+      "title": "OCAPI Settings",
+      "focus": [
+        "mixed-content",
+        "tables",
+        "code"
+      ],
+      "fetchedAt": "2026-02-13T12:51:48.772Z",
+      "current": {
+        "chars": 10740,
+        "codeBlocks": 3,
+        "tables": 4,
+        "images": 0,
+        "orderedSteps": 5,
+        "bullets": 11,
+        "headings": 1
+      },
+      "baseline": null,
+      "exactMatch": null,
+      "charDelta": null,
+      "charDeltaPct": null,
+      "baselineExists": false,
+      "error": null
+    },
+    {
+      "id": "dev-ocapi-customization",
+      "kind": "developer",
+      "url": "https://developer.salesforce.com/docs/commerce/b2c-commerce/references/b2c-commerce-ocapi/customization.html",
+      "title": "OCAPI Customization",
+      "focus": [
+        "code",
+        "images",
+        "examples"
+      ],
+      "fetchedAt": "2026-02-13T12:51:54.149Z",
+      "current": {
+        "chars": 13283,
+        "codeBlocks": 6,
+        "tables": 1,
+        "images": 1,
+        "orderedSteps": 4,
+        "bullets": 40,
+        "headings": 1
+      },
+      "baseline": null,
+      "exactMatch": null,
+      "charDelta": null,
+      "charDeltaPct": null,
+      "baselineExists": false,
+      "error": null
+    },
+    {
+      "id": "dev-ocapi-exportglobaldata",
+      "kind": "developer",
+      "url": "https://developer.salesforce.com/docs/commerce/b2c-commerce/references/b2c-commerce-ocapi/exportglobaldataconfiguration.html",
+      "title": "ExportGlobalDataConfiguration document",
+      "focus": [
+        "schema-table",
+        "property-list"
+      ],
+      "fetchedAt": "2026-02-13T12:51:59.435Z",
+      "current": {
+        "chars": 1997,
+        "codeBlocks": 0,
+        "tables": 1,
+        "images": 0,
+        "orderedSteps": 0,
+        "bullets": 0,
+        "headings": 1
+      },
+      "baseline": null,
+      "exactMatch": null,
+      "charDelta": null,
+      "charDeltaPct": null,
+      "baselineExists": false,
+      "error": null
+    },
+    {
+      "id": "dev-ocapi-batchrequests",
+      "kind": "developer",
+      "url": "https://developer.salesforce.com/docs/commerce/b2c-commerce/references/b2c-commerce-ocapi/batchrequests.html",
+      "title": "OCAPI Batch Requests",
+      "focus": [
+        "multiple-code-samples",
+        "batch-format",
+        "request-examples"
+      ],
+      "fetchedAt": "2026-02-13T12:52:04.698Z",
+      "current": {
+        "chars": 10443,
+        "codeBlocks": 6,
+        "tables": 2,
+        "images": 0,
+        "orderedSteps": 4,
+        "bullets": 0,
+        "headings": 1
+      },
+      "baseline": null,
+      "exactMatch": null,
+      "charDelta": null,
+      "charDeltaPct": null,
+      "baselineExists": false,
+      "error": null
+    },
+    {
+      "id": "dev-ocapi-httpmethods",
+      "kind": "developer",
+      "url": "https://developer.salesforce.com/docs/commerce/b2c-commerce/references/b2c-commerce-ocapi/httpmethods.html",
+      "title": "OCAPI HTTP Methods",
+      "focus": [
+        "dense-code-reference",
+        "method-examples",
+        "long-markdown"
+      ],
+      "fetchedAt": "2026-02-13T12:52:10.108Z",
+      "current": {
+        "chars": 8990,
+        "codeBlocks": 9,
+        "tables": 1,
+        "images": 0,
+        "orderedSteps": 0,
+        "bullets": 3,
+        "headings": 5
+      },
+      "baseline": null,
+      "exactMatch": null,
+      "charDelta": null,
+      "charDeltaPct": null,
+      "baselineExists": false,
+      "error": null
+    },
+    {
+      "id": "help-site-import-export",
+      "kind": "help",
+      "url": "https://help.salesforce.com/s/articleView?id=cc.b2c_site_import_export.htm&type=5&release=2.0.1&language=en_us",
+      "title": "Site Import/Export in B2C Commerce",
+      "focus": [
+        "tables",
+        "steps",
+        "images",
+        "admin-workflow"
+      ],
+      "fetchedAt": "2026-02-13T12:52:21.262Z",
+      "current": {
+        "chars": 14860,
+        "codeBlocks": 0,
+        "tables": 9,
+        "images": 3,
+        "orderedSteps": 12,
+        "bullets": 16,
+        "headings": 21
+      },
+      "baseline": null,
+      "exactMatch": null,
+      "charDelta": null,
+      "charDeltaPct": null,
+      "baselineExists": false,
+      "error": null
+    },
+    {
+      "id": "help-site-import-export-copy-instances",
+      "kind": "help",
+      "url": "https://help.salesforce.com/s/articleView?id=cc.b2c_using_site_import_export_to_copy_instances.htm&type=5&release=2.0.1&language=en_us",
+      "title": "Using Site Import/Export to Copy Instances and Development Testing in B2C Commerce",
+      "focus": [
+        "procedural-steps",
+        "tables",
+        "image-guidance"
+      ],
+      "fetchedAt": "2026-02-13T12:52:32.317Z",
+      "current": {
+        "chars": 5940,
+        "codeBlocks": 0,
+        "tables": 2,
+        "images": 3,
+        "orderedSteps": 12,
+        "bullets": 0,
+        "headings": 5
+      },
+      "baseline": null,
+      "exactMatch": null,
+      "charDelta": null,
+      "charDeltaPct": null,
+      "baselineExists": false,
+      "error": null
+    },
+    {
+      "id": "help-coupons-import-export",
+      "kind": "help",
+      "url": "https://help.salesforce.com/s/articleView?id=cc.b2c_coupons_and_coupon_code_object_import_export.htm&type=5&release=2.0.1&language=en_us",
+      "title": "Coupons and Coupon Code Object Import/Export in B2C Commerce",
+      "focus": [
+        "complex-tables",
+        "many-code-snippets",
+        "data-import-export"
+      ],
+      "fetchedAt": "2026-02-13T12:52:43.227Z",
+      "current": {
+        "chars": 6208,
+        "codeBlocks": 15,
+        "tables": 0,
+        "images": 1,
+        "orderedSteps": 0,
+        "bullets": 12,
+        "headings": 7
+      },
+      "baseline": null,
+      "exactMatch": null,
+      "charDelta": null,
+      "charDeltaPct": null,
+      "baselineExists": false,
+      "error": null
+    },
+    {
+      "id": "dev-ocapi-oauth",
+      "kind": "developer",
+      "url": "https://developer.salesforce.com/docs/commerce/b2c-commerce/references/b2c-commerce-ocapi/oauth.html",
+      "title": "OCAPI OAuth 2.0",
+      "focus": [
+        "auth-flows",
+        "code-samples",
+        "procedural-steps"
+      ],
+      "fetchedAt": "2026-02-13T12:52:48.930Z",
+      "current": {
+        "chars": 12362,
+        "codeBlocks": 12,
+        "tables": 0,
+        "images": 0,
+        "orderedSteps": 11,
+        "bullets": 5,
+        "headings": 3
+      },
+      "baseline": null,
+      "exactMatch": null,
+      "charDelta": null,
+      "charDeltaPct": null,
+      "baselineExists": false,
+      "error": null
+    },
+    {
+      "id": "dev-ocapi-jwt",
+      "kind": "developer",
+      "url": "https://developer.salesforce.com/docs/commerce/b2c-commerce/references/b2c-commerce-ocapi/jwt.html",
+      "title": "OCAPI JWT",
+      "focus": [
+        "token-examples",
+        "code",
+        "request-sequences"
+      ],
+      "fetchedAt": "2026-02-13T12:52:54.174Z",
+      "current": {
+        "chars": 10393,
+        "codeBlocks": 4,
+        "tables": 0,
+        "images": 0,
+        "orderedSteps": 15,
+        "bullets": 7,
+        "headings": 1
+      },
+      "baseline": null,
+      "exactMatch": null,
+      "charDelta": null,
+      "charDeltaPct": null,
+      "baselineExists": false,
+      "error": null
+    },
+    {
+      "id": "dev-ocapi-propertyselection",
+      "kind": "developer",
+      "url": "https://developer.salesforce.com/docs/commerce/b2c-commerce/references/b2c-commerce-ocapi/propertyselection.html",
+      "title": "OCAPI Property Selection",
+      "focus": [
+        "selector-syntax",
+        "tables",
+        "code-samples"
+      ],
+      "fetchedAt": "2026-02-13T12:52:59.285Z",
+      "current": {
+        "chars": 4865,
+        "codeBlocks": 4,
+        "tables": 1,
+        "images": 0,
+        "orderedSteps": 0,
+        "bullets": 0,
+        "headings": 1
+      },
+      "baseline": null,
+      "exactMatch": null,
+      "charDelta": null,
+      "charDeltaPct": null,
+      "baselineExists": false,
+      "error": null
+    },
+    {
+      "id": "dev-ocapi-customproperties",
+      "kind": "developer",
+      "url": "https://developer.salesforce.com/docs/commerce/b2c-commerce/references/b2c-commerce-ocapi/customproperties.html",
+      "title": "OCAPI Custom Properties",
+      "focus": [
+        "schema-details",
+        "tables",
+        "examples"
+      ],
+      "fetchedAt": "2026-02-13T12:53:04.450Z",
+      "current": {
+        "chars": 5386,
+        "codeBlocks": 1,
+        "tables": 2,
+        "images": 0,
+        "orderedSteps": 0,
+        "bullets": 14,
+        "headings": 1
+      },
+      "baseline": null,
+      "exactMatch": null,
+      "charDelta": null,
+      "charDeltaPct": null,
+      "baselineExists": false,
+      "error": null
+    },
+    {
+      "id": "help-site-import-export-development-testing",
+      "kind": "help",
+      "url": "https://help.salesforce.com/s/articleView?id=cc.b2c_using_site_import_export_for_development_testing.htm&type=5&release=2.0.1&language=en_us",
+      "title": "Using Site Import/Export for Development Testing in B2C Commerce",
+      "focus": [
+        "development-workflow",
+        "ordered-steps",
+        "images"
+      ],
+      "fetchedAt": "2026-02-13T12:53:15.272Z",
+      "current": {
+        "chars": 2864,
+        "codeBlocks": 0,
+        "tables": 1,
+        "images": 1,
+        "orderedSteps": 8,
+        "bullets": 0,
+        "headings": 2
+      },
+      "baseline": null,
+      "exactMatch": null,
+      "charDelta": null,
+      "charDeltaPct": null,
+      "baselineExists": false,
+      "error": null
+    }
+  ]
+}

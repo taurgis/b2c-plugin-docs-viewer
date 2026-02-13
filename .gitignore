@@ -11,6 +11,7 @@ coverage/
 
 # Generated runtime artifacts
 artifacts/
+testing/regression/current/
 
 # Local env/token files
 .env

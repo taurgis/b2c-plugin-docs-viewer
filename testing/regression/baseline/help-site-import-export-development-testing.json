@@ -1,0 +1,44 @@
+{
+  "fixture": {
+    "id": "help-site-import-export-development-testing",
+    "kind": "help",
+    "url": "https://help.salesforce.com/s/articleView?id=cc.b2c_using_site_import_export_for_development_testing.htm&type=5&release=2.0.1&language=en_us",
+    "focus": [
+      "development-workflow",
+      "ordered-steps",
+      "images"
+    ]
+  },
+  "detail": {
+    "url": "https://help.salesforce.com/s/articleView?id=cc.b2c_using_site_import_export_for_development_testing.htm&type=5&release=2.0.1&language=en_us",
+    "title": "Using Site Import/Export for Development Testing in B2C Commerce",
+    "markdown": "# Using Site Import/Export for Development Testing in B2C Commerce\n\nWhen multiple developers work on one or more sites, it's necessary to ensure that they all have the same data in their systems. They can use Site Import/Export to set up multiple sandboxes with the same configuration. This topic applies to B2C Commerce.\n\n### Required Editions\n\n| Available in: B2C Commerce |\n| --- |\n\nSometimes, developers want to import some of the data from production into the sandbox. Sometimes, importing all the site information from production isn’t desirable for security or other reasons. For example, a merchant doesn’t want a developer to import customer data for security reasons. In this case, they can use Site Import/Export to export only the portion of the site data that is available.\n\nSite Import/Export is only intended for setting up identical sites (same names and IDs) and the same organization-level data across instances. However, the Business Manager UI also lets you export a subset of the instance data.\n\n![Note](https://sf-zdocs-cdn-prod.zoominsoftware.com/tdta-b2c_merchandiser_administrator-2-production-enus/beac8152-03cc-40b1-b594-e8ed108b8b62/images/icon_note.png)\n\nNote You can import orders during site import on sandboxes. To use this feature, save a file called order.xml in the site's import folder. The file structure must conform to order.xsd. This feature is only available on sandboxes and is intended for (automatic) testing purposes.\n\n1.  Log in to Business Manager with an account that has import and export privileges for the site. Administrators can check account privileges by selecting **Administration** | **Organization** | **Roles and Permissions**.\n2.  Select **Administration** | **Site Development** | **Site Import & Export**.\n3.  In the Export field, enter a name for your export file. Enter a name, not a path.\n\n    We recommend that you use the following syntax:\n\n    *yyyymmdd*\\-*ModuleNames*\\-*version*\n\n    For example: 20101231-Catalogs-Pricebooks-17-1\n\n4.  Check the **Save in the global export directory** box.\n5.  Check the boxes for data you want to export.\n6.  In the Export field, click **Export.**\n7.  Check the Status section of the page for your export process. It includes the name of the export file you provided in parentheses. For example, `Site Export (preferences)` produces a `preferences.zip` file. When the status for your process indicates success, refresh the page. The name of your export file appears in the list of files under the Import section of the page.\n8.  In the Import section, select your export file and click **Import** to download the file.\n\nIf an instance export or backup fails for any reason, the system still generates a .zip file, but appends the suffix \"-invalid\" to the filename. Salesforce recommends that you establish a mechanism to detect if an invalid file is produced."
+  },
+  "analysis": {
+    "id": "help-site-import-export-development-testing",
+    "kind": "help",
+    "url": "https://help.salesforce.com/s/articleView?id=cc.b2c_using_site_import_export_for_development_testing.htm&type=5&release=2.0.1&language=en_us",
+    "title": "Using Site Import/Export for Development Testing in B2C Commerce",
+    "focus": [
+      "development-workflow",
+      "ordered-steps",
+      "images"
+    ],
+    "fetchedAt": "2026-02-13T12:53:15.272Z",
+    "current": {
+      "chars": 2864,
+      "codeBlocks": 0,
+      "tables": 1,
+      "images": 1,
+      "orderedSteps": 8,
+      "bullets": 0,
+      "headings": 2
+    },
+    "baseline": null,
+    "exactMatch": null,
+    "charDelta": null,
+    "charDeltaPct": null,
+    "baselineExists": false,
+    "error": null
+  }
+}

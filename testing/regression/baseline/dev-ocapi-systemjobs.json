@@ -1,0 +1,42 @@
+{
+  "fixture": {
+    "id": "dev-ocapi-systemjobs",
+    "kind": "developer",
+    "url": "https://developer.salesforce.com/docs/commerce/b2c-commerce/references/b2c-commerce-ocapi/systemjobs.html",
+    "focus": [
+      "dx-code-block",
+      "request-response-example"
+    ]
+  },
+  "detail": {
+    "url": "https://developer.salesforce.com/docs/commerce/b2c-commerce/references/b2c-commerce-ocapi/systemjobs.html",
+    "title": "OCAPI System Jobs",
+    "markdown": "# OCAPI System Jobs\n\nSystem jobs are predefined jobs called via the following OCAPI request:\n\nCalling this resource triggers a background job and retrieves a response document containing information about the job's status. Different System Jobs can use different request payloads.\n\nThe job ID always starts with `sfcc-`. This prefix is a namespace specific to Commerce Cloud System Jobs. You can’t use it in custom job IDs.\n\nCurrently available system jobs can be found in [Global Jobs](https://developer.salesforce.com/docs/commerce/b2c-commerce/references/b2c-commerce-ocapi/globaljobs.html).\n\nA System Job request looks like a basic OCAPI Data API request, but can have its own request document. An example is shown here for the site archive import job:\n\n```txt\nPOST dw/data/v24_5/jobs/{job_id}/executions\n```\n\n```txt\nREQUEST:\n      POST /dw/data/v24_5/jobs/sfcc-site-archive-import/executions HTTP/1.1\n      Host: example.com\n      Accept: application/json\n      Authorization: Bearer <access_token>\n      {\n          \"file_name\": \"siteGenesis.zip\",\n          \"mode\": \"merge\"\n      }\n\n      RESPONSE:\n      HTTP/1.1 202 ACCEPTED\n      Content-Type: application/json;charset=UTF-8\n      Content-Length: 741\n      {\n          \"_v\" : \"24.5\",\n          _type\": \"job_execution\",\n          \"client_id\": \"[your_own_client_id]\",\n          \"execution_status\": \"pending\",\n          \"id\": \"42\",\n          \"is_log_file_existing\": false,\n          \"is_restart\": false,\n          \"job_id\": \"sfcc-site-archive-import\",\n          \"log_file_name\": \"Job-sfcc-site-archive-import-20170512142357242.log\",\n          \"modification_time\": \"2017-05-12T14:23:57.316Z\",\n          \"parameters\": [ {\n            \"_type\": \"job_execution_parameter\",\n            \"name\": \"ImportMode\",\n            \"value\": \"merge\"\n          }, {\n            \"_type\": \"job_execution_parameter\",\n            \"name\": \"ImportFile\",\n            \"value\": \"siteGenesis.zip\"\n          } ],\n          \"status\": \"PENDING\"\n      }\n```"
+  },
+  "analysis": {
+    "id": "dev-ocapi-systemjobs",
+    "kind": "developer",
+    "url": "https://developer.salesforce.com/docs/commerce/b2c-commerce/references/b2c-commerce-ocapi/systemjobs.html",
+    "title": "OCAPI System Jobs",
+    "focus": [
+      "dx-code-block",
+      "request-response-example"
+    ],
+    "fetchedAt": "2026-02-13T12:51:38.051Z",
+    "current": {
+      "chars": 1979,
+      "codeBlocks": 2,
+      "tables": 0,
+      "images": 0,
+      "orderedSteps": 0,
+      "bullets": 0,
+      "headings": 1
+    },
+    "baseline": null,
+    "exactMatch": null,
+    "charDelta": null,
+    "charDeltaPct": null,
+    "baselineExists": false,
+    "error": null
+  }
+}
