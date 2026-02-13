@@ -32,7 +32,7 @@ class DocsHelpSiteArticle extends core_1.Command {
             }
         }
         if (showStatus) {
-            this.log("-> Fetching Help article...");
+            this.log("-> Fetching documentation page...");
         }
         const result = await (0, helpScraper_1.getHelpDetails)({
             url: targetUrl,
@@ -61,8 +61,8 @@ class DocsHelpSiteArticle extends core_1.Command {
         this.log(result.markdown);
     }
 }
-DocsHelpSiteArticle.description = "Fetch a Salesforce Help article and return the details.";
-DocsHelpSiteArticle.longDescription = "Accepts a full Help article URL or a numeric ID from the latest search results. " +
+DocsHelpSiteArticle.description = "Fetch a Salesforce Help or Developer doc page and return the details.";
+DocsHelpSiteArticle.longDescription = "Accepts a full Help/Developer docs URL or a numeric ID from the latest search results. " +
     "Run 'b2c docs search-help-site <query>' first if you want to use the ID shortcut.";
 DocsHelpSiteArticle.examples = [
     "b2c docs help-site-article \"https://help.salesforce.com/s/articleView?id=cc.b2c_roles_and_permissions.htm&type=5\"",
@@ -71,7 +71,7 @@ DocsHelpSiteArticle.examples = [
 ];
 DocsHelpSiteArticle.args = {
     reference: core_1.Args.string({
-        description: "Help article URL or result ID from the latest search",
+        description: "Help/Developer docs URL or result ID from the latest search",
         required: true,
     }),
 };

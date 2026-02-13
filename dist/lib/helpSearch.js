@@ -1,5 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.normalizeHelpDocContentUrl = normalizeHelpDocContentUrl;
+exports.extractResults = extractResults;
 exports.searchHelp = searchHelp;
 const playwright_1 = require("playwright");
 const cache_1 = require("./cache");
@@ -21,7 +23,10 @@ const SKIP_URLS = new Set([
     "https://help.salesforce.com/s/",
     "https://help.salesforce.com/s/login",
 ]);
-const DEFAULT_ALLOWED_HOSTS = new Set(["help.salesforce.com"]);
+const DEFAULT_ALLOWED_HOSTS = new Set([
+    "help.salesforce.com",
+    "developer.salesforce.com",
+]);
 function normalizeLimit(value) {
     if (!value || !Number.isFinite(value) || value <= 0)
         return DEFAULT_LIMIT;

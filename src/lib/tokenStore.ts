@@ -1,9 +1,37 @@
-import keytar from "keytar";
-
 const SERVICE_NAME = "b2c-help-search";
 const ACCOUNT_NAME = "coveo-token";
 const DEFAULT_TOKEN_TTL_MS = 24 * 60 * 60 * 1000;
 const TOKEN_EXPIRY_SKEW_MS = 2 * 60 * 1000;
+
+type KeytarLike = {
+  getPassword: (service: string, account: string) => Promise<string | null>;
+  setPassword: (service: string, account: string, password: string) => Promise<void>;
+};
+
+let cachedKeytar: KeytarLike | null | undefined;
+
+async function getKeytar(): Promise<KeytarLike | null> {
+  if (cachedKeytar !== undefined) {
+    return cachedKeytar;
+  }
+
+  try {
+    const module = await import("keytar");
+    const resolved = (module.default ?? module) as unknown as Partial<KeytarLike>;
+    if (
+      typeof resolved.getPassword === "function" &&
+      typeof resolved.setPassword === "function"
+    ) {
+      cachedKeytar = resolved as KeytarLike;
+    } else {
+      cachedKeytar = null;
+    }
+  } catch {
+    cachedKeytar = null;
+  }
+
+  return cachedKeytar;
+}
 
 export type TokenInfo = {
   accessToken: string;
@@ -55,6 +83,9 @@ export function applyTokenExpiry(tokenInfo: TokenInfo): TokenInfo {
 }
 
 export async function loadToken(): Promise<TokenInfo | null> {
+  const keytar = await getKeytar();
+  if (!keytar) return null;
+
   const raw = await keytar.getPassword(SERVICE_NAME, ACCOUNT_NAME);
   if (!raw) return null;
   try {
@@ -76,6 +107,9 @@ export async function loadToken(): Promise<TokenInfo | null> {
 }
 
 export async function storeToken(tokenInfo: TokenInfo): Promise<void> {
+  const keytar = await getKeytar();
+  if (!keytar) return;
+
   const normalized = applyTokenExpiry(tokenInfo);
   await keytar.setPassword(SERVICE_NAME, ACCOUNT_NAME, JSON.stringify(normalized));
 }

@@ -74,7 +74,7 @@ class DocsSearchHelpSite extends core_1.Command {
         this.log(output);
     }
 }
-DocsSearchHelpSite.description = "Search Salesforce Help for matching articles.";
+DocsSearchHelpSite.description = "Search Salesforce Help for matching Help and Developer docs pages.";
 DocsSearchHelpSite.longDescription = "Queries the Salesforce Help search service and returns a boxed table of results. " +
     "Use --json for machine-readable output and --no-cache to force a fresh request.";
 DocsSearchHelpSite.examples = [
@@ -103,7 +103,7 @@ DocsSearchHelpSite.flags = {
         default: false,
     }),
     includeNonHelp: core_1.Flags.boolean({
-        description: "Include results outside help.salesforce.com",
+        description: "Include results outside help.salesforce.com and developer.salesforce.com",
         default: false,
     }),
     cache: core_1.Flags.boolean({

@@ -75,8 +75,8 @@ class DocsFetchResultsHelpSite extends core_1.Command {
         this.log(output);
     }
 }
-DocsFetchResultsHelpSite.description = "Search Salesforce Help and immediately fetch details.";
-DocsFetchResultsHelpSite.longDescription = "Runs a search and then fetches each matching Help article. " +
+DocsFetchResultsHelpSite.description = "Search Salesforce Help and fetch Help/Developer docs details.";
+DocsFetchResultsHelpSite.longDescription = "Runs a search and then fetches each matching Help or Developer docs page. " +
     "Use --out to save results to a file and --json for structured output.";
 DocsFetchResultsHelpSite.examples = [
     "b2c docs fetch-results-help-site \"b2c commerce roles\" --limit 3",
@@ -107,7 +107,7 @@ DocsFetchResultsHelpSite.flags = {
         description: "Write output to a file",
     }),
     includeNonHelp: core_1.Flags.boolean({
-        description: "Include results outside help.salesforce.com",
+        description: "Include results outside help.salesforce.com and developer.salesforce.com",
         default: false,
     }),
     cache: core_1.Flags.boolean({
