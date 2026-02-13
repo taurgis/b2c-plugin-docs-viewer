@@ -37,6 +37,7 @@ Fetch article details (use a URL or a result ID from the latest search):
 ```bash
 b2c docs help-site-article "https://help.salesforce.com/s/articleView?id=cc.b2c_roles_and_permissions.htm&type=5"
 b2c docs help-site-article 2
+b2c docs help-site-article 2 --json --raw-html
 ```
 
 Search and immediately fetch details:
@@ -64,6 +65,15 @@ Fetch by ID from the latest search:
 ```bash
 b2c docs search-help-site "pipelines" --limit 5
 b2c docs help-site-article 2
+```
+
+Fetch markdown plus raw extracted HTML (writes sidecar file):
+
+```bash
+b2c docs help-site-article 2 --out ./artifacts/article.md --raw-html
+# writes:
+# - ./artifacts/article.md
+# - ./artifacts/article.md.raw.html
 ```
 
 Boxed search output (example):
@@ -99,6 +109,7 @@ b2c docs help-site-article #3
 
 - Default output is a boxed table for search results and markdown for article content.
 - Use `--json` to emit structured JSON for automation and AI workflows.
+- Use `--raw-html` with `docs help-site-article` to include raw extracted HTML in `--json` output or to write a `.raw.html` sidecar when using `--out`.
 
 ## Troubleshooting
 
