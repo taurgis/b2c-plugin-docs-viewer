@@ -1,0 +1,42 @@
+{
+  "name": "b2c-plugin-help-docs-viewer",
+  "version": "0.1.0",
+  "description": "B2C CLI plugin for Salesforce Help search and article details.",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "b2c",
+    "sfcc",
+    "help",
+    "docs",
+    "oclif",
+    "plugin"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@mozilla/readability": "^0.4.4",
+    "@oclif/core": "^4.0.0",
+    "jsdom": "^24.0.0",
+    "keytar": "^7.9.0",
+    "playwright": "^1.49.0",
+    "turndown": "^7.1.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/jsdom": "^21.1.6",
+    "@types/turndown": "^5.0.4",
+    "typescript": "^5.3.3"
+  },
+  "oclif": {
+    "commands": "./dist/commands"
+  }
+}
