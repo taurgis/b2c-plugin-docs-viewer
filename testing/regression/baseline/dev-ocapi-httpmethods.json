@@ -24,7 +24,7 @@
       "method-examples",
       "long-markdown"
     ],
-    "fetchedAt": "2026-02-13T12:52:10.108Z",
+    "fetchedAt": "2026-02-23T15:13:07.769Z",
     "current": {
       "chars": 8990,
       "codeBlocks": 9,
@@ -34,11 +34,19 @@
       "bullets": 3,
       "headings": 5
     },
-    "baseline": null,
-    "exactMatch": null,
-    "charDelta": null,
-    "charDeltaPct": null,
-    "baselineExists": false,
+    "baseline": {
+      "chars": 8990,
+      "codeBlocks": 9,
+      "tables": 1,
+      "images": 0,
+      "orderedSteps": 0,
+      "bullets": 3,
+      "headings": 5
+    },
+    "exactMatch": true,
+    "charDelta": 0,
+    "charDeltaPct": 0,
+    "baselineExists": true,
     "error": null
   }
 }

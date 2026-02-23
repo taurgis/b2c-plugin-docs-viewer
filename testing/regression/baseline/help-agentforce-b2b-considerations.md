@@ -16,6 +16,26 @@ Agentforce Guided Shopping Agent - B2B supports these languages and locales.
 | Locale | Code |
 | --- | --- |
 | English (United States) | en_US |
+| English (United Kingdom) | en_GB |
+| English (Canada) | en |
+| French | fr |
+| French (Canada) | fr_CA |
+| Spanish (Mexico) | es |
+| Portugese (Brazil) | pt_BR |
+| German | de |
+| Italian | it |
+| Japanese | ja |
+| Korean | ko |
+| Dutch | nl |
+| Dutch (Netherlands) | nl_NL |
+| Norwegian | no |
+| Polish | pl |
+| Portugese | pt_PT |
+| Swedish | sv |
+| Danish | da |
+| Finnish | fi |
+| Chinese (Simplified) | zh_CN |
+| Chinese (Traditional) | zh_TW |
 
 ## Large Language Model Support
 
@@ -47,7 +67,7 @@ Agentforce Guided Shopping Agent is a consumption-based product that uses Einste
 
 ## Usage Types Billed by Agentforce Guided Shopping Agent
 
-![Tip](https://sf-zdocs-cdn-prod.zoominsoftware.com/tdta-comm-260-0-0-production-enus/29108d7d-c8f2-43fe-8a99-16280680c1bb/images/icon_tip.png)
+![Tip](https://sf-zdocs-cdn-prod.zoominsoftware.com/tdta-comm-260-0-0-production-enus/bb92045e-7bb7-49e4-aab2-3607de0d2556/images/icon_tip.png)
 
 Tip This feature has access to Digital Wallet, a free account management tool that offers near real-time consumption data for enabled products across your active contracts. Access Digital Wallet and start tracking your org's usage. To learn more, see [About Digital Wallet](https://help.salesforce.com/s/articleView?id=xcloud.wallet_about.htm&language=en_US&type=5).
 

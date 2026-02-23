@@ -24,7 +24,7 @@
       "code-samples",
       "procedural-steps"
     ],
-    "fetchedAt": "2026-02-13T12:52:48.930Z",
+    "fetchedAt": "2026-02-23T15:13:52.060Z",
     "current": {
       "chars": 12362,
       "codeBlocks": 12,
@@ -34,11 +34,19 @@
       "bullets": 5,
       "headings": 3
     },
-    "baseline": null,
-    "exactMatch": null,
-    "charDelta": null,
-    "charDeltaPct": null,
-    "baselineExists": false,
+    "baseline": {
+      "chars": 12362,
+      "codeBlocks": 12,
+      "tables": 0,
+      "images": 0,
+      "orderedSteps": 11,
+      "bullets": 5,
+      "headings": 3
+    },
+    "exactMatch": true,
+    "charDelta": 0,
+    "charDeltaPct": 0,
+    "baselineExists": true,
     "error": null
   }
 }

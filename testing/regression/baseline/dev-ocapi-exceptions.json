@@ -22,7 +22,7 @@
       "large-table",
       "long-rows"
     ],
-    "fetchedAt": "2026-02-13T12:51:43.474Z",
+    "fetchedAt": "2026-02-23T15:12:41.105Z",
     "current": {
       "chars": 9068,
       "codeBlocks": 0,
@@ -32,11 +32,19 @@
       "bullets": 0,
       "headings": 1
     },
-    "baseline": null,
-    "exactMatch": null,
-    "charDelta": null,
-    "charDeltaPct": null,
-    "baselineExists": false,
+    "baseline": {
+      "chars": 9068,
+      "codeBlocks": 0,
+      "tables": 1,
+      "images": 0,
+      "orderedSteps": 0,
+      "bullets": 0,
+      "headings": 1
+    },
+    "exactMatch": true,
+    "charDelta": 0,
+    "charDeltaPct": 0,
+    "baselineExists": true,
     "error": null
   }
 }

@@ -24,7 +24,7 @@
       "code",
       "request-sequences"
     ],
-    "fetchedAt": "2026-02-13T12:52:54.174Z",
+    "fetchedAt": "2026-02-23T15:13:57.610Z",
     "current": {
       "chars": 10393,
       "codeBlocks": 4,
@@ -34,11 +34,19 @@
       "bullets": 7,
       "headings": 1
     },
-    "baseline": null,
-    "exactMatch": null,
-    "charDelta": null,
-    "charDeltaPct": null,
-    "baselineExists": false,
+    "baseline": {
+      "chars": 10393,
+      "codeBlocks": 4,
+      "tables": 0,
+      "images": 0,
+      "orderedSteps": 15,
+      "bullets": 7,
+      "headings": 1
+    },
+    "exactMatch": true,
+    "charDelta": 0,
+    "charDeltaPct": 0,
+    "baselineExists": true,
     "error": null
   }
 }

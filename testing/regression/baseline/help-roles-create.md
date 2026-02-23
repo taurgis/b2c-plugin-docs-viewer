@@ -13,7 +13,7 @@ To manage roles and permissions, you must have permissions to the Roles & Permis
 
 If you don't have a user with access to the Roles and Permissions module, contact Commerce Cloud Support to reinstate access to this module.
 
-![Note](https://sf-zdocs-cdn-prod.zoominsoftware.com/tdta-b2c_merchandiser_administrator-2-production-enus/beac8152-03cc-40b1-b594-e8ed108b8b62/images/icon_note.png)
+![Note](https://sf-zdocs-cdn-prod.zoominsoftware.com/tdta-b2c_merchandiser_administrator-2-production-enus/76f32a4a-8e89-47fb-8563-08c81bc97a57/images/icon_note.png)
 
 Note A list of assigned roles also appears on the Roles page of a user definition.
 

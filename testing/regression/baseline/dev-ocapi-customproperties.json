@@ -24,7 +24,7 @@
       "tables",
       "examples"
     ],
-    "fetchedAt": "2026-02-13T12:53:04.450Z",
+    "fetchedAt": "2026-02-23T15:14:08.249Z",
     "current": {
       "chars": 5386,
       "codeBlocks": 1,
@@ -34,11 +34,19 @@
       "bullets": 14,
       "headings": 1
     },
-    "baseline": null,
-    "exactMatch": null,
-    "charDelta": null,
-    "charDeltaPct": null,
-    "baselineExists": false,
+    "baseline": {
+      "chars": 5386,
+      "codeBlocks": 1,
+      "tables": 2,
+      "images": 0,
+      "orderedSteps": 0,
+      "bullets": 14,
+      "headings": 1
+    },
+    "exactMatch": true,
+    "charDelta": 0,
+    "charDeltaPct": 0,
+    "baselineExists": true,
     "error": null
   }
 }

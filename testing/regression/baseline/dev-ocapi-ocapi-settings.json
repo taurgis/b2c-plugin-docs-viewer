@@ -24,7 +24,7 @@
       "tables",
       "code"
     ],
-    "fetchedAt": "2026-02-13T12:51:48.772Z",
+    "fetchedAt": "2026-02-23T15:12:46.616Z",
     "current": {
       "chars": 10740,
       "codeBlocks": 3,
@@ -34,11 +34,19 @@
       "bullets": 11,
       "headings": 1
     },
-    "baseline": null,
-    "exactMatch": null,
-    "charDelta": null,
-    "charDeltaPct": null,
-    "baselineExists": false,
+    "baseline": {
+      "chars": 10740,
+      "codeBlocks": 3,
+      "tables": 4,
+      "images": 0,
+      "orderedSteps": 5,
+      "bullets": 11,
+      "headings": 1
+    },
+    "exactMatch": true,
+    "charDelta": 0,
+    "charDeltaPct": 0,
+    "baselineExists": true,
     "error": null
   }
 }

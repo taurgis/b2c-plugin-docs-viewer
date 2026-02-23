@@ -1,14 +1,14 @@
 {
   "summary": {
-    "startedAt": "2026-02-13T12:50:28.429Z",
-    "finishedAt": "2026-02-13T12:53:15.273Z",
+    "startedAt": "2026-02-23T15:11:21.603Z",
+    "finishedAt": "2026-02-23T15:14:20.157Z",
     "fixtureCount": 21,
     "ok": 21,
     "failed": 0,
-    "compared": 0,
-    "changed": 0,
-    "unchanged": 0,
-    "newBaselineCandidates": 21,
+    "compared": 21,
+    "changed": 9,
+    "unchanged": 12,
+    "newBaselineCandidates": 0,
     "promoted": true
   },
   "results": [
@@ -22,7 +22,7 @@
         "links",
         "basic-sections"
       ],
-      "fetchedAt": "2026-02-13T12:50:39.049Z",
+      "fetchedAt": "2026-02-23T15:11:31.778Z",
       "current": {
         "chars": 1116,
         "codeBlocks": 0,
@@ -32,11 +32,19 @@
         "bullets": 0,
         "headings": 1
       },
-      "baseline": null,
-      "exactMatch": null,
-      "charDelta": null,
-      "charDeltaPct": null,
-      "baselineExists": false,
+      "baseline": {
+        "chars": 1116,
+        "codeBlocks": 0,
+        "tables": 0,
+        "images": 0,
+        "orderedSteps": 0,
+        "bullets": 0,
+        "headings": 1
+      },
+      "exactMatch": true,
+      "charDelta": 0,
+      "charDeltaPct": 0,
+      "baselineExists": true,
       "error": null
     },
     {
@@ -49,7 +57,7 @@
         "images",
         "inline-formatting"
       ],
-      "fetchedAt": "2026-02-13T12:50:49.970Z",
+      "fetchedAt": "2026-02-23T15:11:44.041Z",
       "current": {
         "chars": 1443,
         "codeBlocks": 0,
@@ -59,11 +67,19 @@
         "bullets": 0,
         "headings": 1
       },
-      "baseline": null,
-      "exactMatch": null,
-      "charDelta": null,
-      "charDeltaPct": null,
-      "baselineExists": false,
+      "baseline": {
+        "chars": 1443,
+        "codeBlocks": 0,
+        "tables": 0,
+        "images": 3,
+        "orderedSteps": 6,
+        "bullets": 0,
+        "headings": 1
+      },
+      "exactMatch": false,
+      "charDelta": 0,
+      "charDeltaPct": 0,
+      "baselineExists": true,
       "error": null
     },
     {
@@ -76,8 +92,17 @@
         "images",
         "tables"
       ],
-      "fetchedAt": "2026-02-13T12:50:59.906Z",
+      "fetchedAt": "2026-02-23T15:11:55.999Z",
       "current": {
+        "chars": 7096,
+        "codeBlocks": 0,
+        "tables": 1,
+        "images": 10,
+        "orderedSteps": 21,
+        "bullets": 5,
+        "headings": 3
+      },
+      "baseline": {
         "chars": 6840,
         "codeBlocks": 0,
         "tables": 1,
@@ -86,11 +111,10 @@
         "bullets": 5,
         "headings": 3
       },
-      "baseline": null,
-      "exactMatch": null,
-      "charDelta": null,
-      "charDeltaPct": null,
-      "baselineExists": false,
+      "exactMatch": false,
+      "charDelta": 256,
+      "charDeltaPct": 3.74,
+      "baselineExists": true,
       "error": null
     },
     {
@@ -103,8 +127,17 @@
         "notes",
         "section-headings"
       ],
-      "fetchedAt": "2026-02-13T12:51:10.168Z",
+      "fetchedAt": "2026-02-23T15:12:06.583Z",
       "current": {
+        "chars": 12277,
+        "codeBlocks": 0,
+        "tables": 5,
+        "images": 1,
+        "orderedSteps": 0,
+        "bullets": 12,
+        "headings": 10
+      },
+      "baseline": {
         "chars": 11825,
         "codeBlocks": 0,
         "tables": 5,
@@ -113,11 +146,10 @@
         "bullets": 12,
         "headings": 10
       },
-      "baseline": null,
-      "exactMatch": null,
-      "charDelta": null,
-      "charDeltaPct": null,
-      "baselineExists": false,
+      "exactMatch": false,
+      "charDelta": 452,
+      "charDeltaPct": 3.82,
+      "baselineExists": true,
       "error": null
     },
     {
@@ -130,7 +162,7 @@
         "tables",
         "code-snippet"
       ],
-      "fetchedAt": "2026-02-13T12:51:20.997Z",
+      "fetchedAt": "2026-02-23T15:12:18.589Z",
       "current": {
         "chars": 7916,
         "codeBlocks": 1,
@@ -140,11 +172,19 @@
         "bullets": 0,
         "headings": 12
       },
-      "baseline": null,
-      "exactMatch": null,
-      "charDelta": null,
-      "charDeltaPct": null,
-      "baselineExists": false,
+      "baseline": {
+        "chars": 7916,
+        "codeBlocks": 1,
+        "tables": 6,
+        "images": 1,
+        "orderedSteps": 36,
+        "bullets": 0,
+        "headings": 12
+      },
+      "exactMatch": false,
+      "charDelta": 0,
+      "charDeltaPct": 0,
+      "baselineExists": true,
       "error": null
     },
     {
@@ -157,7 +197,7 @@
         "role-matrix",
         "ordered-lists"
       ],
-      "fetchedAt": "2026-02-13T12:51:32.218Z",
+      "fetchedAt": "2026-02-23T15:12:30.675Z",
       "current": {
         "chars": 16473,
         "codeBlocks": 1,
@@ -167,11 +207,19 @@
         "bullets": 10,
         "headings": 14
       },
-      "baseline": null,
-      "exactMatch": null,
-      "charDelta": null,
-      "charDeltaPct": null,
-      "baselineExists": false,
+      "baseline": {
+        "chars": 16473,
+        "codeBlocks": 1,
+        "tables": 5,
+        "images": 1,
+        "orderedSteps": 13,
+        "bullets": 10,
+        "headings": 14
+      },
+      "exactMatch": false,
+      "charDelta": 0,
+      "charDeltaPct": 0,
+      "baselineExists": true,
       "error": null
     },
     {
@@ -183,7 +231,7 @@
         "dx-code-block",
         "request-response-example"
       ],
-      "fetchedAt": "2026-02-13T12:51:38.051Z",
+      "fetchedAt": "2026-02-23T15:12:36.001Z",
       "current": {
         "chars": 1979,
         "codeBlocks": 2,
@@ -193,11 +241,19 @@
         "bullets": 0,
         "headings": 1
       },
-      "baseline": null,
-      "exactMatch": null,
-      "charDelta": null,
-      "charDeltaPct": null,
-      "baselineExists": false,
+      "baseline": {
+        "chars": 1979,
+        "codeBlocks": 2,
+        "tables": 0,
+        "images": 0,
+        "orderedSteps": 0,
+        "bullets": 0,
+        "headings": 1
+      },
+      "exactMatch": true,
+      "charDelta": 0,
+      "charDeltaPct": 0,
+      "baselineExists": true,
       "error": null
     },
     {
@@ -209,7 +265,7 @@
         "large-table",
         "long-rows"
       ],
-      "fetchedAt": "2026-02-13T12:51:43.474Z",
+      "fetchedAt": "2026-02-23T15:12:41.105Z",
       "current": {
         "chars": 9068,
         "codeBlocks": 0,
@@ -219,11 +275,19 @@
         "bullets": 0,
         "headings": 1
       },
-      "baseline": null,
-      "exactMatch": null,
-      "charDelta": null,
-      "charDeltaPct": null,
-      "baselineExists": false,
+      "baseline": {
+        "chars": 9068,
+        "codeBlocks": 0,
+        "tables": 1,
+        "images": 0,
+        "orderedSteps": 0,
+        "bullets": 0,
+        "headings": 1
+      },
+      "exactMatch": true,
+      "charDelta": 0,
+      "charDeltaPct": 0,
+      "baselineExists": true,
       "error": null
     },
     {
@@ -236,7 +300,7 @@
         "tables",
         "code"
       ],
-      "fetchedAt": "2026-02-13T12:51:48.772Z",
+      "fetchedAt": "2026-02-23T15:12:46.616Z",
       "current": {
         "chars": 10740,
         "codeBlocks": 3,
@@ -246,11 +310,19 @@
         "bullets": 11,
         "headings": 1
       },
-      "baseline": null,
-      "exactMatch": null,
-      "charDelta": null,
-      "charDeltaPct": null,
-      "baselineExists": false,
+      "baseline": {
+        "chars": 10740,
+        "codeBlocks": 3,
+        "tables": 4,
+        "images": 0,
+        "orderedSteps": 5,
+        "bullets": 11,
+        "headings": 1
+      },
+      "exactMatch": true,
+      "charDelta": 0,
+      "charDeltaPct": 0,
+      "baselineExists": true,
       "error": null
     },
     {
@@ -263,7 +335,7 @@
         "images",
         "examples"
       ],
-      "fetchedAt": "2026-02-13T12:51:54.149Z",
+      "fetchedAt": "2026-02-23T15:12:52.017Z",
       "current": {
         "chars": 13283,
         "codeBlocks": 6,
@@ -273,11 +345,19 @@
         "bullets": 40,
         "headings": 1
       },
-      "baseline": null,
-      "exactMatch": null,
-      "charDelta": null,
-      "charDeltaPct": null,
-      "baselineExists": false,
+      "baseline": {
+        "chars": 13283,
+        "codeBlocks": 6,
+        "tables": 1,
+        "images": 1,
+        "orderedSteps": 4,
+        "bullets": 40,
+        "headings": 1
+      },
+      "exactMatch": true,
+      "charDelta": 0,
+      "charDeltaPct": 0,
+      "baselineExists": true,
       "error": null
     },
     {
@@ -289,7 +369,7 @@
         "schema-table",
         "property-list"
       ],
-      "fetchedAt": "2026-02-13T12:51:59.435Z",
+      "fetchedAt": "2026-02-23T15:12:57.151Z",
       "current": {
         "chars": 1997,
         "codeBlocks": 0,
@@ -299,11 +379,19 @@
         "bullets": 0,
         "headings": 1
       },
-      "baseline": null,
-      "exactMatch": null,
-      "charDelta": null,
-      "charDeltaPct": null,
-      "baselineExists": false,
+      "baseline": {
+        "chars": 1997,
+        "codeBlocks": 0,
+        "tables": 1,
+        "images": 0,
+        "orderedSteps": 0,
+        "bullets": 0,
+        "headings": 1
+      },
+      "exactMatch": true,
+      "charDelta": 0,
+      "charDeltaPct": 0,
+      "baselineExists": true,
       "error": null
     },
     {
@@ -316,7 +404,7 @@
         "batch-format",
         "request-examples"
       ],
-      "fetchedAt": "2026-02-13T12:52:04.698Z",
+      "fetchedAt": "2026-02-23T15:13:02.380Z",
       "current": {
         "chars": 10443,
         "codeBlocks": 6,
@@ -326,11 +414,19 @@
         "bullets": 0,
         "headings": 1
       },
-      "baseline": null,
-      "exactMatch": null,
-      "charDelta": null,
-      "charDeltaPct": null,
-      "baselineExists": false,
+      "baseline": {
+        "chars": 10443,
+        "codeBlocks": 6,
+        "tables": 2,
+        "images": 0,
+        "orderedSteps": 4,
+        "bullets": 0,
+        "headings": 1
+      },
+      "exactMatch": true,
+      "charDelta": 0,
+      "charDeltaPct": 0,
+      "baselineExists": true,
       "error": null
     },
     {
@@ -343,7 +439,7 @@
         "method-examples",
         "long-markdown"
       ],
-      "fetchedAt": "2026-02-13T12:52:10.108Z",
+      "fetchedAt": "2026-02-23T15:13:07.769Z",
       "current": {
         "chars": 8990,
         "codeBlocks": 9,
@@ -353,11 +449,19 @@
         "bullets": 3,
         "headings": 5
       },
-      "baseline": null,
-      "exactMatch": null,
-      "charDelta": null,
-      "charDeltaPct": null,
-      "baselineExists": false,
+      "baseline": {
+        "chars": 8990,
+        "codeBlocks": 9,
+        "tables": 1,
+        "images": 0,
+        "orderedSteps": 0,
+        "bullets": 3,
+        "headings": 5
+      },
+      "exactMatch": true,
+      "charDelta": 0,
+      "charDeltaPct": 0,
+      "baselineExists": true,
       "error": null
     },
     {
@@ -371,8 +475,17 @@
         "images",
         "admin-workflow"
       ],
-      "fetchedAt": "2026-02-13T12:52:21.262Z",
+      "fetchedAt": "2026-02-23T15:13:19.750Z",
       "current": {
+        "chars": 15002,
+        "codeBlocks": 0,
+        "tables": 9,
+        "images": 3,
+        "orderedSteps": 12,
+        "bullets": 16,
+        "headings": 21
+      },
+      "baseline": {
         "chars": 14860,
         "codeBlocks": 0,
         "tables": 9,
@@ -381,11 +494,10 @@
         "bullets": 16,
         "headings": 21
       },
-      "baseline": null,
-      "exactMatch": null,
-      "charDelta": null,
-      "charDeltaPct": null,
-      "baselineExists": false,
+      "exactMatch": false,
+      "charDelta": 142,
+      "charDeltaPct": 0.96,
+      "baselineExists": true,
       "error": null
     },
     {
@@ -398,7 +510,7 @@
         "tables",
         "image-guidance"
       ],
-      "fetchedAt": "2026-02-13T12:52:32.317Z",
+      "fetchedAt": "2026-02-23T15:13:32.044Z",
       "current": {
         "chars": 5940,
         "codeBlocks": 0,
@@ -408,11 +520,19 @@
         "bullets": 0,
         "headings": 5
       },
-      "baseline": null,
-      "exactMatch": null,
-      "charDelta": null,
-      "charDeltaPct": null,
-      "baselineExists": false,
+      "baseline": {
+        "chars": 5940,
+        "codeBlocks": 0,
+        "tables": 2,
+        "images": 3,
+        "orderedSteps": 12,
+        "bullets": 0,
+        "headings": 5
+      },
+      "exactMatch": false,
+      "charDelta": 0,
+      "charDeltaPct": 0,
+      "baselineExists": true,
       "error": null
     },
     {
@@ -425,7 +545,7 @@
         "many-code-snippets",
         "data-import-export"
       ],
-      "fetchedAt": "2026-02-13T12:52:43.227Z",
+      "fetchedAt": "2026-02-23T15:13:44.038Z",
       "current": {
         "chars": 6208,
         "codeBlocks": 15,
@@ -435,11 +555,19 @@
         "bullets": 12,
         "headings": 7
       },
-      "baseline": null,
-      "exactMatch": null,
-      "charDelta": null,
-      "charDeltaPct": null,
-      "baselineExists": false,
+      "baseline": {
+        "chars": 6208,
+        "codeBlocks": 15,
+        "tables": 0,
+        "images": 1,
+        "orderedSteps": 0,
+        "bullets": 12,
+        "headings": 7
+      },
+      "exactMatch": false,
+      "charDelta": 0,
+      "charDeltaPct": 0,
+      "baselineExists": true,
       "error": null
     },
     {
@@ -452,7 +580,7 @@
         "code-samples",
         "procedural-steps"
       ],
-      "fetchedAt": "2026-02-13T12:52:48.930Z",
+      "fetchedAt": "2026-02-23T15:13:52.060Z",
       "current": {
         "chars": 12362,
         "codeBlocks": 12,
@@ -462,11 +590,19 @@
         "bullets": 5,
         "headings": 3
       },
-      "baseline": null,
-      "exactMatch": null,
-      "charDelta": null,
-      "charDeltaPct": null,
-      "baselineExists": false,
+      "baseline": {
+        "chars": 12362,
+        "codeBlocks": 12,
+        "tables": 0,
+        "images": 0,
+        "orderedSteps": 11,
+        "bullets": 5,
+        "headings": 3
+      },
+      "exactMatch": true,
+      "charDelta": 0,
+      "charDeltaPct": 0,
+      "baselineExists": true,
       "error": null
     },
     {
@@ -479,7 +615,7 @@
         "code",
         "request-sequences"
       ],
-      "fetchedAt": "2026-02-13T12:52:54.174Z",
+      "fetchedAt": "2026-02-23T15:13:57.610Z",
       "current": {
         "chars": 10393,
         "codeBlocks": 4,
@@ -489,11 +625,19 @@
         "bullets": 7,
         "headings": 1
       },
-      "baseline": null,
-      "exactMatch": null,
-      "charDelta": null,
-      "charDeltaPct": null,
-      "baselineExists": false,
+      "baseline": {
+        "chars": 10393,
+        "codeBlocks": 4,
+        "tables": 0,
+        "images": 0,
+        "orderedSteps": 15,
+        "bullets": 7,
+        "headings": 1
+      },
+      "exactMatch": true,
+      "charDelta": 0,
+      "charDeltaPct": 0,
+      "baselineExists": true,
       "error": null
     },
     {
@@ -506,7 +650,7 @@
         "tables",
         "code-samples"
       ],
-      "fetchedAt": "2026-02-13T12:52:59.285Z",
+      "fetchedAt": "2026-02-23T15:14:02.872Z",
       "current": {
         "chars": 4865,
         "codeBlocks": 4,
@@ -516,11 +660,19 @@
         "bullets": 0,
         "headings": 1
       },
-      "baseline": null,
-      "exactMatch": null,
-      "charDelta": null,
-      "charDeltaPct": null,
-      "baselineExists": false,
+      "baseline": {
+        "chars": 4865,
+        "codeBlocks": 4,
+        "tables": 1,
+        "images": 0,
+        "orderedSteps": 0,
+        "bullets": 0,
+        "headings": 1
+      },
+      "exactMatch": true,
+      "charDelta": 0,
+      "charDeltaPct": 0,
+      "baselineExists": true,
       "error": null
     },
     {
@@ -533,7 +685,7 @@
         "tables",
         "examples"
       ],
-      "fetchedAt": "2026-02-13T12:53:04.450Z",
+      "fetchedAt": "2026-02-23T15:14:08.249Z",
       "current": {
         "chars": 5386,
         "codeBlocks": 1,
@@ -543,11 +695,19 @@
         "bullets": 14,
         "headings": 1
       },
-      "baseline": null,
-      "exactMatch": null,
-      "charDelta": null,
-      "charDeltaPct": null,
-      "baselineExists": false,
+      "baseline": {
+        "chars": 5386,
+        "codeBlocks": 1,
+        "tables": 2,
+        "images": 0,
+        "orderedSteps": 0,
+        "bullets": 14,
+        "headings": 1
+      },
+      "exactMatch": true,
+      "charDelta": 0,
+      "charDeltaPct": 0,
+      "baselineExists": true,
       "error": null
     },
     {
@@ -560,7 +720,7 @@
         "ordered-steps",
         "images"
       ],
-      "fetchedAt": "2026-02-13T12:53:15.272Z",
+      "fetchedAt": "2026-02-23T15:14:20.149Z",
       "current": {
         "chars": 2864,
         "codeBlocks": 0,
@@ -570,11 +730,19 @@
         "bullets": 0,
         "headings": 2
       },
-      "baseline": null,
-      "exactMatch": null,
-      "charDelta": null,
-      "charDeltaPct": null,
-      "baselineExists": false,
+      "baseline": {
+        "chars": 2864,
+        "codeBlocks": 0,
+        "tables": 1,
+        "images": 1,
+        "orderedSteps": 8,
+        "bullets": 0,
+        "headings": 2
+      },
+      "exactMatch": false,
+      "charDelta": 0,
+      "charDeltaPct": 0,
+      "baselineExists": true,
       "error": null
     }
   ]

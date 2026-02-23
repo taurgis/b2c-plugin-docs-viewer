@@ -11,7 +11,7 @@ Sometimes, developers want to import some of the data from production into the s
 
 Site Import/Export is only intended for setting up identical sites (same names and IDs) and the same organization-level data across instances. However, the Business Manager UI also lets you export a subset of the instance data.
 
-![Note](https://sf-zdocs-cdn-prod.zoominsoftware.com/tdta-b2c_merchandiser_administrator-2-production-enus/beac8152-03cc-40b1-b594-e8ed108b8b62/images/icon_note.png)
+![Note](https://sf-zdocs-cdn-prod.zoominsoftware.com/tdta-b2c_merchandiser_administrator-2-production-enus/76f32a4a-8e89-47fb-8563-08c81bc97a57/images/icon_note.png)
 
 Note You can import orders during site import on sandboxes. To use this feature, save a file called order.xml in the site's import folder. The file structure must conform to order.xsd. This feature is only available on sandboxes and is intended for (automatic) testing purposes.
 

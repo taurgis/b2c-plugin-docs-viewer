@@ -24,7 +24,7 @@
       "batch-format",
       "request-examples"
     ],
-    "fetchedAt": "2026-02-13T12:52:04.698Z",
+    "fetchedAt": "2026-02-23T15:13:02.380Z",
     "current": {
       "chars": 10443,
       "codeBlocks": 6,
@@ -34,11 +34,19 @@
       "bullets": 0,
       "headings": 1
     },
-    "baseline": null,
-    "exactMatch": null,
-    "charDelta": null,
-    "charDeltaPct": null,
-    "baselineExists": false,
+    "baseline": {
+      "chars": 10443,
+      "codeBlocks": 6,
+      "tables": 2,
+      "images": 0,
+      "orderedSteps": 4,
+      "bullets": 0,
+      "headings": 1
+    },
+    "exactMatch": true,
+    "charDelta": 0,
+    "charDeltaPct": 0,
+    "baselineExists": true,
     "error": null
   }
 }

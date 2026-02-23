@@ -24,7 +24,7 @@
       "tables",
       "code-samples"
     ],
-    "fetchedAt": "2026-02-13T12:52:59.285Z",
+    "fetchedAt": "2026-02-23T15:14:02.872Z",
     "current": {
       "chars": 4865,
       "codeBlocks": 4,
@@ -34,11 +34,19 @@
       "bullets": 0,
       "headings": 1
     },
-    "baseline": null,
-    "exactMatch": null,
-    "charDelta": null,
-    "charDeltaPct": null,
-    "baselineExists": false,
+    "baseline": {
+      "chars": 4865,
+      "codeBlocks": 4,
+      "tables": 1,
+      "images": 0,
+      "orderedSteps": 0,
+      "bullets": 0,
+      "headings": 1
+    },
+    "exactMatch": true,
+    "charDelta": 0,
+    "charDeltaPct": 0,
+    "baselineExists": true,
     "error": null
   }
 }

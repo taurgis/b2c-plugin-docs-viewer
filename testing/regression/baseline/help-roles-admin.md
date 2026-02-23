@@ -26,7 +26,7 @@ Developers use their own accounts to access instances and don't change or reset 
 
 Security settings let the administrator configure Business Manager passwords behaviors. An administrator can retrieve or reset a forgotten password using the *Forgot Password* feature.
 
-![Note](https://sf-zdocs-cdn-prod.zoominsoftware.com/tdta-b2c_merchandiser_administrator-2-production-enus/beac8152-03cc-40b1-b594-e8ed108b8b62/images/icon_note.png)
+![Note](https://sf-zdocs-cdn-prod.zoominsoftware.com/tdta-b2c_merchandiser_administrator-2-production-enus/76f32a4a-8e89-47fb-8563-08c81bc97a57/images/icon_note.png)
 
 Note Commerce Cloud Support only resets the main administrator password for the admin account. Only a user logged in as the admin user can reset other accounts with administrative access.
 
