@@ -226,11 +226,59 @@ function ensureTitleHeading(markdown: string, title: string | null): string {
   return markdown;
 }
 
+function findTitleLineStart(markdown: string, title: string): number {
+  const normalizedTitle = title.trim().toLowerCase();
+  if (!normalizedTitle) return -1;
+
+  const lines = markdown.split("\n");
+  let offset = 0;
+
+  for (const line of lines) {
+    const normalizedLine = line.trim().toLowerCase();
+    if (normalizedLine === normalizedTitle || normalizedLine === `# ${normalizedTitle}`) {
+      return offset;
+    }
+
+    offset += line.length + 1;
+  }
+
+  return -1;
+}
+
+function removeLeadingBreadcrumbChrome(markdown: string, title: string | null): string {
+  if (!title) return markdown;
+
+  const normalizedTitle = title.trim();
+  if (!normalizedTitle) return markdown;
+
+  const headingLine = `# ${normalizedTitle}`;
+  const lowerMarkdown = markdown.toLowerCase();
+  const lowerHeadingLine = headingLine.toLowerCase();
+
+  const firstHeadingIndex = lowerMarkdown.indexOf(lowerHeadingLine);
+  if (firstHeadingIndex !== 0) return markdown;
+
+  const breadcrumbsIndex = lowerMarkdown.indexOf("you are here:", lowerHeadingLine.length);
+  if (breadcrumbsIndex < 0 || breadcrumbsIndex > 1500) return markdown;
+
+  const secondTitleOffset = findTitleLineStart(markdown.slice(breadcrumbsIndex), title);
+  if (secondTitleOffset < 0) return markdown;
+
+  const secondTitleIndex = breadcrumbsIndex + secondTitleOffset;
+  if (secondTitleIndex > 3500) return markdown;
+
+  const secondTitleLineEnd = markdown.indexOf("\n", secondTitleIndex);
+  const contentStart = secondTitleLineEnd >= 0 ? secondTitleLineEnd : markdown.length;
+
+  return `${markdown.slice(0, headingLine.length)}${markdown.slice(contentStart)}`;
+}
+
 export function formatHelpArticleMarkdown(markdown: string, title: string | null): string {
   let output = markdown.replace(/\u00a0/g, " ");
 
   if (title) {
-    const titleIndex = output.toLowerCase().lastIndexOf(title.toLowerCase());
+    const titleIndex = findTitleLineStart(output, title);
+
     if (titleIndex > 0) {
       output = output.slice(titleIndex);
     }
@@ -245,6 +293,7 @@ export function formatHelpArticleMarkdown(markdown: string, title: string | null
   ]);
 
   output = ensureTitleHeading(output, title);
+  output = removeLeadingBreadcrumbChrome(output, title);
   return output;
 }
 

@@ -533,7 +533,7 @@ async function searchHelp(options) {
     const cachePath = (0, cache_1.buildCachePath)("search", cacheKey);
     if (useCache) {
         const cached = await (0, cache_1.readCache)(cachePath);
-        if (cached && cached.length > 0) {
+        if (cached) {
             await (0, latestSearch_1.storeLatestSearch)(query, cached);
             return cached;
         }
@@ -558,20 +558,15 @@ async function searchHelp(options) {
         });
         if (searchResult?.ok && Array.isArray(searchResult.data?.results)) {
             const results = (0, helpSearchResults_1.extractResults)(searchResult.data, { limit });
-            if (results.length > 0) {
-                if (useCache) {
-                    await (0, cache_1.writeCache)(cachePath, results);
-                }
-                await (0, latestSearch_1.storeLatestSearch)(query, results);
-                return results;
+            if (useCache) {
+                await (0, cache_1.writeCache)(cachePath, results);
             }
+            await (0, latestSearch_1.storeLatestSearch)(query, results);
+            return results;
         }
         tokenInfo = null;
     }
     const results = await searchViaBrowser(query, language, limit, timeoutMs, headed, debug);
-    if (!results.length) {
-        throw new Error("Search returned no results.");
-    }
     if (useCache) {
         await (0, cache_1.writeCache)(cachePath, results);
     }

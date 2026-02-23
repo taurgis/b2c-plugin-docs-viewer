@@ -4,6 +4,13 @@ import { loadLatestSearch } from "../../lib/latestSearch";
 import { normalizeAndValidateDocUrl } from "../../lib/urlPolicy";
 import { getErrorMessage } from "../../lib/errorUtils";
 import { writeTextFile } from "../../lib/fileOutput";
+import {
+  cacheFlag,
+  debugFlag,
+  headedFlag,
+  timeoutFlag,
+  waitFlag,
+} from "../../lib/commandFlags";
 
 export default class DocsHelpSiteArticle extends Command {
   static description = "Fetch a Salesforce Help or Developer doc page and return the details.";
@@ -40,27 +47,11 @@ export default class DocsHelpSiteArticle extends Command {
       char: "o",
       description: "Write output to a file",
     }),
-    cache: Flags.boolean({
-      description: "Use cached results when available",
-      default: true,
-      allowNo: true,
-    }),
-    timeout: Flags.integer({
-      description: "Navigation timeout in ms",
-      default: 45_000,
-    }),
-    wait: Flags.integer({
-      description: "Wait time after load in ms",
-      default: 2500,
-    }),
-    headed: Flags.boolean({
-      description: "Run browser in headed mode",
-      default: false,
-    }),
-    debug: Flags.boolean({
-      description: "Enable debug logging",
-      default: false,
-    }),
+    cache: cacheFlag(),
+    timeout: timeoutFlag(),
+    wait: waitFlag(),
+    headed: headedFlag(),
+    debug: debugFlag(),
   };
 
   async run(): Promise<void> {

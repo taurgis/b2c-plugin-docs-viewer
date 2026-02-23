@@ -635,7 +635,7 @@ export async function searchHelp(options: SearchOptions): Promise<SearchResult[]
 
   if (useCache) {
     const cached = await readCache<SearchResult[]>(cachePath);
-    if (cached && cached.length > 0) {
+    if (cached) {
       await storeLatestSearch(query, cached);
       return cached;
     }
@@ -669,13 +669,13 @@ export async function searchHelp(options: SearchOptions): Promise<SearchResult[]
 
     if (searchResult?.ok && Array.isArray(searchResult.data?.results)) {
       const results = extractResults(searchResult.data, { limit });
-      if (results.length > 0) {
-        if (useCache) {
-          await writeCache(cachePath, results);
-        }
-        await storeLatestSearch(query, results);
-        return results;
+
+      if (useCache) {
+        await writeCache(cachePath, results);
       }
+
+      await storeLatestSearch(query, results);
+      return results;
     }
 
     tokenInfo = null;
@@ -689,10 +689,6 @@ export async function searchHelp(options: SearchOptions): Promise<SearchResult[]
     headed,
     debug
   );
-
-  if (!results.length) {
-    throw new Error("Search returned no results.");
-  }
 
   if (useCache) {
     await writeCache(cachePath, results);

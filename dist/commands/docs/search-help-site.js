@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const core_1 = require("@oclif/core");
 const helpSearch_1 = require("../../lib/helpSearch");
 const searchTable_1 = require("../../lib/searchTable");
+const commandFlags_1 = require("../../lib/commandFlags");
 class DocsSearchHelpSite extends core_1.Command {
     async run() {
         const { args, flags } = await this.parse(DocsSearchHelpSite);
@@ -24,6 +25,10 @@ class DocsSearchHelpSite extends core_1.Command {
         }
         if (flags.json) {
             this.log(JSON.stringify({ query: args.query, count: results.length, results }, null, 2));
+            return;
+        }
+        if (results.length === 0) {
+            this.log("No results found.");
             return;
         }
         this.log((0, searchTable_1.renderSearchResultsTable)(results));
@@ -57,22 +62,9 @@ DocsSearchHelpSite.flags = {
         description: "Output JSON",
         default: false,
     }),
-    cache: core_1.Flags.boolean({
-        description: "Use cached results when available",
-        default: true,
-        allowNo: true,
-    }),
-    timeout: core_1.Flags.integer({
-        description: "Navigation timeout in ms",
-        default: 45000,
-    }),
-    headed: core_1.Flags.boolean({
-        description: "Run browser in headed mode",
-        default: false,
-    }),
-    debug: core_1.Flags.boolean({
-        description: "Enable debug logging",
-        default: false,
-    }),
+    cache: (0, commandFlags_1.cacheFlag)(),
+    timeout: (0, commandFlags_1.timeoutFlag)(),
+    headed: (0, commandFlags_1.headedFlag)(),
+    debug: (0, commandFlags_1.debugFlag)(),
 };
 exports.default = DocsSearchHelpSite;

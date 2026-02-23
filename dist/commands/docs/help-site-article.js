@@ -6,6 +6,7 @@ const latestSearch_1 = require("../../lib/latestSearch");
 const urlPolicy_1 = require("../../lib/urlPolicy");
 const errorUtils_1 = require("../../lib/errorUtils");
 const fileOutput_1 = require("../../lib/fileOutput");
+const commandFlags_1 = require("../../lib/commandFlags");
 class DocsHelpSiteArticle extends core_1.Command {
     async run() {
         const { args, flags } = await this.parse(DocsHelpSiteArticle);
@@ -102,26 +103,10 @@ DocsHelpSiteArticle.flags = {
         char: "o",
         description: "Write output to a file",
     }),
-    cache: core_1.Flags.boolean({
-        description: "Use cached results when available",
-        default: true,
-        allowNo: true,
-    }),
-    timeout: core_1.Flags.integer({
-        description: "Navigation timeout in ms",
-        default: 45000,
-    }),
-    wait: core_1.Flags.integer({
-        description: "Wait time after load in ms",
-        default: 2500,
-    }),
-    headed: core_1.Flags.boolean({
-        description: "Run browser in headed mode",
-        default: false,
-    }),
-    debug: core_1.Flags.boolean({
-        description: "Enable debug logging",
-        default: false,
-    }),
+    cache: (0, commandFlags_1.cacheFlag)(),
+    timeout: (0, commandFlags_1.timeoutFlag)(),
+    wait: (0, commandFlags_1.waitFlag)(),
+    headed: (0, commandFlags_1.headedFlag)(),
+    debug: (0, commandFlags_1.debugFlag)(),
 };
 exports.default = DocsHelpSiteArticle;

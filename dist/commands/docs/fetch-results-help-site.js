@@ -6,6 +6,7 @@ const helpScraper_1 = require("../../lib/helpScraper");
 const urlPolicy_1 = require("../../lib/urlPolicy");
 const errorUtils_1 = require("../../lib/errorUtils");
 const fileOutput_1 = require("../../lib/fileOutput");
+const commandFlags_1 = require("../../lib/commandFlags");
 function buildFailureSection(failures) {
     if (failures.length === 0)
         return "";
@@ -51,6 +52,31 @@ class DocsFetchResultsHelpSite extends core_1.Command {
         });
         if (showStatus) {
             this.log(`-> Found ${results.length} result${results.length === 1 ? "" : "s"}.`);
+        }
+        if (results.length === 0) {
+            if (flags.json) {
+                const output = JSON.stringify({
+                    query: args.query,
+                    count: 0,
+                    results: [],
+                    errors: [],
+                }, null, 2) + "\n";
+                if (flags.out) {
+                    await (0, fileOutput_1.writeTextFile)(flags.out, output);
+                    this.log(`Saved JSON to ${flags.out}`);
+                }
+                else {
+                    this.log(output.trimEnd());
+                }
+            }
+            else if (flags.out) {
+                await (0, fileOutput_1.writeTextFile)(flags.out, "No results found.\n");
+                this.log(`Saved output to ${flags.out}`);
+            }
+            else {
+                this.log("No results found.");
+            }
+            return;
         }
         const concurrency = Math.max(1, Math.min(flags.concurrency, 6));
         if (showStatus) {
@@ -117,7 +143,7 @@ class DocsFetchResultsHelpSite extends core_1.Command {
             else {
                 this.log(output.trimEnd());
             }
-            if (detailed.length === 0) {
+            if (results.length > 0 && detailed.length === 0) {
                 this.error("Failed to fetch all articles.", { code: "ALL_FETCHES_FAILED" });
             }
             return;
@@ -142,7 +168,7 @@ class DocsFetchResultsHelpSite extends core_1.Command {
                 this.warn(`Completed with ${failures.length} failed article fetch(es).`);
             }
         }
-        if (detailed.length === 0) {
+        if (results.length > 0 && detailed.length === 0) {
             this.error("Failed to fetch all articles.", { code: "ALL_FETCHES_FAILED" });
         }
     }
@@ -182,26 +208,10 @@ DocsFetchResultsHelpSite.flags = {
         description: "Parallel article fetch workers",
         default: 2,
     }),
-    cache: core_1.Flags.boolean({
-        description: "Use cached results when available",
-        default: true,
-        allowNo: true,
-    }),
-    timeout: core_1.Flags.integer({
-        description: "Navigation timeout in ms",
-        default: 45000,
-    }),
-    wait: core_1.Flags.integer({
-        description: "Wait time after load in ms",
-        default: 2500,
-    }),
-    headed: core_1.Flags.boolean({
-        description: "Run browser in headed mode",
-        default: false,
-    }),
-    debug: core_1.Flags.boolean({
-        description: "Enable debug logging",
-        default: false,
-    }),
+    cache: (0, commandFlags_1.cacheFlag)(),
+    timeout: (0, commandFlags_1.timeoutFlag)(),
+    wait: (0, commandFlags_1.waitFlag)(),
+    headed: (0, commandFlags_1.headedFlag)(),
+    debug: (0, commandFlags_1.debugFlag)(),
 };
 exports.default = DocsFetchResultsHelpSite;

@@ -1,6 +1,12 @@
 import { Args, Command, Flags } from "@oclif/core";
 import { searchHelp } from "../../lib/helpSearch";
 import { renderSearchResultsTable } from "../../lib/searchTable";
+import {
+  cacheFlag,
+  debugFlag,
+  headedFlag,
+  timeoutFlag,
+} from "../../lib/commandFlags";
 
 export default class DocsSearchHelpSite extends Command {
   static description = "Search Salesforce Help for matching Help and Developer docs pages.";
@@ -36,23 +42,10 @@ export default class DocsSearchHelpSite extends Command {
       description: "Output JSON",
       default: false,
     }),
-    cache: Flags.boolean({
-      description: "Use cached results when available",
-      default: true,
-      allowNo: true,
-    }),
-    timeout: Flags.integer({
-      description: "Navigation timeout in ms",
-      default: 45_000,
-    }),
-    headed: Flags.boolean({
-      description: "Run browser in headed mode",
-      default: false,
-    }),
-    debug: Flags.boolean({
-      description: "Enable debug logging",
-      default: false,
-    }),
+    cache: cacheFlag(),
+    timeout: timeoutFlag(),
+    headed: headedFlag(),
+    debug: debugFlag(),
   };
 
   async run(): Promise<void> {
@@ -81,6 +74,12 @@ export default class DocsSearchHelpSite extends Command {
       this.log(JSON.stringify({ query: args.query, count: results.length, results }, null, 2));
       return;
     }
+
+    if (results.length === 0) {
+      this.log("No results found.");
+      return;
+    }
+
     this.log(renderSearchResultsTable(results));
   }
 }

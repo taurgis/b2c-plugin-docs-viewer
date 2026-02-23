@@ -4,6 +4,13 @@ import { getHelpDetails } from "../../lib/helpScraper";
 import { normalizeAndValidateDocUrl } from "../../lib/urlPolicy";
 import { getErrorMessage } from "../../lib/errorUtils";
 import { writeTextFile } from "../../lib/fileOutput";
+import {
+  cacheFlag,
+  debugFlag,
+  headedFlag,
+  timeoutFlag,
+  waitFlag,
+} from "../../lib/commandFlags";
 
 type DetailedResult = {
   url: string;
@@ -92,27 +99,11 @@ export default class DocsFetchResultsHelpSite extends Command {
       description: "Parallel article fetch workers",
       default: 2,
     }),
-    cache: Flags.boolean({
-      description: "Use cached results when available",
-      default: true,
-      allowNo: true,
-    }),
-    timeout: Flags.integer({
-      description: "Navigation timeout in ms",
-      default: 45_000,
-    }),
-    wait: Flags.integer({
-      description: "Wait time after load in ms",
-      default: 2500,
-    }),
-    headed: Flags.boolean({
-      description: "Run browser in headed mode",
-      default: false,
-    }),
-    debug: Flags.boolean({
-      description: "Enable debug logging",
-      default: false,
-    }),
+    cache: cacheFlag(),
+    timeout: timeoutFlag(),
+    wait: waitFlag(),
+    headed: headedFlag(),
+    debug: debugFlag(),
   };
 
   async run(): Promise<void> {
@@ -135,6 +126,35 @@ export default class DocsFetchResultsHelpSite extends Command {
 
     if (showStatus) {
       this.log(`-> Found ${results.length} result${results.length === 1 ? "" : "s"}.`);
+    }
+
+    if (results.length === 0) {
+      if (flags.json) {
+        const output = JSON.stringify(
+          {
+            query: args.query,
+            count: 0,
+            results: [],
+            errors: [],
+          },
+          null,
+          2
+        ) + "\n";
+
+        if (flags.out) {
+          await writeTextFile(flags.out, output);
+          this.log(`Saved JSON to ${flags.out}`);
+        } else {
+          this.log(output.trimEnd());
+        }
+      } else if (flags.out) {
+        await writeTextFile(flags.out, "No results found.\n");
+        this.log(`Saved output to ${flags.out}`);
+      } else {
+        this.log("No results found.");
+      }
+
+      return;
     }
 
     const concurrency = Math.max(1, Math.min(flags.concurrency, 6));
@@ -213,7 +233,7 @@ export default class DocsFetchResultsHelpSite extends Command {
         this.log(output.trimEnd());
       }
 
-      if (detailed.length === 0) {
+      if (results.length > 0 && detailed.length === 0) {
         this.error("Failed to fetch all articles.", { code: "ALL_FETCHES_FAILED" });
       }
 
@@ -242,7 +262,7 @@ export default class DocsFetchResultsHelpSite extends Command {
       }
     }
 
-    if (detailed.length === 0) {
+    if (results.length > 0 && detailed.length === 0) {
       this.error("Failed to fetch all articles.", { code: "ALL_FETCHES_FAILED" });
     }
   }

@@ -87,4 +87,26 @@ describe("docs search-help-site", () => {
     expect(tableOutput).toContain("Doc A");
     expect(tableOutput).toContain("Doc B");
   });
+
+  it("treats zero results as a valid non-error outcome", async () => {
+    vi.mocked(searchHelp).mockResolvedValue([]);
+
+    const ctx = createContext({
+      args: { query: "nothing" },
+      flags: {
+        json: false,
+        language: "en_US",
+        limit: 10,
+        timeout: 45000,
+        cache: true,
+        headed: false,
+        debug: false,
+      },
+    });
+
+    await DocsSearchHelpSite.prototype.run.call(ctx as never);
+
+    expect(ctx.log).toHaveBeenCalledTimes(3);
+    expect(String(ctx.log.mock.calls[2][0])).toBe("No results found.");
+  });
 });

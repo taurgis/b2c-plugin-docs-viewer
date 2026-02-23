@@ -115,4 +115,66 @@ describe("docs fetch-results-help-site", () => {
     expect(parsed.errors).toHaveLength(1);
     expect(parsed.errors[0].error).toContain("network down");
   });
+
+  it("returns JSON with count 0 when search has no hits", async () => {
+    vi.mocked(searchHelp).mockResolvedValue([]);
+
+    const ctx = createContext({
+      args: { query: "nope" },
+      flags: {
+        limit: 3,
+        language: "en_US",
+        json: true,
+        out: undefined,
+        concurrency: 2,
+        cache: true,
+        timeout: 45000,
+        wait: 2500,
+        headed: false,
+        debug: false,
+      },
+    });
+
+    await DocsFetchResultsHelpSite.prototype.run.call(ctx as never);
+
+    expect(getHelpDetails).not.toHaveBeenCalled();
+    const output = String(ctx.log.mock.calls[0][0]);
+    const parsed = JSON.parse(output) as {
+      query: string;
+      count: number;
+      results: unknown[];
+      errors: unknown[];
+    };
+
+    expect(parsed.query).toBe("nope");
+    expect(parsed.count).toBe(0);
+    expect(parsed.results).toHaveLength(0);
+    expect(parsed.errors).toHaveLength(0);
+  });
+
+  it("prints a friendly message when search has no hits in non-JSON mode", async () => {
+    vi.mocked(searchHelp).mockResolvedValue([]);
+
+    const ctx = createContext({
+      args: { query: "nope" },
+      flags: {
+        limit: 3,
+        language: "en_US",
+        json: false,
+        out: undefined,
+        concurrency: 2,
+        cache: true,
+        timeout: 45000,
+        wait: 2500,
+        headed: false,
+        debug: false,
+      },
+    });
+
+    await DocsFetchResultsHelpSite.prototype.run.call(ctx as never);
+
+    expect(getHelpDetails).not.toHaveBeenCalled();
+    const lastLog = String(ctx.log.mock.calls[ctx.log.mock.calls.length - 1][0]);
+    expect(lastLog).toBe("No results found.");
+  });
 });

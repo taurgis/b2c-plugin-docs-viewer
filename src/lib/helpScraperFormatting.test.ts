@@ -103,4 +103,55 @@ describe("formatHelpArticleMarkdown", () => {
     expect(markdown).not.toContain("DID THIS ARTICLE SOLVE YOUR ISSUE?");
     expect(markdown).not.toContain("COOKIE CONSENT MANAGER");
   });
+
+  it("does not truncate content when the title appears again later", () => {
+    const raw = [
+      "Read More",
+      "Enable Agentforce for Guided Shopping",
+      "First paragraph that should be preserved.",
+      "Some body text.",
+      "Later we mention Enable Agentforce for Guided Shopping again in context.",
+      "Final paragraph.",
+    ].join("\n");
+
+    const markdown = formatHelpArticleMarkdown(raw, "Enable Agentforce for Guided Shopping");
+
+    expect(markdown.startsWith("# Enable Agentforce for Guided Shopping")).toBe(true);
+    expect(markdown).toContain("First paragraph that should be preserved.");
+    expect(markdown).toContain("Final paragraph.");
+  });
+
+  it("ignores title text inside TOC links and starts at the real title line", () => {
+    const raw = [
+      "Enable Agentforce for Guided Shopping](https://help.salesforce.com/s/articleView?id=x&type=5)",
+      "- Another nav link",
+      "Enable Agentforce for Guided Shopping",
+      "You are here:",
+      "Body content starts here.",
+    ].join("\n");
+
+    const markdown = formatHelpArticleMarkdown(raw, "Enable Agentforce for Guided Shopping");
+
+    expect(markdown.startsWith("# Enable Agentforce for Guided Shopping")).toBe(true);
+    expect(markdown).toContain("Body content starts here.");
+    expect(markdown).not.toContain("](/s/articleView?id=x&type=5)");
+  });
+
+  it("removes leading 'You are here' breadcrumbs and duplicate title heading", () => {
+    const raw = [
+      "Enable Agentforce for Guided Shopping",
+      "You are here:",
+      "1. Salesforce Help",
+      "2. Docs",
+      "Enable Agentforce for Guided Shopping",
+      "Body content starts here.",
+    ].join("\n");
+
+    const markdown = formatHelpArticleMarkdown(raw, "Enable Agentforce for Guided Shopping");
+
+    expect(markdown.startsWith("# Enable Agentforce for Guided Shopping")).toBe(true);
+    expect((markdown.match(/# Enable Agentforce for Guided Shopping/g) || []).length).toBe(1);
+    expect(markdown).not.toContain("You are here:");
+    expect(markdown).toContain("Body content starts here.");
+  });
 });

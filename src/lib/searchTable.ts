@@ -1,5 +1,7 @@
 import type { SearchResult } from "./helpSearch";
 
+const MAX_URL_WIDTH = 65;
+
 function padRight(value: string, width: number): string {
   return value.padEnd(width, " ");
 }
@@ -21,7 +23,7 @@ export function renderSearchResultsTable(results: SearchResult[]): string {
   }));
 
   const maxTitleWidth = Math.min(60, Math.max("Title".length, ...rows.map((row) => row.title.length)));
-  const maxUrlWidth = Math.min(80, Math.max("URL".length, 65));
+  const maxUrlWidth = Math.max("URL".length, MAX_URL_WIDTH);
   const numberWidth = Math.max("#".length, ...rows.map((row) => row.number.length));
 
   const border =
