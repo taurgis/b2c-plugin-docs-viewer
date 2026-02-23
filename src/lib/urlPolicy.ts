@@ -16,8 +16,8 @@ export function normalizeAndValidateDocUrl(rawUrl: string): string {
     throw new Error("Invalid URL. Provide a valid Help or Developer docs URL.");
   }
 
-  if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
-    throw new Error("Unsupported URL protocol. Use http or https URLs only.");
+  if (parsed.protocol !== "https:") {
+    throw new Error("Unsupported URL protocol. Use https URLs only.");
   }
 
   if (!isAllowedDocHost(parsed.hostname)) {

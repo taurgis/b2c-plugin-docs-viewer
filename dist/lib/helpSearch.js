@@ -1,13 +1,14 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.normalizeHelpDocContentUrl = normalizeHelpDocContentUrl;
-exports.extractResults = extractResults;
+exports.normalizeHelpDocContentUrl = exports.extractResults = void 0;
 exports.searchHelp = searchHelp;
 const playwright_1 = require("playwright");
 const cache_1 = require("./cache");
 const latestSearch_1 = require("./latestSearch");
 const tokenStore_1 = require("./tokenStore");
-const urlPolicy_1 = require("./urlPolicy");
+const browserConsent_1 = require("./browserConsent");
+const helpSearchResults_1 = require("./helpSearchResults");
+const errorUtils_1 = require("./errorUtils");
 const DEFAULT_TIMEOUT_MS = 45000;
 const DEFAULT_LIMIT = 10;
 const MAX_LIMIT = 100;
@@ -18,12 +19,6 @@ const DEFAULT_ORG_ID = "org62salesforce";
 const DEFAULT_SEARCH_HUB = "HTCommunity";
 const DEFAULT_ENDPOINT_BASE = "https://help.salesforce.com/services/apexrest/coveo";
 const DEFAULT_CLIENT_URI = "https://platform.cloud.coveo.com";
-const SKIP_URLS = new Set([
-    "https://help.salesforce.com/",
-    "https://help.salesforce.com/s",
-    "https://help.salesforce.com/s/",
-    "https://help.salesforce.com/s/login",
-]);
 function normalizeLimit(value) {
     if (!value || !Number.isFinite(value) || value <= 0)
         return DEFAULT_LIMIT;
@@ -43,95 +38,9 @@ function buildSearchUrl(query, language) {
     }
     return url.toString();
 }
-async function acceptOneTrust(page, timeoutMs) {
-    const selectors = [
-        "#onetrust-accept-btn-handler",
-        "button#onetrust-accept-btn-handler",
-        "button:has-text(\"Accept All\")",
-        "button:has-text(\"Accept all\")",
-        "button:has-text(\"I Agree\")",
-    ];
-    for (const selector of selectors) {
-        try {
-            const button = page.locator(selector).first();
-            if (await button.isVisible({ timeout: 2000 }).catch(() => false)) {
-                await button.click({ timeout: 3000 });
-                await page.waitForLoadState("networkidle", { timeout: timeoutMs }).catch(() => { });
-                return;
-            }
-        }
-        catch {
-            // Ignore and continue probing
-        }
-    }
-}
-function normalizeHelpDocContentUrl(rawUrl) {
-    let url;
-    try {
-        url = new URL(rawUrl);
-    }
-    catch {
-        return rawUrl;
-    }
-    if (url.hostname !== "help.salesforce.com")
-        return rawUrl;
-    if (!url.pathname.toLowerCase().startsWith("/help_doccontent"))
-        return rawUrl;
-    const id = url.searchParams.get("id");
-    if (!id)
-        return rawUrl;
-    const normalizedId = id.endsWith(".htm") ? id : `${id}.htm`;
-    const articleUrl = new URL("https://help.salesforce.com/s/articleView");
-    articleUrl.searchParams.set("id", normalizedId);
-    articleUrl.searchParams.set("type", "5");
-    const release = url.searchParams.get("release");
-    if (release)
-        articleUrl.searchParams.set("release", release);
-    const language = url.searchParams.get("language");
-    if (language)
-        articleUrl.searchParams.set("language", language);
-    return articleUrl.toString();
-}
-function extractResults(data, options) {
-    const results = Array.isArray(data?.results) ? data.results : [];
-    const items = [];
-    const seen = new Set();
-    for (const result of results) {
-        const raw = result?.raw || {};
-        let url = result?.clickUri ||
-            result?.uri ||
-            raw.clickuri ||
-            raw.uri ||
-            raw.sourceurl ||
-            raw.document_uri ||
-            raw.sfurl ||
-            raw.sfdcurl ||
-            null;
-        if (!url)
-            continue;
-        url = normalizeHelpDocContentUrl(url);
-        try {
-            const host = new URL(url).hostname;
-            if (!(0, urlPolicy_1.isAllowedDocHost)(host))
-                continue;
-        }
-        catch {
-            continue;
-        }
-        if (SKIP_URLS.has(url))
-            continue;
-        if (seen.has(url))
-            continue;
-        seen.add(url);
-        items.push({
-            url,
-            title: result?.title || raw.title || null,
-        });
-        if (items.length >= options.limit)
-            break;
-    }
-    return items;
-}
+var helpSearchResults_2 = require("./helpSearchResults");
+Object.defineProperty(exports, "extractResults", { enumerable: true, get: function () { return helpSearchResults_2.extractResults; } });
+Object.defineProperty(exports, "normalizeHelpDocContentUrl", { enumerable: true, get: function () { return helpSearchResults_2.normalizeHelpDocContentUrl; } });
 function stripAuraResponsePrefix(text) {
     let cleaned = text.trim();
     if (cleaned.startsWith("for(;;);")) {
@@ -198,7 +107,7 @@ function extractAuraContextFromHtml(html) {
         return null;
     }
 }
-async function getAuraContext(page, timeoutMs) {
+async function getAuraContext(page, timeoutMs, debug) {
     let auraContext = null;
     try {
         await page.waitForFunction(() => window.$A && window.$A.getContext, {
@@ -213,7 +122,10 @@ async function getAuraContext(page, timeoutMs) {
             return null;
         });
     }
-    catch {
+    catch (error) {
+        if (debug) {
+            console.error(`[debug] Aura context unavailable in window context: ${(0, errorUtils_1.getErrorMessage)(error)}`);
+        }
         auraContext = null;
     }
     if (!auraContext) {
@@ -249,7 +161,7 @@ function buildAuraMessage() {
     };
 }
 async function fetchCoveoToken(context, page, timeoutMs, debug) {
-    const { auraContext, pageUri } = await getAuraContext(page, timeoutMs);
+    const { auraContext, pageUri } = await getAuraContext(page, timeoutMs, debug);
     const endpoint = new URL(AURA_TOKEN_ENDPOINT);
     endpoint.searchParams.set("r", String(Math.floor(Math.random() * 100)));
     endpoint.searchParams.set("other.Search_CoveoTokenGenerator.getToken", "1");
@@ -323,7 +235,10 @@ function extractTokenFromAuraPayload(payload, debug) {
                 clientUri = parsed.clientUri || clientUri;
                 filterer = parsed.filterer || parsed.filter || filterer;
             }
-            catch {
+            catch (error) {
+                if (debug) {
+                    console.error(`[debug] Failed parsing token JSON payload: ${(0, errorUtils_1.getErrorMessage)(error)}`);
+                }
                 accessToken = null;
             }
         }
@@ -434,7 +349,12 @@ async function searchViaCoveoFetch(tokenInfo, query, language, limit, timeoutMs,
         }
         return { ok: false, status: response.status, data: null };
     }
-    const data = await response.json().catch(() => null);
+    const data = await response.json().catch((error) => {
+        if (debug) {
+            console.error(`[debug] Coveo fetch response JSON parse failed: ${(0, errorUtils_1.getErrorMessage)(error)}`);
+        }
+        return null;
+    });
     return { ok: Boolean(data), status: response.status, data };
 }
 async function searchViaCoveo(request, tokenInfo, query, language, limit, timeoutMs, debug) {
@@ -451,15 +371,20 @@ async function searchViaCoveo(request, tokenInfo, query, language, limit, timeou
         }
         return { ok: false, status: response.status(), data: null };
     }
-    const data = await response.json().catch(() => null);
+    const data = await response.json().catch((error) => {
+        if (debug) {
+            console.error(`[debug] Coveo request response JSON parse failed: ${(0, errorUtils_1.getErrorMessage)(error)}`);
+        }
+        return null;
+    });
     return { ok: Boolean(data), status: response.status(), data };
 }
 async function obtainAuraToken(auraTokenPromise, context, page, timeoutMs, debug) {
     let tokenInfo = await parseAuraTokenResponse(await auraTokenPromise, debug);
     if (!tokenInfo) {
-        tokenInfo = await fetchCoveoToken(context, page, timeoutMs, debug).catch((err) => {
+        tokenInfo = await fetchCoveoToken(context, page, timeoutMs, debug).catch((error) => {
             if (debug)
-                console.error(`[debug] Aura token fetch error: ${err.message}`);
+                console.error(`[debug] Aura token fetch error: ${(0, errorUtils_1.getErrorMessage)(error)}`);
             return null;
         });
     }
@@ -486,15 +411,22 @@ async function searchViaBrowser(query, language, limit, timeoutMs, headed, debug
             }
             captured = { data, requestPayload };
         }
-        catch {
-            // Ignore response parsing failures
+        catch (error) {
+            if (debug) {
+                console.error(`[debug] Failed to capture search response: ${(0, errorUtils_1.getErrorMessage)(error)}`);
+            }
         }
     });
     try {
         const searchUrl = buildSearchUrl(query, language);
         const responsePromise = page
             .waitForResponse((resp) => resp.url().includes(COVEO_SEARCH_PATH) && resp.request().method() === "POST", { timeout: timeoutMs })
-            .catch(() => null);
+            .catch((error) => {
+            if (debug) {
+                console.error(`[debug] Timed out waiting for Coveo response: ${(0, errorUtils_1.getErrorMessage)(error)}`);
+            }
+            return null;
+        });
         const auraTokenPromise = page
             .waitForResponse((resp) => {
             if (!resp.url().includes("/s/sfsites/aura"))
@@ -504,17 +436,27 @@ async function searchViaBrowser(query, language, limit, timeoutMs, headed, debug
             const postData = resp.request().postData() || "";
             return postData.includes("Search_CoveoTokenGenerator") && postData.includes("getToken");
         }, { timeout: timeoutMs })
-            .catch(() => null);
+            .catch((error) => {
+            if (debug) {
+                console.error(`[debug] Timed out waiting for Aura token response: ${(0, errorUtils_1.getErrorMessage)(error)}`);
+            }
+            return null;
+        });
         await page.goto(searchUrl, { waitUntil: "domcontentloaded", timeout: timeoutMs });
-        await acceptOneTrust(page, timeoutMs);
+        await (0, browserConsent_1.acceptOneTrust)(page, timeoutMs);
         await page.waitForLoadState("networkidle", { timeout: timeoutMs }).catch(() => { });
         let results = [];
         const tokenInfo = await obtainAuraToken(auraTokenPromise, context, page, timeoutMs, debug);
         if (tokenInfo) {
             await (0, tokenStore_1.storeToken)(tokenInfo);
-            const searchResult = await searchViaCoveo(context.request, tokenInfo, query, language, limit, timeoutMs, debug).catch(() => null);
+            const searchResult = await searchViaCoveo(context.request, tokenInfo, query, language, limit, timeoutMs, debug).catch((error) => {
+                if (debug) {
+                    console.error(`[debug] Direct Coveo request failed: ${(0, errorUtils_1.getErrorMessage)(error)}`);
+                }
+                return null;
+            });
             if (searchResult?.data && Array.isArray(searchResult.data.results)) {
-                results = extractResults(searchResult.data, { limit });
+                results = (0, helpSearchResults_1.extractResults)(searchResult.data, { limit });
             }
         }
         if (results.length === 0) {
@@ -530,7 +472,12 @@ async function searchViaBrowser(query, language, limit, timeoutMs, headed, debug
                 catch {
                     requestPayload = {};
                 }
-                data = await response.json().catch(() => null);
+                data = await response.json().catch((error) => {
+                    if (debug) {
+                        console.error(`[debug] Browser search response JSON parse failed: ${(0, errorUtils_1.getErrorMessage)(error)}`);
+                    }
+                    return null;
+                });
             }
             else {
                 const capturedSnapshot = captured;
@@ -554,13 +501,18 @@ async function searchViaBrowser(query, language, limit, timeoutMs, headed, debug
                         timeout: timeoutMs,
                     });
                     if (apiResponse.ok()) {
-                        const apiData = await apiResponse.json().catch(() => null);
+                        const apiData = await apiResponse.json().catch((error) => {
+                            if (debug) {
+                                console.error(`[debug] Retry API response JSON parse failed: ${(0, errorUtils_1.getErrorMessage)(error)}`);
+                            }
+                            return null;
+                        });
                         if (apiData && Array.isArray(apiData.results)) {
                             data = apiData;
                         }
                     }
                 }
-                results = extractResults(data, { limit });
+                results = (0, helpSearchResults_1.extractResults)(data, { limit });
             }
         }
         return results;
@@ -598,11 +550,18 @@ async function searchHelp(options) {
         };
     }
     if (tokenInfo && (0, tokenStore_1.isTokenValid)(tokenInfo.expiresAtMs)) {
-        const searchResult = await searchViaCoveoFetch(tokenInfo, query, language, limit, timeoutMs, debug).catch(() => null);
+        const searchResult = await searchViaCoveoFetch(tokenInfo, query, language, limit, timeoutMs, debug).catch((error) => {
+            if (debug) {
+                console.error(`[debug] Token-based Coveo fetch failed: ${(0, errorUtils_1.getErrorMessage)(error)}`);
+            }
+            return null;
+        });
         if (searchResult?.ok && Array.isArray(searchResult.data?.results)) {
-            const results = extractResults(searchResult.data, { limit });
+            const results = (0, helpSearchResults_1.extractResults)(searchResult.data, { limit });
             if (results.length > 0) {
-                await (0, cache_1.writeCache)(cachePath, results);
+                if (useCache) {
+                    await (0, cache_1.writeCache)(cachePath, results);
+                }
                 await (0, latestSearch_1.storeLatestSearch)(query, results);
                 return results;
             }
@@ -613,7 +572,9 @@ async function searchHelp(options) {
     if (!results.length) {
         throw new Error("Search returned no results.");
     }
-    await (0, cache_1.writeCache)(cachePath, results);
+    if (useCache) {
+        await (0, cache_1.writeCache)(cachePath, results);
+    }
     await (0, latestSearch_1.storeLatestSearch)(query, results);
     return results;
 }

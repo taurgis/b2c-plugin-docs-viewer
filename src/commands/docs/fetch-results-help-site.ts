@@ -1,9 +1,9 @@
-import fs from "fs/promises";
-import path from "path";
 import { Args, Command, Flags } from "@oclif/core";
 import { searchHelp } from "../../lib/helpSearch";
 import { getHelpDetails } from "../../lib/helpScraper";
 import { normalizeAndValidateDocUrl } from "../../lib/urlPolicy";
+import { getErrorMessage } from "../../lib/errorUtils";
+import { writeTextFile } from "../../lib/fileOutput";
 
 type DetailedResult = {
   url: string;
@@ -16,6 +16,20 @@ type FetchFailure = {
   title: string | null;
   error: string;
 };
+
+function buildFailureSection(failures: FetchFailure[]): string {
+  if (failures.length === 0) return "";
+  return [
+    "",
+    "-----",
+    "",
+    "## Failed URLs",
+    ...failures.map((failure, index) => {
+      const heading = `${index + 1}. ${failure.title || failure.url}`;
+      return `${heading}\n${failure.url}\n${failure.error}`;
+    }),
+  ].join("\n\n");
+}
 
 async function mapWithConcurrency<T, R>(
   items: T[],
@@ -141,6 +155,7 @@ export default class DocsFetchResultsHelpSite extends Command {
           waitMs: flags.wait,
           headed: flags.headed,
           useCache: flags.cache,
+          debug: flags.debug,
         });
 
         return {
@@ -157,7 +172,7 @@ export default class DocsFetchResultsHelpSite extends Command {
           item: {
             url: item.url,
             title: item.title,
-            error: error instanceof Error ? error.message : String(error),
+            error: getErrorMessage(error),
           },
         };
       }
@@ -179,10 +194,6 @@ export default class DocsFetchResultsHelpSite extends Command {
       );
     }
 
-    if (detailed.length === 0) {
-      this.error("Failed to fetch all articles. No output was produced.");
-    }
-
     if (flags.json) {
       const output = JSON.stringify(
         {
@@ -196,13 +207,16 @@ export default class DocsFetchResultsHelpSite extends Command {
       ) + "\n";
 
       if (flags.out) {
-        await fs.mkdir(path.dirname(flags.out), { recursive: true });
-        await fs.writeFile(flags.out, output, "utf8");
+        await writeTextFile(flags.out, output);
         this.log(`Saved JSON to ${flags.out}`);
-        return;
+      } else {
+        this.log(output.trimEnd());
       }
 
-      this.log(output.trimEnd());
+      if (detailed.length === 0) {
+        this.error("Failed to fetch all articles.", { code: "ALL_FETCHES_FAILED" });
+      }
+
       return;
     }
 
@@ -212,33 +226,24 @@ export default class DocsFetchResultsHelpSite extends Command {
     });
 
     const output = blocks.join("\n\n-----\n\n");
-    const failureSection = failures.length
-      ? [
-          "",
-          "-----",
-          "",
-          "## Failed URLs",
-          ...failures.map((failure, index) => {
-            const heading = `${index + 1}. ${failure.title || failure.url}`;
-            return `${heading}\n${failure.url}\n${failure.error}`;
-          }),
-        ].join("\n\n")
-      : "";
+    const failureSection = buildFailureSection(failures);
     const fullOutput = `${output}${failureSection}`;
 
     if (flags.out) {
-      await fs.mkdir(path.dirname(flags.out), { recursive: true });
-      await fs.writeFile(flags.out, fullOutput + "\n", "utf8");
+      await writeTextFile(flags.out, fullOutput + "\n");
       this.log(`Saved output to ${flags.out}`);
       if (failures.length > 0) {
         this.warn(`Completed with ${failures.length} failed article fetch(es).`);
       }
-      return;
+    } else {
+      this.log(fullOutput);
+      if (failures.length > 0) {
+        this.warn(`Completed with ${failures.length} failed article fetch(es).`);
+      }
     }
 
-    this.log(fullOutput);
-    if (failures.length > 0) {
-      this.warn(`Completed with ${failures.length} failed article fetch(es).`);
+    if (detailed.length === 0) {
+      this.error("Failed to fetch all articles.", { code: "ALL_FETCHES_FAILED" });
     }
   }
 }

@@ -7,7 +7,7 @@ Highlights:
 - Search Salesforce Help with boxed, column-aligned results.
 - Fetch a single Help or Developer docs page by URL or by ID from the latest search.
 - Fetch search results + content in one command (supports Help and Developer docs URLs).
-- Direct URL fetching is restricted to `help.salesforce.com` and `developer.salesforce.com`.
+- Direct URL fetching is restricted to `https://help.salesforce.com` and `https://developer.salesforce.com`.
 - Batch fetch uses bounded concurrency and reports per-URL failures instead of failing fast.
 - Cached results are reused for up to 5 days (opt out with `--no-cache`).
 
@@ -113,7 +113,7 @@ b2c docs help-site-article #3
 
 - Search and detail results are cached under the system temp directory.
 - Cached items are reused for up to 5 days.
-- Use `--no-cache` to bypass cached items and refresh results.
+- Use `--no-cache` to force a fresh network fetch and parsing pass. In this mode cache files are neither read nor written.
 
 ## Testing
 

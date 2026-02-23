@@ -24,4 +24,10 @@ describe("urlPolicy", () => {
       /Only help\.salesforce\.com and developer\.salesforce\.com/
     );
   });
+
+  it("throws for non-https URLs", () => {
+    expect(() => normalizeAndValidateDocUrl("http://help.salesforce.com/s/articleView?id=x&type=5")).toThrow(
+      /Use https URLs only/
+    );
+  });
 });

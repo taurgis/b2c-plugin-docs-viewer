@@ -1,18 +1,19 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.formatHelpArticleMarkdown = exports.convertHtmlToMarkdown = void 0;
 exports.getDetailSourceType = getDetailSourceType;
-exports.formatHelpArticleMarkdown = formatHelpArticleMarkdown;
-exports.convertHtmlToMarkdown = convertHtmlToMarkdown;
 exports.getHelpDetails = getHelpDetails;
 const playwright_1 = require("playwright");
 const readability_1 = require("@mozilla/readability");
 const jsdom_1 = require("jsdom");
-const turndown_1 = __importDefault(require("turndown"));
 const cache_1 = require("./cache");
 const urlPolicy_1 = require("./urlPolicy");
+const browserConsent_1 = require("./browserConsent");
+const helpScraperMarkdown_1 = require("./helpScraperMarkdown");
+const errorUtils_1 = require("./errorUtils");
+var helpScraperMarkdown_2 = require("./helpScraperMarkdown");
+Object.defineProperty(exports, "convertHtmlToMarkdown", { enumerable: true, get: function () { return helpScraperMarkdown_2.convertHtmlToMarkdown; } });
+Object.defineProperty(exports, "formatHelpArticleMarkdown", { enumerable: true, get: function () { return helpScraperMarkdown_2.formatHelpArticleMarkdown; } });
 const DEFAULT_TIMEOUT_MS = 45000;
 const DEFAULT_WAIT_MS = 2500;
 const MIN_CONTENT_LENGTH = 100;
@@ -84,28 +85,6 @@ const GARBAGE_PATTERNS = [
     /Salesforce Tower,\s*415 Mission Street/,
     /^\*\s+(English|Francais|Deutsch|Italiano|\u65e5\u672c\u8a9e)\s*$/m,
 ];
-async function acceptOneTrust(page, timeoutMs) {
-    const selectors = [
-        "#onetrust-accept-btn-handler",
-        "button#onetrust-accept-btn-handler",
-        "button:has-text(\"Accept All\")",
-        "button:has-text(\"Accept all\")",
-        "button:has-text(\"I Agree\")",
-    ];
-    for (const selector of selectors) {
-        try {
-            const button = page.locator(selector).first();
-            if (await button.isVisible({ timeout: 2000 }).catch(() => false)) {
-                await button.click({ timeout: 3000 });
-                await page.waitForLoadState("networkidle", { timeout: timeoutMs }).catch(() => { });
-                return;
-            }
-        }
-        catch {
-            // Ignore and continue probing
-        }
-    }
-}
 function stripGarbage(text) {
     let output = text.trim();
     for (const pattern of GARBAGE_PATTERNS) {
@@ -166,224 +145,6 @@ function isDeveloperDocsUrl(rawUrl) {
 function getDetailSourceType(rawUrl) {
     return isDeveloperDocsUrl(rawUrl) ? "developer" : "help";
 }
-function toAbsoluteUrl(rawUrl, baseUrl) {
-    if (!rawUrl)
-        return rawUrl;
-    if (rawUrl.startsWith("#"))
-        return rawUrl;
-    try {
-        return new URL(rawUrl, baseUrl).toString();
-    }
-    catch {
-        return rawUrl;
-    }
-}
-function escapeTableCell(value) {
-    return value.replace(/\|/g, "\\|").replace(/\n/g, "<br>");
-}
-function extractTableCellText(cell) {
-    const clone = cell.cloneNode(true);
-    for (const brNode of Array.from(clone.querySelectorAll("br"))) {
-        brNode.replaceWith("\n");
-    }
-    for (const blockNode of Array.from(clone.querySelectorAll("p,li,div"))) {
-        blockNode.appendChild(clone.ownerDocument.createTextNode("\n"));
-    }
-    return (clone.textContent || "")
-        .replace(/\u00a0/g, " ")
-        .replace(/[ \t]*\n[ \t]*/g, "\n")
-        .replace(/\n{3,}/g, "\n\n")
-        .replace(/[ \t]{2,}/g, " ")
-        .trim();
-}
-function tableToMarkdown(table) {
-    const rowNodes = Array.from(table.querySelectorAll("tr"));
-    const rows = rowNodes
-        .map((row) => Array.from(row.querySelectorAll("th,td")).map(extractTableCellText))
-        .filter((row) => row.length > 0);
-    if (!rows.length)
-        return "\n\n";
-    const header = rows[0];
-    const body = rows.slice(1);
-    const columnCount = Math.max(header.length, ...body.map((row) => row.length));
-    const padRow = (row) => {
-        if (row.length >= columnCount)
-            return row;
-        return [...row, ...Array.from({ length: columnCount - row.length }, () => "")];
-    };
-    const headerLine = `| ${padRow(header).map(escapeTableCell).join(" | ")} |`;
-    const separatorLine = `| ${Array.from({ length: columnCount }, () => "---").join(" | ")} |`;
-    const bodyLines = body.map((row) => `| ${padRow(row).map(escapeTableCell).join(" | ")} |`);
-    return `\n\n${[headerLine, separatorLine, ...bodyLines].join("\n")}\n\n`;
-}
-function preprocessHtmlForTurndown(html, baseUrl) {
-    const dom = new jsdom_1.JSDOM(`<body>${html}</body>`, { url: baseUrl });
-    const { document } = dom.window;
-    for (const heading of Array.from(document.querySelectorAll("h1,h2,h3,h4,h5,h6"))) {
-        for (const anchor of Array.from(heading.querySelectorAll("a"))) {
-            const text = (anchor.textContent || "").trim();
-            const hasChildContent = anchor.querySelector("img,svg,code,span,strong,em") !== null;
-            if (text.length > 0 || hasChildContent)
-                continue;
-            const anchorId = anchor.getAttribute("id") || anchor.getAttribute("name");
-            if (anchorId && !heading.getAttribute("id")) {
-                heading.setAttribute("id", anchorId);
-            }
-            anchor.remove();
-        }
-    }
-    for (const anchor of Array.from(document.querySelectorAll("a"))) {
-        const nextNode = anchor.nextSibling;
-        if (nextNode && nextNode.nodeType === dom.window.Node.ELEMENT_NODE && nextNode.tagName === "A") {
-            anchor.after(document.createTextNode(" "));
-            continue;
-        }
-        if (nextNode && nextNode.nodeType === dom.window.Node.TEXT_NODE) {
-            const text = nextNode.textContent || "";
-            if (text.length > 0 && /^\S/.test(text) && /^[A-Za-z0-9(]/.test(text)) {
-                nextNode.textContent = ` ${text}`;
-            }
-        }
-    }
-    for (const node of Array.from(document.querySelectorAll("dx-code-block"))) {
-        const code = (node.getAttribute("code-block") || node.textContent || "")
-            .replace(/\r\n/g, "\n")
-            .replace(/\r/g, "\n")
-            .trim();
-        const language = (node.getAttribute("language") || "").trim();
-        const pre = document.createElement("pre");
-        if (language) {
-            pre.setAttribute("data-language", language);
-        }
-        const codeNode = document.createElement("code");
-        codeNode.textContent = code;
-        pre.appendChild(codeNode);
-        node.replaceWith(pre);
-    }
-    for (const emphNode of Array.from(document.querySelectorAll("emph"))) {
-        const emNode = document.createElement("em");
-        emNode.innerHTML = emphNode.innerHTML;
-        emphNode.replaceWith(emNode);
-    }
-    for (const image of Array.from(document.querySelectorAll("img"))) {
-        const nextNode = image.nextSibling;
-        if (nextNode && nextNode.nodeType === dom.window.Node.TEXT_NODE) {
-            const text = nextNode.textContent || "";
-            if (text.length > 0 && /^\S/.test(text) && /^[A-Za-z0-9(]/.test(text)) {
-                nextNode.textContent = ` ${text}`;
-            }
-        }
-    }
-    return document.body.innerHTML;
-}
-function createTurndown(baseUrl) {
-    const turndown = new turndown_1.default({
-        codeBlockStyle: "fenced",
-        headingStyle: "atx",
-        bulletListMarker: "-",
-        emDelimiter: "*",
-    });
-    turndown.addRule("fenced-pre", {
-        filter: (node) => node.nodeName === "PRE",
-        replacement: (_content, node) => {
-            const code = (node.textContent || "")
-                .replace(/\r\n/g, "\n")
-                .replace(/\r/g, "\n")
-                .trim();
-            if (!code)
-                return "\n\n";
-            const language = (node.getAttribute("data-language") || "").trim();
-            return `\n\n\`\`\`${language}\n${code}\n\`\`\`\n\n`;
-        },
-    });
-    turndown.addRule("table", {
-        filter: (node) => node.nodeName === "TABLE",
-        replacement: (_content, node) => tableToMarkdown(node),
-    });
-    turndown.addRule("absolute-links", {
-        filter: (node) => node.nodeName === "A",
-        replacement: (content, node) => {
-            const href = node.getAttribute("href") || "";
-            const label = content.trim();
-            if (!href)
-                return label;
-            if (!label)
-                return "";
-            const absoluteHref = toAbsoluteUrl(href, baseUrl);
-            const title = node.getAttribute("title");
-            const titlePart = title ? ` \"${title}\"` : "";
-            return `[${label}](${absoluteHref}${titlePart})`;
-        },
-    });
-    turndown.addRule("absolute-images", {
-        filter: (node) => node.nodeName === "IMG",
-        replacement: (_content, node) => {
-            const src = node.getAttribute("src") || "";
-            if (!src)
-                return "";
-            const alt = node.getAttribute("alt") || "";
-            const absoluteSrc = toAbsoluteUrl(src, baseUrl);
-            return `![${alt}](${absoluteSrc})`;
-        },
-    });
-    return turndown;
-}
-function postProcessMarkdownArtifacts(markdown) {
-    return markdown
-        .replace(/^(#{1,6})\s+\[(https?:\/\/[^\]]+)\]\(\2\)\s*/gm, "$1 ")
-        .replace(/\)\[/g, ") [")
-        .replace(/(!\[[^\]]*\]\([^\)\n]+\))(?=[A-Za-z0-9])/g, "$1 ")
-        .replace(/[ \t]+$/gm, "");
-}
-function cutAtFirstMarker(input, markers) {
-    const lower = input.toLowerCase();
-    let cutIndex = -1;
-    for (const marker of markers) {
-        const index = lower.indexOf(marker.toLowerCase());
-        if (index >= 0 && (cutIndex < 0 || index < cutIndex)) {
-            cutIndex = index;
-        }
-    }
-    if (cutIndex >= 0) {
-        return input.slice(0, cutIndex);
-    }
-    return input;
-}
-function ensureTitleHeading(markdown, title) {
-    if (!title)
-        return markdown;
-    const lines = markdown.split("\n");
-    const firstNonEmptyIndex = lines.findIndex((line) => line.trim().length > 0);
-    if (firstNonEmptyIndex < 0)
-        return markdown;
-    if (lines[firstNonEmptyIndex].trim().toLowerCase() === title.trim().toLowerCase()) {
-        lines[firstNonEmptyIndex] = `# ${title}`;
-        return lines.join("\n");
-    }
-    return markdown;
-}
-function formatHelpArticleMarkdown(markdown, title) {
-    let output = markdown.replace(/\u00a0/g, " ");
-    if (title) {
-        const titleIndex = output.toLowerCase().lastIndexOf(title.toLowerCase());
-        if (titleIndex > 0) {
-            output = output.slice(titleIndex);
-        }
-    }
-    output = cutAtFirstMarker(output, [
-        "did this article solve your issue?",
-        "1-800-667-6389",
-        "salesforce help | article",
-        "cookie consent manager",
-        "we use cookies on our website",
-    ]);
-    output = ensureTitleHeading(output, title);
-    return output;
-}
-function convertHtmlToMarkdown(html, baseUrl) {
-    const turndown = createTurndown(baseUrl);
-    return postProcessMarkdownArtifacts(turndown.turndown(preprocessHtmlForTurndown(html, baseUrl)));
-}
 function normalizeMarkdown(markdown) {
     return markdown
         .replace(/\r\n/g, "\n")
@@ -395,14 +156,18 @@ function extractMarkdownTitle(markdown) {
     const match = markdown.match(/^#\s+(.+)$/m);
     return match?.[1]?.trim() || null;
 }
-async function scrapeHelpMarkdown(url, timeoutMs, waitMs, headed, includeRawHtml) {
+async function scrapeHelpMarkdown(url, timeoutMs, waitMs, headed, includeRawHtml, debug) {
     const browser = await playwright_1.chromium.launch({ headless: !headed });
     const context = await browser.newContext();
     const page = await context.newPage();
     try {
         await page.goto(url, { waitUntil: "domcontentloaded", timeout: timeoutMs });
-        await acceptOneTrust(page, timeoutMs);
-        await page.waitForLoadState("networkidle", { timeout: timeoutMs }).catch(() => { });
+        await (0, browserConsent_1.acceptOneTrust)(page, timeoutMs);
+        await page.waitForLoadState("networkidle", { timeout: timeoutMs }).catch((error) => {
+            if (debug) {
+                console.error(`[debug] Help page networkidle wait failed: ${(0, errorUtils_1.getErrorMessage)(error)}`);
+            }
+        });
         if (waitMs > 0) {
             await page.waitForTimeout(waitMs);
         }
@@ -423,12 +188,12 @@ async function scrapeHelpMarkdown(url, timeoutMs, waitMs, headed, includeRawHtml
         let { html: contentHtml, title } = extractBestContent(document);
         let markdown = "";
         if (contentHtml) {
-            markdown = convertHtmlToMarkdown(contentHtml, url);
+            markdown = (0, helpScraperMarkdown_1.convertHtmlToMarkdown)(contentHtml, url);
         }
         markdown = stripGarbage(markdown);
-        markdown = formatHelpArticleMarkdown(markdown, title || null);
+        markdown = (0, helpScraperMarkdown_1.formatHelpArticleMarkdown)(markdown, title || null);
         if (markdown.length < MIN_CONTENT_LENGTH) {
-            const textFallback = formatHelpArticleMarkdown(stripGarbage(bodyText), title || null);
+            const textFallback = (0, helpScraperMarkdown_1.formatHelpArticleMarkdown)(stripGarbage(bodyText), title || null);
             if (textFallback.length >= MIN_CONTENT_LENGTH) {
                 markdown = textFallback;
             }
@@ -505,7 +270,7 @@ async function extractDeveloperCodeBlocks(page) {
             .filter((item) => item.code.length > 0);
     });
 }
-async function scrapeDeveloperMarkdown(url, timeoutMs, waitMs, headed, includeRawHtml) {
+async function scrapeDeveloperMarkdown(url, timeoutMs, waitMs, headed, includeRawHtml, debug) {
     const browser = await playwright_1.chromium.launch({ headless: !headed });
     const context = await browser.newContext();
     const page = await context.newPage();
@@ -528,18 +293,29 @@ async function scrapeDeveloperMarkdown(url, timeoutMs, waitMs, headed, includeRa
                 docsApiTitle = payload.title || payload.id || docsApiTitle;
             }
         }
-        catch {
-            // Ignore non-JSON responses
+        catch (error) {
+            if (debug) {
+                console.error(`[debug] Developer docs API response parse failed: ${(0, errorUtils_1.getErrorMessage)(error)}`);
+            }
         }
     });
     try {
         await page.goto(url, { waitUntil: "domcontentloaded", timeout: timeoutMs });
-        await acceptOneTrust(page, timeoutMs);
-        await page.waitForLoadState("networkidle", { timeout: timeoutMs }).catch(() => { });
+        await (0, browserConsent_1.acceptOneTrust)(page, timeoutMs);
+        await page.waitForLoadState("networkidle", { timeout: timeoutMs }).catch((error) => {
+            if (debug) {
+                console.error(`[debug] Developer page networkidle wait failed: ${(0, errorUtils_1.getErrorMessage)(error)}`);
+            }
+        });
         if (waitMs > 0) {
             await page.waitForTimeout(waitMs);
         }
-        const bodyText = await page.innerText("body").catch(() => "");
+        const bodyText = await page.innerText("body").catch((error) => {
+            if (debug) {
+                console.error(`[debug] Failed reading developer page text content: ${(0, errorUtils_1.getErrorMessage)(error)}`);
+            }
+            return "";
+        });
         if (looksLikeDeveloperErrorPage(bodyText)) {
             throw new Error("Developer documentation error page detected.");
         }
@@ -553,7 +329,7 @@ async function scrapeDeveloperMarkdown(url, timeoutMs, waitMs, headed, includeRa
                 }
             }
         }
-        const turndown = createTurndown(page.url());
+        const turndown = (0, helpScraperMarkdown_1.createTurndown)(page.url());
         const extracted = extractBestContent(document);
         let title = await page.title().catch(() => null);
         if (!title) {
@@ -563,7 +339,10 @@ async function scrapeDeveloperMarkdown(url, timeoutMs, waitMs, headed, includeRa
         try {
             primaryHtml = await page.locator("main, article").first().evaluate((el) => el.outerHTML);
         }
-        catch {
+        catch (error) {
+            if (debug) {
+                console.error(`[debug] Failed reading primary developer HTML container: ${(0, errorUtils_1.getErrorMessage)(error)}`);
+            }
             primaryHtml = null;
         }
         const htmlCandidates = [primaryHtml, extracted.html].filter((value, index, values) => Boolean(value) && values.indexOf(value) === index);
@@ -576,7 +355,12 @@ async function scrapeDeveloperMarkdown(url, timeoutMs, waitMs, headed, includeRa
                 selectedHtml = candidateHtml;
             }
         }
-        const codeBlocks = await extractDeveloperCodeBlocks(page).catch(() => []);
+        const codeBlocks = await extractDeveloperCodeBlocks(page).catch((error) => {
+            if (debug) {
+                console.error(`[debug] Failed extracting developer code blocks: ${(0, errorUtils_1.getErrorMessage)(error)}`);
+            }
+            return [];
+        });
         if (codeBlocks.length > 0) {
             const missingBlocks = codeBlocks.filter((block) => {
                 const snippet = block.code.slice(0, 48);
@@ -595,7 +379,12 @@ async function scrapeDeveloperMarkdown(url, timeoutMs, waitMs, headed, includeRa
             selectedHtml = docsApiContent;
         }
         if (markdown.length < MIN_CONTENT_LENGTH) {
-            const shadowHtml = await extractDeveloperShadowDomHtml(page).catch(() => "");
+            const shadowHtml = await extractDeveloperShadowDomHtml(page).catch((error) => {
+                if (debug) {
+                    console.error(`[debug] Failed extracting developer shadow DOM HTML: ${(0, errorUtils_1.getErrorMessage)(error)}`);
+                }
+                return "";
+            });
             if (shadowHtml.length > MIN_CONTENT_LENGTH) {
                 const cleanedShadow = shadowHtml
                     .replace(/<style[\s\S]*?<\/style>/gi, "")
@@ -604,7 +393,12 @@ async function scrapeDeveloperMarkdown(url, timeoutMs, waitMs, headed, includeRa
                 if (shadowMarkdown.length > markdown.length) {
                     markdown = shadowMarkdown;
                     selectedHtml = cleanedShadow;
-                    title = (await page.title().catch(() => null)) || title;
+                    title = (await page.title().catch((error) => {
+                        if (debug) {
+                            console.error(`[debug] Failed reading developer page title: ${(0, errorUtils_1.getErrorMessage)(error)}`);
+                        }
+                        return null;
+                    })) || title;
                 }
             }
         }
@@ -643,6 +437,7 @@ async function getHelpDetails(options) {
     const headed = options.headed ?? false;
     const useCache = options.useCache ?? true;
     const includeRawHtml = options.includeRawHtml ?? false;
+    const debug = options.debug ?? false;
     const cacheKey = JSON.stringify({ url, includeRawHtml });
     const cachePath = (0, cache_1.buildCachePath)("detail", cacheKey);
     if (useCache) {
@@ -652,8 +447,10 @@ async function getHelpDetails(options) {
         }
     }
     const result = getDetailSourceType(url) === "developer"
-        ? await scrapeDeveloperMarkdown(url, timeoutMs, waitMs, headed, includeRawHtml)
-        : await scrapeHelpMarkdown(url, timeoutMs, waitMs, headed, includeRawHtml);
-    await (0, cache_1.writeCache)(cachePath, result);
+        ? await scrapeDeveloperMarkdown(url, timeoutMs, waitMs, headed, includeRawHtml, debug)
+        : await scrapeHelpMarkdown(url, timeoutMs, waitMs, headed, includeRawHtml, debug);
+    if (useCache) {
+        await (0, cache_1.writeCache)(cachePath, result);
+    }
     return result;
 }

@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const core_1 = require("@oclif/core");
 const helpSearch_1 = require("../../lib/helpSearch");
+const searchTable_1 = require("../../lib/searchTable");
 class DocsSearchHelpSite extends core_1.Command {
     async run() {
         const { args, flags } = await this.parse(DocsSearchHelpSite);
@@ -25,52 +26,7 @@ class DocsSearchHelpSite extends core_1.Command {
             this.log(JSON.stringify({ query: args.query, count: results.length, results }, null, 2));
             return;
         }
-        const padRight = (value, width) => value.padEnd(width, " ");
-        const wrap = (value, width) => {
-            if (width <= 0)
-                return [value];
-            const parts = [];
-            for (let i = 0; i < value.length; i += width) {
-                parts.push(value.slice(i, i + width));
-            }
-            return parts.length ? parts : [""];
-        };
-        const rows = results.map((item, index) => ({
-            number: String(index + 1).padStart(2, "0"),
-            title: item.title || "(untitled)",
-            url: item.url,
-        }));
-        const maxTitleWidth = Math.min(60, Math.max("Title".length, ...rows.map((row) => row.title.length)));
-        const maxUrlWidth = Math.min(80, Math.max("URL".length, 65));
-        const numberWidth = Math.max("#".length, ...rows.map((row) => row.number.length));
-        const border = "+" +
-            "-".repeat(numberWidth + 2) +
-            "+" +
-            "-".repeat(maxTitleWidth + 2) +
-            "+" +
-            "-".repeat(maxUrlWidth + 2) +
-            "+";
-        const header = `| ${padRight("#", numberWidth)} ` +
-            `| ${padRight("Title", maxTitleWidth)} ` +
-            `| ${padRight("URL", maxUrlWidth)} |`;
-        const body = rows.flatMap((row, rowIndex) => {
-            const titleLine = padRight(row.title.slice(0, maxTitleWidth), maxTitleWidth);
-            const urlLines = wrap(row.url, maxUrlWidth).map((line) => padRight(line, maxUrlWidth));
-            const lineCount = Math.max(1, urlLines.length);
-            const output = [];
-            for (let i = 0; i < lineCount; i += 1) {
-                const numberCell = i === 0 ? padRight(row.number, numberWidth) : padRight("", numberWidth);
-                const titleCell = i === 0 ? titleLine : padRight("", maxTitleWidth);
-                const urlCell = urlLines[i] || padRight("", maxUrlWidth);
-                output.push(`| ${numberCell} | ${titleCell} | ${urlCell} |`);
-            }
-            if (rowIndex < rows.length - 1) {
-                output.push(border);
-            }
-            return output;
-        });
-        const output = [border, header, border, ...body, border].join("\n");
-        this.log(output);
+        this.log((0, searchTable_1.renderSearchResultsTable)(results));
     }
 }
 DocsSearchHelpSite.description = "Search Salesforce Help for matching Help and Developer docs pages.";

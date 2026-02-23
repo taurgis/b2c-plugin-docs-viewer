@@ -1,14 +1,11 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-const promises_1 = __importDefault(require("fs/promises"));
-const path_1 = __importDefault(require("path"));
 const core_1 = require("@oclif/core");
 const helpScraper_1 = require("../../lib/helpScraper");
 const latestSearch_1 = require("../../lib/latestSearch");
 const urlPolicy_1 = require("../../lib/urlPolicy");
+const errorUtils_1 = require("../../lib/errorUtils");
+const fileOutput_1 = require("../../lib/fileOutput");
 class DocsHelpSiteArticle extends core_1.Command {
     async run() {
         const { args, flags } = await this.parse(DocsHelpSiteArticle);
@@ -39,8 +36,7 @@ class DocsHelpSiteArticle extends core_1.Command {
             targetUrl = (0, urlPolicy_1.normalizeAndValidateDocUrl)(targetUrl);
         }
         catch (error) {
-            const message = error instanceof Error ? error.message : String(error);
-            this.error(message);
+            this.error((0, errorUtils_1.getErrorMessage)(error));
         }
         if (flags.rawHtml && !flags.json && !flags.out) {
             this.error("--raw-html requires --json or --out to avoid flooding terminal output.");
@@ -52,12 +48,12 @@ class DocsHelpSiteArticle extends core_1.Command {
             headed: flags.headed,
             useCache: flags.cache,
             includeRawHtml: flags.rawHtml,
+            debug: flags.debug,
         });
         if (flags.json) {
             const output = JSON.stringify(result, null, 2) + "\n";
             if (flags.out) {
-                await promises_1.default.mkdir(path_1.default.dirname(flags.out), { recursive: true });
-                await promises_1.default.writeFile(flags.out, output, "utf8");
+                await (0, fileOutput_1.writeTextFile)(flags.out, output);
                 this.log(`Saved JSON to ${flags.out}`);
                 return;
             }
@@ -65,12 +61,11 @@ class DocsHelpSiteArticle extends core_1.Command {
             return;
         }
         if (flags.out) {
-            await promises_1.default.mkdir(path_1.default.dirname(flags.out), { recursive: true });
-            await promises_1.default.writeFile(flags.out, result.markdown + "\n", "utf8");
+            await (0, fileOutput_1.writeTextFile)(flags.out, result.markdown + "\n");
             this.log(`Saved markdown to ${flags.out}`);
             if (flags.rawHtml) {
                 const htmlOut = `${flags.out}.raw.html`;
-                await promises_1.default.writeFile(htmlOut, (result.rawHtml || "") + "\n", "utf8");
+                await (0, fileOutput_1.writeTextFile)(htmlOut, (result.rawHtml || "") + "\n");
                 this.log(`Saved raw HTML to ${htmlOut}`);
             }
             return;
@@ -122,6 +117,10 @@ DocsHelpSiteArticle.flags = {
     }),
     headed: core_1.Flags.boolean({
         description: "Run browser in headed mode",
+        default: false,
+    }),
+    debug: core_1.Flags.boolean({
+        description: "Enable debug logging",
         default: false,
     }),
 };

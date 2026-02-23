@@ -1,9 +1,9 @@
-import fs from "fs/promises";
-import path from "path";
 import { Args, Command, Flags } from "@oclif/core";
 import { getHelpDetails } from "../../lib/helpScraper";
 import { loadLatestSearch } from "../../lib/latestSearch";
 import { normalizeAndValidateDocUrl } from "../../lib/urlPolicy";
+import { getErrorMessage } from "../../lib/errorUtils";
+import { writeTextFile } from "../../lib/fileOutput";
 
 export default class DocsHelpSiteArticle extends Command {
   static description = "Fetch a Salesforce Help or Developer doc page and return the details.";
@@ -57,6 +57,10 @@ export default class DocsHelpSiteArticle extends Command {
       description: "Run browser in headed mode",
       default: false,
     }),
+    debug: Flags.boolean({
+      description: "Enable debug logging",
+      default: false,
+    }),
   };
 
   async run(): Promise<void> {
@@ -94,8 +98,7 @@ export default class DocsHelpSiteArticle extends Command {
     try {
       targetUrl = normalizeAndValidateDocUrl(targetUrl);
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      this.error(message);
+      this.error(getErrorMessage(error));
     }
 
     if (flags.rawHtml && !flags.json && !flags.out) {
@@ -109,13 +112,13 @@ export default class DocsHelpSiteArticle extends Command {
       headed: flags.headed,
       useCache: flags.cache,
       includeRawHtml: flags.rawHtml,
+      debug: flags.debug,
     });
 
     if (flags.json) {
       const output = JSON.stringify(result, null, 2) + "\n";
       if (flags.out) {
-        await fs.mkdir(path.dirname(flags.out), { recursive: true });
-        await fs.writeFile(flags.out, output, "utf8");
+        await writeTextFile(flags.out, output);
         this.log(`Saved JSON to ${flags.out}`);
         return;
       }
@@ -124,13 +127,12 @@ export default class DocsHelpSiteArticle extends Command {
     }
 
     if (flags.out) {
-      await fs.mkdir(path.dirname(flags.out), { recursive: true });
-      await fs.writeFile(flags.out, result.markdown + "\n", "utf8");
+      await writeTextFile(flags.out, result.markdown + "\n");
       this.log(`Saved markdown to ${flags.out}`);
 
       if (flags.rawHtml) {
         const htmlOut = `${flags.out}.raw.html`;
-        await fs.writeFile(htmlOut, (result.rawHtml || "") + "\n", "utf8");
+        await writeTextFile(htmlOut, (result.rawHtml || "") + "\n");
         this.log(`Saved raw HTML to ${htmlOut}`);
       }
 

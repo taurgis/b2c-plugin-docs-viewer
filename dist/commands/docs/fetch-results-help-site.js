@@ -1,14 +1,25 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-const promises_1 = __importDefault(require("fs/promises"));
-const path_1 = __importDefault(require("path"));
 const core_1 = require("@oclif/core");
 const helpSearch_1 = require("../../lib/helpSearch");
 const helpScraper_1 = require("../../lib/helpScraper");
 const urlPolicy_1 = require("../../lib/urlPolicy");
+const errorUtils_1 = require("../../lib/errorUtils");
+const fileOutput_1 = require("../../lib/fileOutput");
+function buildFailureSection(failures) {
+    if (failures.length === 0)
+        return "";
+    return [
+        "",
+        "-----",
+        "",
+        "## Failed URLs",
+        ...failures.map((failure, index) => {
+            const heading = `${index + 1}. ${failure.title || failure.url}`;
+            return `${heading}\n${failure.url}\n${failure.error}`;
+        }),
+    ].join("\n\n");
+}
 async function mapWithConcurrency(items, concurrency, mapper) {
     const output = new Array(items.length);
     let cursor = 0;
@@ -57,6 +68,7 @@ class DocsFetchResultsHelpSite extends core_1.Command {
                     waitMs: flags.wait,
                     headed: flags.headed,
                     useCache: flags.cache,
+                    debug: flags.debug,
                 });
                 return {
                     ok: true,
@@ -73,7 +85,7 @@ class DocsFetchResultsHelpSite extends core_1.Command {
                     item: {
                         url: item.url,
                         title: item.title,
-                        error: error instanceof Error ? error.message : String(error),
+                        error: (0, errorUtils_1.getErrorMessage)(error),
                     },
                 };
             }
@@ -91,9 +103,6 @@ class DocsFetchResultsHelpSite extends core_1.Command {
         if (showStatus) {
             this.log(`-> Completed: ${detailed.length} succeeded, ${failures.length} failed.`);
         }
-        if (detailed.length === 0) {
-            this.error("Failed to fetch all articles. No output was produced.");
-        }
         if (flags.json) {
             const output = JSON.stringify({
                 query: args.query,
@@ -102,12 +111,15 @@ class DocsFetchResultsHelpSite extends core_1.Command {
                 errors: failures,
             }, null, 2) + "\n";
             if (flags.out) {
-                await promises_1.default.mkdir(path_1.default.dirname(flags.out), { recursive: true });
-                await promises_1.default.writeFile(flags.out, output, "utf8");
+                await (0, fileOutput_1.writeTextFile)(flags.out, output);
                 this.log(`Saved JSON to ${flags.out}`);
-                return;
             }
-            this.log(output.trimEnd());
+            else {
+                this.log(output.trimEnd());
+            }
+            if (detailed.length === 0) {
+                this.error("Failed to fetch all articles.", { code: "ALL_FETCHES_FAILED" });
+            }
             return;
         }
         const blocks = detailed.map((item, index) => {
@@ -115,31 +127,23 @@ class DocsFetchResultsHelpSite extends core_1.Command {
             return `${heading}\n${item.url}\n\n${item.markdown}`.trim();
         });
         const output = blocks.join("\n\n-----\n\n");
-        const failureSection = failures.length
-            ? [
-                "",
-                "-----",
-                "",
-                "## Failed URLs",
-                ...failures.map((failure, index) => {
-                    const heading = `${index + 1}. ${failure.title || failure.url}`;
-                    return `${heading}\n${failure.url}\n${failure.error}`;
-                }),
-            ].join("\n\n")
-            : "";
+        const failureSection = buildFailureSection(failures);
         const fullOutput = `${output}${failureSection}`;
         if (flags.out) {
-            await promises_1.default.mkdir(path_1.default.dirname(flags.out), { recursive: true });
-            await promises_1.default.writeFile(flags.out, fullOutput + "\n", "utf8");
+            await (0, fileOutput_1.writeTextFile)(flags.out, fullOutput + "\n");
             this.log(`Saved output to ${flags.out}`);
             if (failures.length > 0) {
                 this.warn(`Completed with ${failures.length} failed article fetch(es).`);
             }
-            return;
         }
-        this.log(fullOutput);
-        if (failures.length > 0) {
-            this.warn(`Completed with ${failures.length} failed article fetch(es).`);
+        else {
+            this.log(fullOutput);
+            if (failures.length > 0) {
+                this.warn(`Completed with ${failures.length} failed article fetch(es).`);
+            }
+        }
+        if (detailed.length === 0) {
+            this.error("Failed to fetch all articles.", { code: "ALL_FETCHES_FAILED" });
         }
     }
 }
