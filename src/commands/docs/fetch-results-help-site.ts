@@ -3,6 +3,39 @@ import path from "path";
 import { Args, Command, Flags } from "@oclif/core";
 import { searchHelp } from "../../lib/helpSearch";
 import { getHelpDetails } from "../../lib/helpScraper";
+import { normalizeAndValidateDocUrl } from "../../lib/urlPolicy";
+
+type DetailedResult = {
+  url: string;
+  title: string | null;
+  markdown: string;
+};
+
+type FetchFailure = {
+  url: string;
+  title: string | null;
+  error: string;
+};
+
+async function mapWithConcurrency<T, R>(
+  items: T[],
+  concurrency: number,
+  mapper: (item: T, index: number) => Promise<R>
+): Promise<R[]> {
+  const output = new Array<R>(items.length);
+  let cursor = 0;
+
+  const workers = Array.from({ length: Math.max(1, concurrency) }, async () => {
+    while (cursor < items.length) {
+      const index = cursor;
+      cursor += 1;
+      output[index] = await mapper(items[index], index);
+    }
+  });
+
+  await Promise.all(workers);
+  return output;
+}
 
 export default class DocsFetchResultsHelpSite extends Command {
   static description = "Search Salesforce Help and fetch Help/Developer docs details.";
@@ -41,9 +74,9 @@ export default class DocsFetchResultsHelpSite extends Command {
       char: "o",
       description: "Write output to a file",
     }),
-    includeNonHelp: Flags.boolean({
-      description: "Include results outside help.salesforce.com and developer.salesforce.com",
-      default: false,
+    concurrency: Flags.integer({
+      description: "Parallel article fetch workers",
+      default: 2,
     }),
     cache: Flags.boolean({
       description: "Use cached results when available",
@@ -80,7 +113,6 @@ export default class DocsFetchResultsHelpSite extends Command {
       query: args.query,
       language: flags.language,
       limit: flags.limit,
-      includeNonHelp: flags.includeNonHelp,
       timeoutMs: flags.timeout,
       useCache: flags.cache,
       headed: flags.headed,
@@ -91,24 +123,64 @@ export default class DocsFetchResultsHelpSite extends Command {
       this.log(`-> Found ${results.length} result${results.length === 1 ? "" : "s"}.`);
     }
 
-    const detailed = [] as Array<{ url: string; title: string | null; markdown: string }>;
+    const concurrency = Math.max(1, Math.min(flags.concurrency, 6));
+    if (showStatus) {
+      this.log(`-> Fetching ${results.length} article(s) with concurrency ${concurrency}...`);
+    }
 
-    for (const [index, item] of results.entries()) {
+    const settled = await mapWithConcurrency(results, concurrency, async (item, index) => {
       if (showStatus) {
         this.log(`-> Fetching article ${index + 1}/${results.length}...`);
       }
-      const detail = await getHelpDetails({
-        url: item.url,
-        timeoutMs: flags.timeout,
-        waitMs: flags.wait,
-        headed: flags.headed,
-        useCache: flags.cache,
-      });
-      detailed.push({
-        url: item.url,
-        title: detail.title || item.title,
-        markdown: detail.markdown,
-      });
+
+      try {
+        const validatedUrl = normalizeAndValidateDocUrl(item.url);
+        const detail = await getHelpDetails({
+          url: validatedUrl,
+          timeoutMs: flags.timeout,
+          waitMs: flags.wait,
+          headed: flags.headed,
+          useCache: flags.cache,
+        });
+
+        return {
+          ok: true as const,
+          item: {
+            url: validatedUrl,
+            title: detail.title || item.title,
+            markdown: detail.markdown,
+          },
+        };
+      } catch (error) {
+        return {
+          ok: false as const,
+          item: {
+            url: item.url,
+            title: item.title,
+            error: error instanceof Error ? error.message : String(error),
+          },
+        };
+      }
+    });
+
+    const detailed: DetailedResult[] = [];
+    const failures: FetchFailure[] = [];
+    for (const entry of settled) {
+      if (entry.ok) {
+        detailed.push(entry.item);
+      } else {
+        failures.push(entry.item);
+      }
+    }
+
+    if (showStatus) {
+      this.log(
+        `-> Completed: ${detailed.length} succeeded, ${failures.length} failed.`
+      );
+    }
+
+    if (detailed.length === 0) {
+      this.error("Failed to fetch all articles. No output was produced.");
     }
 
     if (flags.json) {
@@ -117,6 +189,7 @@ export default class DocsFetchResultsHelpSite extends Command {
           query: args.query,
           count: detailed.length,
           results: detailed,
+          errors: failures,
         },
         null,
         2
@@ -139,14 +212,33 @@ export default class DocsFetchResultsHelpSite extends Command {
     });
 
     const output = blocks.join("\n\n-----\n\n");
+    const failureSection = failures.length
+      ? [
+          "",
+          "-----",
+          "",
+          "## Failed URLs",
+          ...failures.map((failure, index) => {
+            const heading = `${index + 1}. ${failure.title || failure.url}`;
+            return `${heading}\n${failure.url}\n${failure.error}`;
+          }),
+        ].join("\n\n")
+      : "";
+    const fullOutput = `${output}${failureSection}`;
 
     if (flags.out) {
       await fs.mkdir(path.dirname(flags.out), { recursive: true });
-      await fs.writeFile(flags.out, output + "\n", "utf8");
+      await fs.writeFile(flags.out, fullOutput + "\n", "utf8");
       this.log(`Saved output to ${flags.out}`);
+      if (failures.length > 0) {
+        this.warn(`Completed with ${failures.length} failed article fetch(es).`);
+      }
       return;
     }
 
-    this.log(output);
+    this.log(fullOutput);
+    if (failures.length > 0) {
+      this.warn(`Completed with ${failures.length} failed article fetch(es).`);
+    }
   }
 }

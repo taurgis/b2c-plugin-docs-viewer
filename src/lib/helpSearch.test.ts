@@ -45,7 +45,7 @@ describe("extractResults", () => {
   };
 
   it("keeps Help + Developer results by default and excludes other hosts", () => {
-    const results = extractResults(data, { includeNonHelp: false, limit: 10 });
+    const results = extractResults(data, { limit: 10 });
     const urls = results.map((item) => item.url);
 
     expect(urls).toContain(
@@ -58,10 +58,10 @@ describe("extractResults", () => {
     expect(urls).not.toContain("https://help.salesforce.com/s/login");
   });
 
-  it("includes external hosts when includeNonHelp is enabled", () => {
-    const results = extractResults(data, { includeNonHelp: true, limit: 10 });
+  it("always excludes hosts outside help and developer domains", () => {
+    const results = extractResults(data, { limit: 10 });
     const urls = results.map((item) => item.url);
 
-    expect(urls).toContain("https://example.com/other-docs");
+    expect(urls).not.toContain("https://example.com/other-docs");
   });
 });

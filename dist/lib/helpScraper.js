@@ -12,6 +12,7 @@ const readability_1 = require("@mozilla/readability");
 const jsdom_1 = require("jsdom");
 const turndown_1 = __importDefault(require("turndown"));
 const cache_1 = require("./cache");
+const urlPolicy_1 = require("./urlPolicy");
 const DEFAULT_TIMEOUT_MS = 45000;
 const DEFAULT_WAIT_MS = 2500;
 const MIN_CONTENT_LENGTH = 100;
@@ -636,12 +637,13 @@ async function scrapeDeveloperMarkdown(url, timeoutMs, waitMs, headed, includeRa
     }
 }
 async function getHelpDetails(options) {
+    const url = (0, urlPolicy_1.normalizeAndValidateDocUrl)(options.url);
     const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
     const waitMs = options.waitMs ?? DEFAULT_WAIT_MS;
     const headed = options.headed ?? false;
     const useCache = options.useCache ?? true;
     const includeRawHtml = options.includeRawHtml ?? false;
-    const cacheKey = JSON.stringify({ url: options.url, includeRawHtml });
+    const cacheKey = JSON.stringify({ url, includeRawHtml });
     const cachePath = (0, cache_1.buildCachePath)("detail", cacheKey);
     if (useCache) {
         const cached = await (0, cache_1.readCache)(cachePath);
@@ -649,9 +651,9 @@ async function getHelpDetails(options) {
             return cached;
         }
     }
-    const result = getDetailSourceType(options.url) === "developer"
-        ? await scrapeDeveloperMarkdown(options.url, timeoutMs, waitMs, headed, includeRawHtml)
-        : await scrapeHelpMarkdown(options.url, timeoutMs, waitMs, headed, includeRawHtml);
+    const result = getDetailSourceType(url) === "developer"
+        ? await scrapeDeveloperMarkdown(url, timeoutMs, waitMs, headed, includeRawHtml)
+        : await scrapeHelpMarkdown(url, timeoutMs, waitMs, headed, includeRawHtml);
     await (0, cache_1.writeCache)(cachePath, result);
     return result;
 }

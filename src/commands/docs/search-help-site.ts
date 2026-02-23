@@ -35,10 +35,6 @@ export default class DocsSearchHelpSite extends Command {
       description: "Output JSON",
       default: false,
     }),
-    includeNonHelp: Flags.boolean({
-      description: "Include results outside help.salesforce.com and developer.salesforce.com",
-      default: false,
-    }),
     cache: Flags.boolean({
       description: "Use cached results when available",
       default: true,
@@ -70,7 +66,6 @@ export default class DocsSearchHelpSite extends Command {
       query: args.query,
       language: flags.language,
       limit: flags.limit,
-      includeNonHelp: flags.includeNonHelp,
       timeoutMs: flags.timeout,
       useCache: flags.cache,
       headed: flags.headed,

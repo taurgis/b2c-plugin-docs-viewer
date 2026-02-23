@@ -7,6 +7,8 @@ Highlights:
 - Search Salesforce Help with boxed, column-aligned results.
 - Fetch a single Help or Developer docs page by URL or by ID from the latest search.
 - Fetch search results + content in one command (supports Help and Developer docs URLs).
+- Direct URL fetching is restricted to `help.salesforce.com` and `developer.salesforce.com`.
+- Batch fetch uses bounded concurrency and reports per-URL failures instead of failing fast.
 - Cached results are reused for up to 5 days (opt out with `--no-cache`).
 
 ## Install (npm)
@@ -56,6 +58,7 @@ Search and immediately fetch details:
 
 ```bash
 b2c docs fetch-results-help-site "b2c commerce roles" --limit 3
+b2c docs fetch-results-help-site "b2c commerce roles" --limit 6 --concurrency 3
 ```
 
 ## Examples

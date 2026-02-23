@@ -3,6 +3,7 @@ import path from "path";
 import { Args, Command, Flags } from "@oclif/core";
 import { getHelpDetails } from "../../lib/helpScraper";
 import { loadLatestSearch } from "../../lib/latestSearch";
+import { normalizeAndValidateDocUrl } from "../../lib/urlPolicy";
 
 export default class DocsHelpSiteArticle extends Command {
   static description = "Fetch a Salesforce Help or Developer doc page and return the details.";
@@ -88,6 +89,13 @@ export default class DocsHelpSiteArticle extends Command {
 
     if (showStatus) {
       this.log("-> Fetching documentation page...");
+    }
+
+    try {
+      targetUrl = normalizeAndValidateDocUrl(targetUrl);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.error(message);
     }
 
     if (flags.rawHtml && !flags.json && !flags.out) {

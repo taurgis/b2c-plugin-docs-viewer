@@ -13,7 +13,6 @@ class DocsSearchHelpSite extends core_1.Command {
             query: args.query,
             language: flags.language,
             limit: flags.limit,
-            includeNonHelp: flags.includeNonHelp,
             timeoutMs: flags.timeout,
             useCache: flags.cache,
             headed: flags.headed,
@@ -100,10 +99,6 @@ DocsSearchHelpSite.flags = {
     }),
     json: core_1.Flags.boolean({
         description: "Output JSON",
-        default: false,
-    }),
-    includeNonHelp: core_1.Flags.boolean({
-        description: "Include results outside help.salesforce.com and developer.salesforce.com",
         default: false,
     }),
     cache: core_1.Flags.boolean({

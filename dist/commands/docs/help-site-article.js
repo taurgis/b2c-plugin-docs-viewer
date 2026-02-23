@@ -8,6 +8,7 @@ const path_1 = __importDefault(require("path"));
 const core_1 = require("@oclif/core");
 const helpScraper_1 = require("../../lib/helpScraper");
 const latestSearch_1 = require("../../lib/latestSearch");
+const urlPolicy_1 = require("../../lib/urlPolicy");
 class DocsHelpSiteArticle extends core_1.Command {
     async run() {
         const { args, flags } = await this.parse(DocsHelpSiteArticle);
@@ -33,6 +34,13 @@ class DocsHelpSiteArticle extends core_1.Command {
         }
         if (showStatus) {
             this.log("-> Fetching documentation page...");
+        }
+        try {
+            targetUrl = (0, urlPolicy_1.normalizeAndValidateDocUrl)(targetUrl);
+        }
+        catch (error) {
+            const message = error instanceof Error ? error.message : String(error);
+            this.error(message);
         }
         if (flags.rawHtml && !flags.json && !flags.out) {
             this.error("--raw-html requires --json or --out to avoid flooding terminal output.");

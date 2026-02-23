@@ -8,6 +8,20 @@ const path_1 = __importDefault(require("path"));
 const core_1 = require("@oclif/core");
 const helpSearch_1 = require("../../lib/helpSearch");
 const helpScraper_1 = require("../../lib/helpScraper");
+const urlPolicy_1 = require("../../lib/urlPolicy");
+async function mapWithConcurrency(items, concurrency, mapper) {
+    const output = new Array(items.length);
+    let cursor = 0;
+    const workers = Array.from({ length: Math.max(1, concurrency) }, async () => {
+        while (cursor < items.length) {
+            const index = cursor;
+            cursor += 1;
+            output[index] = await mapper(items[index], index);
+        }
+    });
+    await Promise.all(workers);
+    return output;
+}
 class DocsFetchResultsHelpSite extends core_1.Command {
     async run() {
         const { args, flags } = await this.parse(DocsFetchResultsHelpSite);
@@ -19,7 +33,6 @@ class DocsFetchResultsHelpSite extends core_1.Command {
             query: args.query,
             language: flags.language,
             limit: flags.limit,
-            includeNonHelp: flags.includeNonHelp,
             timeoutMs: flags.timeout,
             useCache: flags.cache,
             headed: flags.headed,
@@ -28,29 +41,65 @@ class DocsFetchResultsHelpSite extends core_1.Command {
         if (showStatus) {
             this.log(`-> Found ${results.length} result${results.length === 1 ? "" : "s"}.`);
         }
-        const detailed = [];
-        for (const [index, item] of results.entries()) {
+        const concurrency = Math.max(1, Math.min(flags.concurrency, 6));
+        if (showStatus) {
+            this.log(`-> Fetching ${results.length} article(s) with concurrency ${concurrency}...`);
+        }
+        const settled = await mapWithConcurrency(results, concurrency, async (item, index) => {
             if (showStatus) {
                 this.log(`-> Fetching article ${index + 1}/${results.length}...`);
             }
-            const detail = await (0, helpScraper_1.getHelpDetails)({
-                url: item.url,
-                timeoutMs: flags.timeout,
-                waitMs: flags.wait,
-                headed: flags.headed,
-                useCache: flags.cache,
-            });
-            detailed.push({
-                url: item.url,
-                title: detail.title || item.title,
-                markdown: detail.markdown,
-            });
+            try {
+                const validatedUrl = (0, urlPolicy_1.normalizeAndValidateDocUrl)(item.url);
+                const detail = await (0, helpScraper_1.getHelpDetails)({
+                    url: validatedUrl,
+                    timeoutMs: flags.timeout,
+                    waitMs: flags.wait,
+                    headed: flags.headed,
+                    useCache: flags.cache,
+                });
+                return {
+                    ok: true,
+                    item: {
+                        url: validatedUrl,
+                        title: detail.title || item.title,
+                        markdown: detail.markdown,
+                    },
+                };
+            }
+            catch (error) {
+                return {
+                    ok: false,
+                    item: {
+                        url: item.url,
+                        title: item.title,
+                        error: error instanceof Error ? error.message : String(error),
+                    },
+                };
+            }
+        });
+        const detailed = [];
+        const failures = [];
+        for (const entry of settled) {
+            if (entry.ok) {
+                detailed.push(entry.item);
+            }
+            else {
+                failures.push(entry.item);
+            }
+        }
+        if (showStatus) {
+            this.log(`-> Completed: ${detailed.length} succeeded, ${failures.length} failed.`);
+        }
+        if (detailed.length === 0) {
+            this.error("Failed to fetch all articles. No output was produced.");
         }
         if (flags.json) {
             const output = JSON.stringify({
                 query: args.query,
                 count: detailed.length,
                 results: detailed,
+                errors: failures,
             }, null, 2) + "\n";
             if (flags.out) {
                 await promises_1.default.mkdir(path_1.default.dirname(flags.out), { recursive: true });
@@ -66,13 +115,32 @@ class DocsFetchResultsHelpSite extends core_1.Command {
             return `${heading}\n${item.url}\n\n${item.markdown}`.trim();
         });
         const output = blocks.join("\n\n-----\n\n");
+        const failureSection = failures.length
+            ? [
+                "",
+                "-----",
+                "",
+                "## Failed URLs",
+                ...failures.map((failure, index) => {
+                    const heading = `${index + 1}. ${failure.title || failure.url}`;
+                    return `${heading}\n${failure.url}\n${failure.error}`;
+                }),
+            ].join("\n\n")
+            : "";
+        const fullOutput = `${output}${failureSection}`;
         if (flags.out) {
             await promises_1.default.mkdir(path_1.default.dirname(flags.out), { recursive: true });
-            await promises_1.default.writeFile(flags.out, output + "\n", "utf8");
+            await promises_1.default.writeFile(flags.out, fullOutput + "\n", "utf8");
             this.log(`Saved output to ${flags.out}`);
+            if (failures.length > 0) {
+                this.warn(`Completed with ${failures.length} failed article fetch(es).`);
+            }
             return;
         }
-        this.log(output);
+        this.log(fullOutput);
+        if (failures.length > 0) {
+            this.warn(`Completed with ${failures.length} failed article fetch(es).`);
+        }
     }
 }
 DocsFetchResultsHelpSite.description = "Search Salesforce Help and fetch Help/Developer docs details.";
@@ -106,9 +174,9 @@ DocsFetchResultsHelpSite.flags = {
         char: "o",
         description: "Write output to a file",
     }),
-    includeNonHelp: core_1.Flags.boolean({
-        description: "Include results outside help.salesforce.com and developer.salesforce.com",
-        default: false,
+    concurrency: core_1.Flags.integer({
+        description: "Parallel article fetch workers",
+        default: 2,
     }),
     cache: core_1.Flags.boolean({
         description: "Use cached results when available",

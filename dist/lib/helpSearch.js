@@ -7,6 +7,7 @@ const playwright_1 = require("playwright");
 const cache_1 = require("./cache");
 const latestSearch_1 = require("./latestSearch");
 const tokenStore_1 = require("./tokenStore");
+const urlPolicy_1 = require("./urlPolicy");
 const DEFAULT_TIMEOUT_MS = 45000;
 const DEFAULT_LIMIT = 10;
 const MAX_LIMIT = 100;
@@ -22,10 +23,6 @@ const SKIP_URLS = new Set([
     "https://help.salesforce.com/s",
     "https://help.salesforce.com/s/",
     "https://help.salesforce.com/s/login",
-]);
-const DEFAULT_ALLOWED_HOSTS = new Set([
-    "help.salesforce.com",
-    "developer.salesforce.com",
 ]);
 function normalizeLimit(value) {
     if (!value || !Number.isFinite(value) || value <= 0)
@@ -113,15 +110,13 @@ function extractResults(data, options) {
         if (!url)
             continue;
         url = normalizeHelpDocContentUrl(url);
-        if (!options.includeNonHelp) {
-            try {
-                const host = new URL(url).hostname;
-                if (!DEFAULT_ALLOWED_HOSTS.has(host))
-                    continue;
-            }
-            catch {
+        try {
+            const host = new URL(url).hostname;
+            if (!(0, urlPolicy_1.isAllowedDocHost)(host))
                 continue;
-            }
+        }
+        catch {
+            continue;
         }
         if (SKIP_URLS.has(url))
             continue;
@@ -470,7 +465,7 @@ async function obtainAuraToken(auraTokenPromise, context, page, timeoutMs, debug
     }
     return tokenInfo ? (0, tokenStore_1.applyTokenExpiry)(tokenInfo) : null;
 }
-async function searchViaBrowser(query, language, limit, includeNonHelp, timeoutMs, headed, debug) {
+async function searchViaBrowser(query, language, limit, timeoutMs, headed, debug) {
     const browser = await playwright_1.chromium.launch({ headless: !headed });
     const context = await browser.newContext();
     const page = await context.newPage();
@@ -519,7 +514,7 @@ async function searchViaBrowser(query, language, limit, includeNonHelp, timeoutM
             await (0, tokenStore_1.storeToken)(tokenInfo);
             const searchResult = await searchViaCoveo(context.request, tokenInfo, query, language, limit, timeoutMs, debug).catch(() => null);
             if (searchResult?.data && Array.isArray(searchResult.data.results)) {
-                results = extractResults(searchResult.data, { includeNonHelp, limit });
+                results = extractResults(searchResult.data, { limit });
             }
         }
         if (results.length === 0) {
@@ -565,7 +560,7 @@ async function searchViaBrowser(query, language, limit, includeNonHelp, timeoutM
                         }
                     }
                 }
-                results = extractResults(data, { includeNonHelp, limit });
+                results = extractResults(data, { limit });
             }
         }
         return results;
@@ -578,12 +573,11 @@ async function searchHelp(options) {
     const query = options.query;
     const language = options.language || "en_US";
     const limit = normalizeLimit(options.limit);
-    const includeNonHelp = options.includeNonHelp ?? false;
     const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
     const useCache = options.useCache ?? true;
     const headed = options.headed ?? false;
     const debug = options.debug ?? false;
-    const cacheKey = JSON.stringify({ query, language, limit, includeNonHelp });
+    const cacheKey = JSON.stringify({ query, language, limit });
     const cachePath = (0, cache_1.buildCachePath)("search", cacheKey);
     if (useCache) {
         const cached = await (0, cache_1.readCache)(cachePath);
@@ -606,7 +600,7 @@ async function searchHelp(options) {
     if (tokenInfo && (0, tokenStore_1.isTokenValid)(tokenInfo.expiresAtMs)) {
         const searchResult = await searchViaCoveoFetch(tokenInfo, query, language, limit, timeoutMs, debug).catch(() => null);
         if (searchResult?.ok && Array.isArray(searchResult.data?.results)) {
-            const results = extractResults(searchResult.data, { includeNonHelp, limit });
+            const results = extractResults(searchResult.data, { limit });
             if (results.length > 0) {
                 await (0, cache_1.writeCache)(cachePath, results);
                 await (0, latestSearch_1.storeLatestSearch)(query, results);
@@ -615,7 +609,7 @@ async function searchHelp(options) {
         }
         tokenInfo = null;
     }
-    const results = await searchViaBrowser(query, language, limit, includeNonHelp, timeoutMs, headed, debug);
+    const results = await searchViaBrowser(query, language, limit, timeoutMs, headed, debug);
     if (!results.length) {
         throw new Error("Search returned no results.");
     }

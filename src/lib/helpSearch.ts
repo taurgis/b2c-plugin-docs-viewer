@@ -10,6 +10,7 @@ import {
   storeToken,
   type TokenInfo,
 } from "./tokenStore";
+import { isAllowedDocHost } from "./urlPolicy";
 
 const DEFAULT_TIMEOUT_MS = 45_000;
 const DEFAULT_LIMIT = 10;
@@ -27,10 +28,6 @@ const SKIP_URLS = new Set([
   "https://help.salesforce.com/s/",
   "https://help.salesforce.com/s/login",
 ]);
-const DEFAULT_ALLOWED_HOSTS = new Set([
-  "help.salesforce.com",
-  "developer.salesforce.com",
-]);
 
 export type SearchResult = {
   url: string;
@@ -41,7 +38,6 @@ export type SearchOptions = {
   query: string;
   language?: string;
   limit?: number;
-  includeNonHelp?: boolean;
   timeoutMs?: number;
   useCache?: boolean;
   headed?: boolean;
@@ -124,7 +120,7 @@ export function normalizeHelpDocContentUrl(rawUrl: string): string {
   return articleUrl.toString();
 }
 
-export function extractResults(data: any, options: { includeNonHelp: boolean; limit: number }): SearchResult[] {
+export function extractResults(data: any, options: { limit: number }): SearchResult[] {
   const results = Array.isArray(data?.results) ? data.results : [];
   const items: SearchResult[] = [];
   const seen = new Set<string>();
@@ -145,13 +141,11 @@ export function extractResults(data: any, options: { includeNonHelp: boolean; li
     if (!url) continue;
     url = normalizeHelpDocContentUrl(url);
 
-    if (!options.includeNonHelp) {
-      try {
-        const host = new URL(url).hostname;
-        if (!DEFAULT_ALLOWED_HOSTS.has(host)) continue;
-      } catch {
-        continue;
-      }
+    try {
+      const host = new URL(url).hostname;
+      if (!isAllowedDocHost(host)) continue;
+    } catch {
+      continue;
     }
 
     if (SKIP_URLS.has(url)) continue;
@@ -553,7 +547,6 @@ async function searchViaBrowser(
   query: string,
   language: string,
   limit: number,
-  includeNonHelp: boolean,
   timeoutMs: number,
   headed: boolean,
   debug: boolean
@@ -618,7 +611,7 @@ async function searchViaBrowser(
       ).catch(() => null);
 
       if (searchResult?.data && Array.isArray(searchResult.data.results)) {
-        results = extractResults(searchResult.data, { includeNonHelp, limit });
+        results = extractResults(searchResult.data, { limit });
       }
     }
 
@@ -666,7 +659,7 @@ async function searchViaBrowser(
           }
         }
 
-        results = extractResults(data, { includeNonHelp, limit });
+        results = extractResults(data, { limit });
       }
     }
 
@@ -680,13 +673,12 @@ export async function searchHelp(options: SearchOptions): Promise<SearchResult[]
   const query = options.query;
   const language = options.language || "en_US";
   const limit = normalizeLimit(options.limit);
-  const includeNonHelp = options.includeNonHelp ?? false;
   const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
   const useCache = options.useCache ?? true;
   const headed = options.headed ?? false;
   const debug = options.debug ?? false;
 
-  const cacheKey = JSON.stringify({ query, language, limit, includeNonHelp });
+  const cacheKey = JSON.stringify({ query, language, limit });
   const cachePath = buildCachePath("search", cacheKey);
 
   if (useCache) {
@@ -719,7 +711,7 @@ export async function searchHelp(options: SearchOptions): Promise<SearchResult[]
     ).catch(() => null);
 
     if (searchResult?.ok && Array.isArray(searchResult.data?.results)) {
-      const results = extractResults(searchResult.data, { includeNonHelp, limit });
+      const results = extractResults(searchResult.data, { limit });
       if (results.length > 0) {
         await writeCache(cachePath, results);
         await storeLatestSearch(query, results);
@@ -734,7 +726,6 @@ export async function searchHelp(options: SearchOptions): Promise<SearchResult[]
     query,
     language,
     limit,
-    includeNonHelp,
     timeoutMs,
     headed,
     debug

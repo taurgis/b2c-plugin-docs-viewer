@@ -4,6 +4,7 @@ import { Readability } from "@mozilla/readability";
 import { JSDOM } from "jsdom";
 import TurndownService from "turndown";
 import { buildCachePath, readCache, writeCache } from "./cache";
+import { normalizeAndValidateDocUrl } from "./urlPolicy";
 
 const DEFAULT_TIMEOUT_MS = 45_000;
 const DEFAULT_WAIT_MS = 2500;
@@ -747,13 +748,14 @@ async function scrapeDeveloperMarkdown(
 }
 
 export async function getHelpDetails(options: DetailOptions): Promise<DetailResult> {
+  const url = normalizeAndValidateDocUrl(options.url);
   const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
   const waitMs = options.waitMs ?? DEFAULT_WAIT_MS;
   const headed = options.headed ?? false;
   const useCache = options.useCache ?? true;
   const includeRawHtml = options.includeRawHtml ?? false;
 
-  const cacheKey = JSON.stringify({ url: options.url, includeRawHtml });
+  const cacheKey = JSON.stringify({ url, includeRawHtml });
   const cachePath = buildCachePath("detail", cacheKey);
 
   if (useCache) {
@@ -763,9 +765,9 @@ export async function getHelpDetails(options: DetailOptions): Promise<DetailResu
     }
   }
 
-  const result = getDetailSourceType(options.url) === "developer"
-    ? await scrapeDeveloperMarkdown(options.url, timeoutMs, waitMs, headed, includeRawHtml)
-    : await scrapeHelpMarkdown(options.url, timeoutMs, waitMs, headed, includeRawHtml);
+  const result = getDetailSourceType(url) === "developer"
+    ? await scrapeDeveloperMarkdown(url, timeoutMs, waitMs, headed, includeRawHtml)
+    : await scrapeHelpMarkdown(url, timeoutMs, waitMs, headed, includeRawHtml);
   await writeCache(cachePath, result);
   return result;
 }
