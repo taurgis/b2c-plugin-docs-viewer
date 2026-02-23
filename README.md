@@ -9,6 +9,18 @@ Highlights:
 - Fetch search results + content in one command (supports Help and Developer docs URLs).
 - Cached results are reused for up to 5 days (opt out with `--no-cache`).
 
+## Install (npm)
+
+```bash
+b2c plugins install b2c-plugin-help-docs-viewer
+```
+
+If Playwright Chromium is not installed yet:
+
+```bash
+npx playwright install chromium
+```
+
 ## Install (local development)
 
 ```bash
