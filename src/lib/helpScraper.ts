@@ -11,6 +11,7 @@ import {
   formatHelpArticleMarkdown,
 } from "./helpScraperMarkdown";
 import { getErrorMessage } from "./errorUtils";
+import { firstFulfilled } from "./promiseUtils";
 
 export { convertHtmlToMarkdown, formatHelpArticleMarkdown } from "./helpScraperMarkdown";
 
@@ -172,13 +173,12 @@ function extractBestContent(document: Document): { html: string | null; title: s
 }
 
 async function isAuraErrorVisible(page: Page): Promise<boolean> {
-  for (const selector of HELP_ERROR_SELECTORS) {
-    const locator = page.locator(selector).first();
-    if (await locator.isVisible({ timeout: 1500 }).catch(() => false)) {
-      return true;
-    }
-  }
-  return false;
+  const results = await Promise.all(
+    HELP_ERROR_SELECTORS.map((selector) =>
+      page.locator(selector).first().isVisible({ timeout: 1500 }).catch(() => false)
+    )
+  );
+  return results.some(Boolean);
 }
 
 async function waitForAnySelector(
@@ -190,20 +190,16 @@ async function waitForAnySelector(
 ): Promise<void> {
   if (selectors.length === 0) return;
 
-  const perSelectorTimeout = Math.max(1200, Math.floor(timeoutMs / selectors.length));
+  const sharedTimeout = Math.max(1200, timeoutMs);
 
-  for (const selector of selectors) {
-    const matched = await page
-      .locator(selector)
-      .first()
-      .waitFor({ state: "visible", timeout: perSelectorTimeout })
-      .then(() => true)
-      .catch(() => false);
+  const matchedSelector = await firstFulfilled(
+    selectors.map(async (selector) => {
+      await page.locator(selector).first().waitFor({ state: "visible", timeout: sharedTimeout });
+      return selector;
+    })
+  );
 
-    if (matched) {
-      return;
-    }
-  }
+  if (matchedSelector) return;
 
   if (debug) {
     console.error(
