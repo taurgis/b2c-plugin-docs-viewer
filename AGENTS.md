@@ -10,7 +10,7 @@ This repository provides a B2C CLI plugin that:
 - Searches and fetches in one step (`b2c docs fetch-results-help-site`)
 
 Tech stack:
-- Node.js >= 18
+- Node.js >= 20.19.0
 - TypeScript
 - oclif command framework
 - Playwright + jsdom + Readability + Turndown for scraping and markdown conversion
