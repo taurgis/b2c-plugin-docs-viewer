@@ -46,13 +46,13 @@
     "turndown": "^7.1.2"
   },
   "devDependencies": {
-    "@eslint/js": "^10.0.1",
+    "@eslint/js": "^9.39.3",
     "@types/jsdom": "^21.1.6",
     "@types/node": "^20.11.0",
     "@types/turndown": "^5.0.4",
     "@typescript-eslint/eslint-plugin": "^8.56.1",
     "@typescript-eslint/parser": "^8.56.1",
-    "eslint": "^10.0.2",
+    "eslint": "^9.39.3",
     "globals": "^17.3.0",
     "typescript": "^5.3.3",
     "vitest": "^4.0.18"
