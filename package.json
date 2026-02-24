@@ -1,6 +1,6 @@
 {
   "name": "b2c-plugin-help-docs-viewer",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "B2C CLI plugin for Salesforce Help search and article details.",
   "homepage": "https://github.com/taurgis/b2c-plugin-docs-viewer#readme",
   "bugs": {
