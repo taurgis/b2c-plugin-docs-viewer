@@ -1,6 +1,6 @@
 import { Args, Command, Flags } from "@oclif/core";
 import { searchHelp } from "../../lib/helpSearch";
-import { getHelpDetails } from "../../lib/helpScraper";
+import { createScraperSession, getHelpDetails } from "../../lib/helpScraper";
 import { normalizeAndValidateDocUrl } from "../../lib/urlPolicy";
 import { getErrorMessage } from "../../lib/errorUtils";
 import { writeTextFile } from "../../lib/fileOutput";
@@ -162,6 +162,7 @@ export default class DocsFetchResultsHelpSite extends Command {
       this.log(`-> Fetching ${results.length} article(s) with concurrency ${concurrency}...`);
     }
 
+    const scraperSession = await createScraperSession({ headed: flags.headed });
     const settled = await mapWithConcurrency(results, concurrency, async (item, index) => {
       if (showStatus) {
         this.log(`-> Fetching article ${index + 1}/${results.length}...`);
@@ -173,9 +174,9 @@ export default class DocsFetchResultsHelpSite extends Command {
           url: validatedUrl,
           timeoutMs: flags.timeout,
           waitMs: flags.wait,
-          headed: flags.headed,
           useCache: flags.cache,
           debug: flags.debug,
+          session: scraperSession,
         });
 
         return {
@@ -196,6 +197,8 @@ export default class DocsFetchResultsHelpSite extends Command {
           },
         };
       }
+    }).finally(async () => {
+      await scraperSession.close();
     });
 
     const detailed: DetailedResult[] = [];

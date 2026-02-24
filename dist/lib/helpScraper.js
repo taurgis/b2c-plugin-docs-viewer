@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.formatHelpArticleMarkdown = exports.convertHtmlToMarkdown = void 0;
+exports.createScraperSession = createScraperSession;
 exports.getDetailSourceType = getDetailSourceType;
 exports.getHelpDetails = getHelpDetails;
 const playwright_1 = require("playwright");
@@ -85,6 +86,25 @@ const GARBAGE_PATTERNS = [
     /Salesforce Tower,\s*415 Mission Street/,
     /^\*\s+(English|Francais|Deutsch|Italiano|\u65e5\u672c\u8a9e)\s*$/m,
 ];
+async function createScraperSession(options) {
+    const headed = options?.headed ?? false;
+    const browser = await playwright_1.chromium.launch({ headless: !headed });
+    const context = await browser.newContext();
+    let closed = false;
+    return {
+        context,
+        close: async () => {
+            if (closed)
+                return;
+            closed = true;
+            await closeScraperSession(browser, context);
+        },
+    };
+}
+async function closeScraperSession(browser, context) {
+    await context.close().catch(() => { });
+    await browser.close().catch(() => { });
+}
 function stripGarbage(text) {
     let output = text.trim();
     for (const pattern of GARBAGE_PATTERNS) {
@@ -127,6 +147,25 @@ async function isAuraErrorVisible(page) {
     }
     return false;
 }
+async function waitForAnySelector(page, selectors, timeoutMs, debug, label) {
+    if (selectors.length === 0)
+        return;
+    const perSelectorTimeout = Math.max(1200, Math.floor(timeoutMs / selectors.length));
+    for (const selector of selectors) {
+        const matched = await page
+            .locator(selector)
+            .first()
+            .waitFor({ state: "visible", timeout: perSelectorTimeout })
+            .then(() => true)
+            .catch(() => false);
+        if (matched) {
+            return;
+        }
+    }
+    if (debug) {
+        console.error(`[debug] Timed out waiting for ${label} selectors (${selectors.join(", ")}).`);
+    }
+}
 function looksLikeErrorPage(text) {
     return HELP_ERROR_PATTERNS.some((pattern) => pattern.test(text));
 }
@@ -156,18 +195,12 @@ function extractMarkdownTitle(markdown) {
     const match = markdown.match(/^#\s+(.+)$/m);
     return match?.[1]?.trim() || null;
 }
-async function scrapeHelpMarkdown(url, timeoutMs, waitMs, headed, includeRawHtml, debug) {
-    const browser = await playwright_1.chromium.launch({ headless: !headed });
-    const context = await browser.newContext();
+async function scrapeHelpMarkdown(context, url, timeoutMs, waitMs, includeRawHtml, debug) {
     const page = await context.newPage();
     try {
         await page.goto(url, { waitUntil: "domcontentloaded", timeout: timeoutMs });
         await (0, browserConsent_1.acceptOneTrust)(page, timeoutMs);
-        await page.waitForLoadState("networkidle", { timeout: timeoutMs }).catch((error) => {
-            if (debug) {
-                console.error(`[debug] Help page networkidle wait failed: ${(0, errorUtils_1.getErrorMessage)(error)}`);
-            }
-        });
+        await waitForAnySelector(page, [".markdown-content", ".ht-body", "main article", "article", "main", ".cHCPortalTheme"], Math.min(timeoutMs, 12000), debug, "help content");
         if (waitMs > 0) {
             await page.waitForTimeout(waitMs);
         }
@@ -214,7 +247,7 @@ async function scrapeHelpMarkdown(url, timeoutMs, waitMs, headed, includeRawHtml
         return result;
     }
     finally {
-        await browser.close();
+        await page.close().catch(() => { });
     }
 }
 async function extractDeveloperShadowDomHtml(page) {
@@ -270,9 +303,7 @@ async function extractDeveloperCodeBlocks(page) {
             .filter((item) => item.code.length > 0);
     });
 }
-async function scrapeDeveloperMarkdown(url, timeoutMs, waitMs, headed, includeRawHtml, debug) {
-    const browser = await playwright_1.chromium.launch({ headless: !headed });
-    const context = await browser.newContext();
+async function scrapeDeveloperMarkdown(context, url, timeoutMs, waitMs, includeRawHtml, debug) {
     const page = await context.newPage();
     let docsApiContent = null;
     let docsApiTitle = null;
@@ -302,11 +333,7 @@ async function scrapeDeveloperMarkdown(url, timeoutMs, waitMs, headed, includeRa
     try {
         await page.goto(url, { waitUntil: "domcontentloaded", timeout: timeoutMs });
         await (0, browserConsent_1.acceptOneTrust)(page, timeoutMs);
-        await page.waitForLoadState("networkidle", { timeout: timeoutMs }).catch((error) => {
-            if (debug) {
-                console.error(`[debug] Developer page networkidle wait failed: ${(0, errorUtils_1.getErrorMessage)(error)}`);
-            }
-        });
+        await waitForAnySelector(page, ["main", "article", ".markdown-content", "doc-content-layout", "doc-amf-reference"], Math.min(timeoutMs, 12000), debug, "developer content");
         if (waitMs > 0) {
             await page.waitForTimeout(waitMs);
         }
@@ -427,7 +454,7 @@ async function scrapeDeveloperMarkdown(url, timeoutMs, waitMs, headed, includeRa
         return result;
     }
     finally {
-        await browser.close();
+        await page.close().catch(() => { });
     }
 }
 async function getHelpDetails(options) {
@@ -438,6 +465,7 @@ async function getHelpDetails(options) {
     const useCache = options.useCache ?? true;
     const includeRawHtml = options.includeRawHtml ?? false;
     const debug = options.debug ?? false;
+    const providedSession = options.session ?? null;
     const cacheKey = JSON.stringify({ url, includeRawHtml });
     const cachePath = (0, cache_1.buildCachePath)("detail", cacheKey);
     if (useCache) {
@@ -446,9 +474,20 @@ async function getHelpDetails(options) {
             return cached;
         }
     }
-    const result = getDetailSourceType(url) === "developer"
-        ? await scrapeDeveloperMarkdown(url, timeoutMs, waitMs, headed, includeRawHtml, debug)
-        : await scrapeHelpMarkdown(url, timeoutMs, waitMs, headed, includeRawHtml, debug);
+    const session = providedSession || (await createScraperSession({ headed }));
+    const shouldCloseSession = !providedSession;
+    let result;
+    try {
+        result =
+            getDetailSourceType(url) === "developer"
+                ? await scrapeDeveloperMarkdown(session.context, url, timeoutMs, waitMs, includeRawHtml, debug)
+                : await scrapeHelpMarkdown(session.context, url, timeoutMs, waitMs, includeRawHtml, debug);
+    }
+    finally {
+        if (shouldCloseSession) {
+            await session.close();
+        }
+    }
     if (useCache) {
         await (0, cache_1.writeCache)(cachePath, result);
     }

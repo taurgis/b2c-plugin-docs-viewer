@@ -82,6 +82,7 @@ class DocsFetchResultsHelpSite extends core_1.Command {
         if (showStatus) {
             this.log(`-> Fetching ${results.length} article(s) with concurrency ${concurrency}...`);
         }
+        const scraperSession = await (0, helpScraper_1.createScraperSession)({ headed: flags.headed });
         const settled = await mapWithConcurrency(results, concurrency, async (item, index) => {
             if (showStatus) {
                 this.log(`-> Fetching article ${index + 1}/${results.length}...`);
@@ -92,9 +93,9 @@ class DocsFetchResultsHelpSite extends core_1.Command {
                     url: validatedUrl,
                     timeoutMs: flags.timeout,
                     waitMs: flags.wait,
-                    headed: flags.headed,
                     useCache: flags.cache,
                     debug: flags.debug,
+                    session: scraperSession,
                 });
                 return {
                     ok: true,
@@ -115,6 +116,8 @@ class DocsFetchResultsHelpSite extends core_1.Command {
                     },
                 };
             }
+        }).finally(async () => {
+            await scraperSession.close();
         });
         const detailed = [];
         const failures = [];

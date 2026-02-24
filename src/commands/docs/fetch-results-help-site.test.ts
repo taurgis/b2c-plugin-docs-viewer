@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import DocsFetchResultsHelpSite from "./fetch-results-help-site";
 import { searchHelp } from "../../lib/helpSearch";
-import { getHelpDetails } from "../../lib/helpScraper";
+import { createScraperSession, getHelpDetails } from "../../lib/helpScraper";
 import { normalizeAndValidateDocUrl } from "../../lib/urlPolicy";
 
 vi.mock("../../lib/helpSearch", () => ({
@@ -9,6 +9,7 @@ vi.mock("../../lib/helpSearch", () => ({
 }));
 
 vi.mock("../../lib/helpScraper", () => ({
+  createScraperSession: vi.fn(),
   getHelpDetails: vi.fn(),
 }));
 
@@ -38,6 +39,10 @@ describe("docs fetch-results-help-site", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(normalizeAndValidateDocUrl).mockImplementation((value: string) => value);
+    vi.mocked(createScraperSession).mockResolvedValue({
+      context: {} as never,
+      close: vi.fn().mockResolvedValue(undefined),
+    });
   });
 
   it("reports partial failures and keeps successful markdown output", async () => {
