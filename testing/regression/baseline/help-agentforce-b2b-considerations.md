@@ -67,7 +67,7 @@ Agentforce Guided Shopping Agent is a consumption-based product that uses Einste
 
 ## Usage Types Billed by Agentforce Guided Shopping Agent
 
-![Tip](https://sf-zdocs-cdn-prod.zoominsoftware.com/tdta-comm-260-0-0-production-enus/bb92045e-7bb7-49e4-aab2-3607de0d2556/images/icon_tip.png)
+![Tip](https://sf-zdocs-cdn-prod.zoominsoftware.com/tdta-comm-260-0-0-production-enus/__asset_version__/images/icon_tip.png)
 
 Tip This feature has access to Digital Wallet, a free account management tool that offers near real-time consumption data for enabled products across your active contracts. Access Digital Wallet and start tracking your org's usage. To learn more, see [About Digital Wallet](https://help.salesforce.com/s/articleView?id=xcloud.wallet_about.htm&language=en_US&type=5).
 

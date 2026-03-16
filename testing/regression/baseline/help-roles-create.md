@@ -11,9 +11,9 @@ The SiteGenesis application contains several roles predefined for your convenien
 
 To manage roles and permissions, you must have permissions to the Roles & Permissions module. To add a user and to manage user login and credential information, you must have permissions to the Users module. To assign or unassign roles to users, you must have permissions to both the Users module and the Roles & Permissions module.
 
-If you don't have a user with access to the Roles and Permissions module, contact Commerce Cloud Support to reinstate access to this module.
+If you don't have a user with access to the Roles and Permissions module, contact B2C Commerce Support to reinstate access to this module.
 
-![Note](https://sf-zdocs-cdn-prod.zoominsoftware.com/tdta-b2c_merchandiser_administrator-2-production-enus/76f32a4a-8e89-47fb-8563-08c81bc97a57/images/icon_note.png)
+![Note](https://sf-zdocs-cdn-prod.zoominsoftware.com/tdta-b2c_merchandiser_administrator-2-production-enus/__asset_version__/images/icon_note.png)
 
 Note A list of assigned roles also appears on the Roles page of a user definition.
 

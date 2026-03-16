@@ -7,12 +7,12 @@ Create a Guided Shopping Agent to unlock agent capabilities in your store. Guide
 | View supported editions. |
 | --- |
 
-1.  In your Salesforce org, click ![Setup icon](https://sf-zdocs-cdn-prod.zoominsoftware.com/tdta-comm-260-0-0-production-enus/bb92045e-7bb7-49e4-aab2-3607de0d2556/comm/images/comm_setup_icon_no_border.png) at the top of the page, and then select **Setup**.
+1.  In your Salesforce org, click ![Setup icon](https://sf-zdocs-cdn-prod.zoominsoftware.com/tdta-comm-260-0-0-production-enus/__asset_version__/comm/images/comm_setup_icon_no_border.png) at the top of the page, and then select **Setup**.
 2.  In the Quick Find box, enter Agentforce Agents, and select **Agentforce Agents**.
 3.  To create an agent, click **New Agent**.
 4.  Select the Agentforce for **Guided Shopping - B2B template**, and then click **Next**.
 
-    ![Select an agent window with Agentforce for Guided Shopping - B2B template selected.](https://sf-zdocs-cdn-prod.zoominsoftware.com/tdta-comm-260-0-0-production-enus/bb92045e-7bb7-49e4-aab2-3607de0d2556/comm/images/comm_agent_template.jpg)
+    ![Select an agent window with Agentforce for Guided Shopping - B2B template selected.](https://sf-zdocs-cdn-prod.zoominsoftware.com/tdta-comm-260-0-0-production-enus/__asset_version__/comm/images/comm_agent_template.jpg)
 
 5.  On the Review Topics page, review the topics included in the template. Salesforce suggests keeping all default topics.
 
@@ -33,7 +33,7 @@ Create a Guided Shopping Agent to unlock agent capabilities in your store. Guide
 9.  Click **Next**.
 10.  Click **Create**.
 
-     ![Customize your agent window with information for Guided Shopping Agent entered](https://sf-zdocs-cdn-prod.zoominsoftware.com/tdta-comm-260-0-0-production-enus/bb92045e-7bb7-49e4-aab2-3607de0d2556/comm/images/comm_agent_customize_agent.jpg)
+     ![Customize your agent window with information for Guided Shopping Agent entered](https://sf-zdocs-cdn-prod.zoominsoftware.com/tdta-comm-260-0-0-production-enus/__asset_version__/comm/images/comm_agent_customize_agent.jpg)
 
 11.  (Optional). To add Guided Shopping topics to a pre-existing agent, select the agent and then click **Open in Builder**. If the agent is active, click **Deactivate**. Click **New** | **Add From Asset Library**. Select the Topics to add, and then click **Finish**.
 
@@ -45,33 +45,33 @@ Create a Guided Shopping Agent to unlock agent capabilities in your store. Guide
 
      This ID is a 15-character record ID beginning with OZE. Always use the hardcoded value '0ZExxxxxxxxxxxx' for the input webStoreId parameter in any action that requires this identifier.
 
-     ![Commerce Global Instructions topic instruction with replaced webstore ID value](https://sf-zdocs-cdn-prod.zoominsoftware.com/tdta-comm-260-0-0-production-enus/bb92045e-7bb7-49e4-aab2-3607de0d2556/comm/images/comm_agent_global_instructions_replace_value.jpg)
+     ![Commerce Global Instructions topic instruction with replaced webstore ID value](https://sf-zdocs-cdn-prod.zoominsoftware.com/tdta-comm-260-0-0-production-enus/__asset_version__/comm/images/comm_agent_global_instructions_replace_value.jpg)
 
-     ![Note](https://sf-zdocs-cdn-prod.zoominsoftware.com/tdta-comm-260-0-0-production-enus/bb92045e-7bb7-49e4-aab2-3607de0d2556/images/icon_note.png)
+     ![Note](https://sf-zdocs-cdn-prod.zoominsoftware.com/tdta-comm-260-0-0-production-enus/__asset_version__/images/icon_note.png)
 
-     Note Locate the webStoreUrl on the store's setup page in the URL. ![Location within store setup to find the store's webstore ID.](https://sf-zdocs-cdn-prod.zoominsoftware.com/tdta-comm-260-0-0-production-enus/bb92045e-7bb7-49e4-aab2-3607de0d2556/comm/images/comm_agent_webstore_id_location.jpg)
+     Note Locate the webStoreUrl on the store's setup page in the URL. ![Location within store setup to find the store's webstore ID.](https://sf-zdocs-cdn-prod.zoominsoftware.com/tdta-comm-260-0-0-production-enus/__asset_version__/comm/images/comm_agent_webstore_id_location.jpg)
 
 15.  Save your work.
 16.  In Agent Builder, select the **Commerce Order** topic.
 17.  Click **New Version**.
 18.  Locate the instruction that begins with For the cart URL. Replace {loginPageUrl}?startURL={cartPageUrl}/cart with webStoreUrl/cart, where webStoreUrl is your store's URL. For example, https://mydomain.com/store/cart.
 
-     ![Commerce Order cart URL topic instruction replaced text with example webstore ID](https://sf-zdocs-cdn-prod.zoominsoftware.com/tdta-comm-260-0-0-production-enus/bb92045e-7bb7-49e4-aab2-3607de0d2556/comm/images/comm_agent_cart_url_replace.jpg)
+     ![Commerce Order cart URL topic instruction replaced text with example webstore ID](https://sf-zdocs-cdn-prod.zoominsoftware.com/tdta-comm-260-0-0-production-enus/__asset_version__/comm/images/comm_agent_cart_url_replace.jpg)
 
 19.  Locate the instruction that begins with For the Order Url. Replace {loginPageUrl}?startURL={orderSummaryPageUrl}/orderId with webStoreUrl/orderSummary/{orderId}, where webStoreUrl is your store's URL. For example, https://mydomain.com/store/orderSummary/{orderId}.
 
-     ![Commerce Order order URL topic instruction replaced fields with webstore ID.](https://sf-zdocs-cdn-prod.zoominsoftware.com/tdta-comm-260-0-0-production-enus/bb92045e-7bb7-49e4-aab2-3607de0d2556/comm/images/comm_agent_replace_commerce_order_instruction_order_url.jpg)
+     ![Commerce Order order URL topic instruction replaced fields with webstore ID.](https://sf-zdocs-cdn-prod.zoominsoftware.com/tdta-comm-260-0-0-production-enus/__asset_version__/comm/images/comm_agent_replace_commerce_order_instruction_order_url.jpg)
 
 20.  Enable the agent to interact in languages other than the default English.
      1.  In the left pane of the Agentforce Builder, select **Language**.
      2.  Move the languages you want the agent to use from the Available column to the Selected column.
 21.  Save your work.
 
-![Example](https://sf-zdocs-cdn-prod.zoominsoftware.com/tdta-comm-260-0-0-production-enus/bb92045e-7bb7-49e4-aab2-3607de0d2556/images/icon_example.png)
+![Example](https://sf-zdocs-cdn-prod.zoominsoftware.com/tdta-comm-260-0-0-production-enus/__asset_version__/images/icon_example.png)
 
 Example A Guided Shopping agent with all the B2B Commerce topics added.
 
-![A B2B store with all Commerce Topics added.](https://sf-zdocs-cdn-prod.zoominsoftware.com/tdta-comm-260-0-0-production-enus/bb92045e-7bb7-49e4-aab2-3607de0d2556/comm/images/comm_agent_all_topics.jpg)
+![A B2B store with all Commerce Topics added.](https://sf-zdocs-cdn-prod.zoominsoftware.com/tdta-comm-260-0-0-production-enus/__asset_version__/comm/images/comm_agent_all_topics.jpg)
 
 #### See Also
 

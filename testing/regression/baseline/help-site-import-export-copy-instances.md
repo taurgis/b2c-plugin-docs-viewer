@@ -6,7 +6,7 @@ You can use Site Import/Export to export SiteGenesis from one instance and then 
 
 Site Import/Export is only intended for setting up identical sites (same names and IDs) and the same organization-level data across instances. However, the Business Manager UI also lets you export a subset of the instance data.
 
-![Note](https://sf-zdocs-cdn-prod.zoominsoftware.com/tdta-b2c_merchandiser_administrator-2-production-enus/76f32a4a-8e89-47fb-8563-08c81bc97a57/images/icon_note.png)
+![Note](https://sf-zdocs-cdn-prod.zoominsoftware.com/tdta-b2c_merchandiser_administrator-2-production-enus/__asset_version__/images/icon_note.png)
 
 Note Scheduled execution of custom jobs is disabled for sandboxes. If you export a production or staging instance and import it into a sandbox, you can prevent accidentally running jobs that affect staging or production systems. However, you can run jobs manually on sandboxes. We recommend caution if you haven’t examined the job configuration to make sure it doesn't affect other instances.
 
@@ -42,7 +42,7 @@ Export a site from an existing instance to populate a sandbox with data from the
 
 4.  Select the data you want to export. If you’re exporting SiteGenesis, select all data except users, so that you don't overwrite the users and permissions in the sandboxes.
 
-    ![Note](https://sf-zdocs-cdn-prod.zoominsoftware.com/tdta-b2c_merchandiser_administrator-2-production-enus/76f32a4a-8e89-47fb-8563-08c81bc97a57/images/icon_note.png)
+    ![Note](https://sf-zdocs-cdn-prod.zoominsoftware.com/tdta-b2c_merchandiser_administrator-2-production-enus/__asset_version__/images/icon_note.png)
 
     Note If you select the option Save in Global Export Directory, be aware that for Sandboxes, data is available to other Sandboxes in the SIG. For Production, Development, or Staging, data is available to other instances in the PIG.
 
@@ -56,7 +56,7 @@ Export a site from an existing instance to populate a sandbox with data from the
 
 The system generates a .zip file containing the site export. If an instance export or backup fails for any reason, the system generates a .zip file, but appends the suffix "-invalid" to the filename. We recommend that you establish a mechanism to detect when an invalid file is produced.
 
-See Also: [Global exports from Commerce Cloud B2C platform PIG instances do not appear in SIG instances](https://help.salesforce.com/s/articleView?id=002326272&language=en_US&type=1)
+See Also: [Global exports from B2C Commerce platform PIG instances do not appear in SIG instances](https://help.salesforce.com/s/articleView?id=002326272&language=en_US&type=1)
 
 ## Import a Site
 
@@ -67,7 +67,7 @@ To import a site, first upload the .zip file onto B2C Commerce and then import i
 | Available in: B2C Commerce |
 | --- |
 
-![Note](https://sf-zdocs-cdn-prod.zoominsoftware.com/tdta-b2c_merchandiser_administrator-2-production-enus/76f32a4a-8e89-47fb-8563-08c81bc97a57/images/icon_note.png)
+![Note](https://sf-zdocs-cdn-prod.zoominsoftware.com/tdta-b2c_merchandiser_administrator-2-production-enus/__asset_version__/images/icon_note.png)
 
 Note You can import orders during site import on sandboxes. To use this feature, save a file called order.xml in the site's import folder. The file structure must conform to order.xsd. This feature is only available on sandboxes and is intended for (automatic) testing purposes.
 
@@ -89,4 +89,4 @@ Note You can import orders during site import on sandboxes. To use this feature,
 
 To check the status in the Status section of the page. If the site has imported successfully, the status is set to Success. Otherwise, the status indicates if there are errors. Click the process link to see a log with information on any errors.
 
-See Also: [Global exports from Commerce Cloud B2C platform PIG instances do not appear in SIG instances](https://help.salesforce.com/s/articleView?id=002326272&language=en_US&type=1)
+See Also: [Global exports from B2C Commerce PIG instances do not appear in SIG instances](https://help.salesforce.com/s/articleView?id=002326272&language=en_US&type=1)

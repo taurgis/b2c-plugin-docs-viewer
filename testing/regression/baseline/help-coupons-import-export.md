@@ -58,7 +58,7 @@ The following XML sample shows an order export that includes coupon code redempt
 
 You can import/export coupon redemptions in the XML format, or one code at a time in the CSV format. However, only import coupon redemptions in rare cases. Before you export coupon redemptions from one instance and import them into another, make sure that all appropriate coupon and order information were already imported. Otherwise, the import can fail to work as expected.
 
-![Note](https://sf-zdocs-cdn-prod.zoominsoftware.com/tdta-b2c_merchandiser_administrator-2-production-enus/76f32a4a-8e89-47fb-8563-08c81bc97a57/images/icon_note.png)
+![Note](https://sf-zdocs-cdn-prod.zoominsoftware.com/tdta-b2c_merchandiser_administrator-2-production-enus/__asset_version__/images/icon_note.png)
 
 Note This schema is presented only to illustrate its functions and can change at any time.
 

@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { getHelpDetails } from '../../dist/lib/helpScraper.js';
+import { normalizeRegressionMarkdown } from '../../dist/lib/regressionMarkdown.js';
 
 const FIXTURES_PATH = path.join('testing', 'regression', 'fixtures.json');
 const ROOT_DIR = path.join('testing', 'regression');
@@ -67,8 +68,9 @@ for (const [index, fixture] of fixtures.entries()) {
       timeoutMs,
     });
 
-    const currentMetrics = metrics(detail.markdown);
-    await fs.writeFile(currentMdPath, `${detail.markdown}\n`, 'utf8');
+    const normalizedMarkdown = normalizeRegressionMarkdown(detail.markdown);
+    const currentMetrics = metrics(normalizedMarkdown);
+    await fs.writeFile(currentMdPath, `${normalizedMarkdown}\n`, 'utf8');
 
     const baselineExists = await fileExists(baselineMdPath);
     let baselineMarkdown = null;
@@ -80,8 +82,9 @@ for (const [index, fixture] of fixtures.entries()) {
     if (baselineExists) {
       baselineMarkdown = await fs.readFile(baselineMdPath, 'utf8');
       baselineMarkdown = baselineMarkdown.replace(/\n$/, '');
+      baselineMarkdown = normalizeRegressionMarkdown(baselineMarkdown);
       baselineMetrics = metrics(baselineMarkdown);
-      exactMatch = baselineMarkdown === detail.markdown;
+      exactMatch = baselineMarkdown === normalizedMarkdown;
       charDelta = currentMetrics.chars - baselineMetrics.chars;
       charDeltaPct = safeDelta(currentMetrics.chars, baselineMetrics.chars);
     }
@@ -104,7 +107,7 @@ for (const [index, fixture] of fixtures.entries()) {
 
     await fs.writeFile(
       currentJsonPath,
-      `${JSON.stringify({ fixture, detail, analysis: row }, null, 2)}\n`,
+      `${JSON.stringify({ fixture, detail: { ...detail, markdown: normalizedMarkdown }, analysis: row }, null, 2)}\n`,
       'utf8'
     );
 

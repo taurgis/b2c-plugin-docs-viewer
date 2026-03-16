@@ -2,13 +2,13 @@
 
 The site.xsd schema file describes the structure of data that is exported from an instance to a zip file, or imported from a .zip file. The site.xsd file describes all site-related data and global, non-site-related data (that is, organization-level data, such as shipping methods). This topic applies to B2C Commerce.
 
-![Note](https://sf-zdocs-cdn-prod.zoominsoftware.com/tdta-b2c_merchandiser_administrator-2-production-enus/76f32a4a-8e89-47fb-8563-08c81bc97a57/images/icon_note.png)
+![Note](https://sf-zdocs-cdn-prod.zoominsoftware.com/tdta-b2c_merchandiser_administrator-2-production-enus/__asset_version__/images/icon_note.png)
 
 Note Don't use special characters, such as umlauts, in file names—including names of image files—because doing so causes site import/export to fail.
 
 Site export exports certain objects (including database objects and static files) and stores them in a single .zip file, which is available for download. You can upload the zip file to another instance and import it there. Site import is possible only if there’s no custom site in the instance.
 
-![Note](https://sf-zdocs-cdn-prod.zoominsoftware.com/tdta-b2c_merchandiser_administrator-2-production-enus/76f32a4a-8e89-47fb-8563-08c81bc97a57/images/icon_note.png)
+![Note](https://sf-zdocs-cdn-prod.zoominsoftware.com/tdta-b2c_merchandiser_administrator-2-production-enus/__asset_version__/images/icon_note.png)
 
 Note Code (cartridges) isn't part of the Site import/export and must be dealt with separately.
 
@@ -186,7 +186,7 @@ All site directories
 
 ## Use Site Import/Export to Import Reference Application Demo Sites in B2C Commerce
 
-You can import Commerce Cloud reference application demo sites into a sandbox. Demo sites are prebuilt and enable you to explore storefront functionality. Unlike custom sites, demo sites don’t have to be exported from other instances. They can be immediately imported into sandboxes. This topic applies to B2C Commerce.
+You can import B2C Commerce reference application demo sites into a sandbox. Demo sites are prebuilt and enable you to explore storefront functionality. Unlike custom sites, demo sites don’t have to be exported from other instances. They can be immediately imported into sandboxes. This topic applies to B2C Commerce.
 
 There are two demo sites:
 
@@ -197,7 +197,7 @@ There are two demo sites:
     -   Search indexes are automatically updated.
 -   SiteGenesis (SGJC) Demo Site: When you import the SGJC demo site, Business Manager imports the site data only. You upload code separately. Search indexes aren’t automatically updated.
 
-![Note](https://sf-zdocs-cdn-prod.zoominsoftware.com/tdta-b2c_merchandiser_administrator-2-production-enus/76f32a4a-8e89-47fb-8563-08c81bc97a57/images/icon_note.png)
+![Note](https://sf-zdocs-cdn-prod.zoominsoftware.com/tdta-b2c_merchandiser_administrator-2-production-enus/__asset_version__/images/icon_note.png)
 
 Note When you import a demo site, you import data (and code) that can be older than the data and code in the associated git repositories.
 

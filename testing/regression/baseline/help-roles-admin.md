@@ -26,9 +26,9 @@ Developers use their own accounts to access instances and don't change or reset 
 
 Security settings let the administrator configure Business Manager passwords behaviors. An administrator can retrieve or reset a forgotten password using the *Forgot Password* feature.
 
-![Note](https://sf-zdocs-cdn-prod.zoominsoftware.com/tdta-b2c_merchandiser_administrator-2-production-enus/76f32a4a-8e89-47fb-8563-08c81bc97a57/images/icon_note.png)
+![Note](https://sf-zdocs-cdn-prod.zoominsoftware.com/tdta-b2c_merchandiser_administrator-2-production-enus/__asset_version__/images/icon_note.png)
 
-Note Commerce Cloud Support only resets the main administrator password for the admin account. Only a user logged in as the admin user can reset other accounts with administrative access.
+Note Salesforce Support resets only the main administrator password for the admin account. Only a user logged in as the admin user can reset other accounts with administrative access.
 
 ## Import and Export
 
@@ -68,7 +68,7 @@ The following table lists the functional permissions that apply to your organiza
 
 | Permission | Description |
 | --- | --- |
-| Access_Customer_and_Customerlist_Impex | controls access to the Customers and Customer List in the Business Manager Import and Export module. Users have access to the import and export buttons and are authorized to import and export data. Limiting authorization provides better control over data import and export operations. It helps organizations maintain data integrity and follow security policies. Users can view relevent files and status overview on the Import and Export page. |
+| Access_Customer_and_Customerlist_Impex | controls access to the Customers and Customer List in the Business Manager Import and Export module. Users have access to the import and export buttons and are authorized to import and export data. Limiting authorization provides better control over data import and export operations. It helps organizations maintain data integrity and follow security policies. Users can view relevant files and status overview on the Import and Export page. |
 | Replication_Run_For_Org | Lets a user manage and start data replication processes for global replication tasks (that is, system object type definitions). |
 | Manage_All_Catalogs | Lets a user:<br>view, create, edit, organization catalogs<br>assign catalogs to sites<br>view, create, edit, all assets in all catalogs in all languages and for all sites<br>Allows access to catalogs, categories, products, recommendations, variation attributes, options, product category assignments, or catalog images. Assign this permission to users who need access to Products, Catalogs, Product Options, Product Sets, Recommendations, or Variation Attributes modules. |
 | Delete_All_Catalogs | Lets a user:<br>delete organization catalogs<br>delete all assets in all catalogs in all languages and for all sites<br>Having the Manage_Site_Catalog functional permission along with the Delete_All_Catalogs functional permission isn't sufficient for being allowed to delete any catalog. Only users with both Manage_All_Catalogs and Delete_All_Catalogs can delete catalogs. As of Release 16.3, all users who previously had the _Manage\_All\_Catalogs_ permission are automatically assigned the additional Delete_All_Catalogs permission. |
