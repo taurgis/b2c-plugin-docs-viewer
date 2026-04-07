@@ -273,6 +273,304 @@ function removeLeadingBreadcrumbChrome(markdown: string, title: string | null): 
   return `${markdown.slice(0, headingLine.length)}${markdown.slice(contentStart)}`;
 }
 
+function tokenizeMarkdownBlocks(markdown: string): string[] {
+  const lines = markdown.split("\n");
+  const blocks: string[] = [];
+
+  for (let index = 0; index < lines.length; ) {
+    if (lines[index].trim().length === 0) {
+      index += 1;
+      continue;
+    }
+
+    if (lines[index].startsWith("```")) {
+      const codeBlockLines = [lines[index]];
+      index += 1;
+
+      while (index < lines.length) {
+        codeBlockLines.push(lines[index]);
+        if (lines[index].startsWith("```")) {
+          index += 1;
+          break;
+        }
+        index += 1;
+      }
+
+      blocks.push(codeBlockLines.join("\n"));
+      continue;
+    }
+
+    blocks.push(lines[index].trim());
+    index += 1;
+  }
+
+  return blocks;
+}
+
+function untokenizeMarkdownBlocks(blocks: string[]): string {
+  return blocks.join("\n\n").replace(/\n{3,}/g, "\n\n").trim();
+}
+
+function isDeveloperNoiseToken(token: string): boolean {
+  return /^(false|hide|show)$/i.test(token.trim());
+}
+
+function isDeveloperIdentifierToken(token: string): boolean {
+  const normalized = token.replace(/\\_/g, "_").trim();
+  return /^[A-Za-z_][A-Za-z0-9_.-]*$/.test(normalized);
+}
+
+function isDeveloperTypeToken(token: string): boolean {
+  const normalized = token.replace(/\\_/g, "_").trim();
+  if (normalized.length === 0 || normalized.length > 60) return false;
+  if (/[,:]/.test(normalized)) return false;
+
+  return /^(?:string|object|number|integer|boolean|array|null|enum|date(?:-time)?|datetime|time|uri|url|file|binary|any|[A-Z][A-Za-z0-9_.<>-]*(?:\[\])?)$/i.test(
+    normalized
+  );
+}
+
+function isDeveloperConstraintToken(token: string): boolean {
+  return /^[A-Z][A-Za-z ]+:\s*.+$/.test(token.trim());
+}
+
+function isDeveloperStatusToken(token: string): boolean {
+  return /^\d{3}(?:default|\s+default)$/i.test(token.trim());
+}
+
+function normalizeDeveloperStatusToken(token: string): string {
+  const match = token.trim().match(/^(\d{3})(default)$/i);
+  return match ? `${match[1]} default` : token;
+}
+
+function splitConcatenatedMediaTypes(token: string): string {
+  const prefixes = [
+    "application/",
+    "audio/",
+    "font/",
+    "example/",
+    "image/",
+    "message/",
+    "model/",
+    "multipart/",
+    "text/",
+    "video/",
+  ];
+
+  let normalized = token.trim();
+  for (const prefix of prefixes) {
+    normalized = normalized.replace(new RegExp(`(?!^)${prefix}`, "g"), `, ${prefix}`);
+  }
+
+  return normalized.replace(/,\s+,/g, ", ").trim();
+}
+
+function isDeveloperPropertyStart(blocks: string[], index: number): boolean {
+  if (index + 1 >= blocks.length) return false;
+  return isDeveloperIdentifierToken(blocks[index]) && isDeveloperTypeToken(blocks[index + 1]);
+}
+
+function renderDeveloperPropertyTable(
+  heading: string,
+  rows: Array<{
+    name: string;
+    type: string;
+    flags: string[];
+    descriptions: string[];
+    constraints: string[];
+  }>
+): string {
+  const nameHeader = heading.toLowerCase() === "uri parameters" ? "Name" : "Field";
+  const flagHeader = heading.toLowerCase() === "uri parameters" ? "Required" : "Flags";
+  const header = `| ${nameHeader} | Type | ${flagHeader} | Description | Constraints |`;
+  const separator = "| --- | --- | --- | --- | --- |";
+  const body = rows.map((row) => {
+    const flagValue =
+      heading.toLowerCase() === "uri parameters"
+        ? row.flags.includes("Required")
+          ? "Yes"
+          : ""
+        : row.flags.join(", ");
+
+    return `| ${escapeTableCell(row.name)} | ${escapeTableCell(row.type)} | ${escapeTableCell(
+      flagValue
+    )} | ${escapeTableCell(row.descriptions.join(" "))} | ${escapeTableCell(
+      row.constraints.join("; ")
+    )} |`;
+  });
+
+  return [header, separator, ...body].join("\n");
+}
+
+function normalizeDeveloperPropertySections(markdown: string): string {
+  const blocks = tokenizeMarkdownBlocks(markdown);
+  const normalizedBlocks: string[] = [];
+
+  for (let index = 0; index < blocks.length; ) {
+    const block = blocks[index];
+    const normalizedBlock = normalizeDeveloperStatusToken(block);
+
+    if (block === "URI parameters" || block === "Query parameters" || block === "Headers" || block === "Body") {
+      const sectionBlocks = [block];
+      let cursor = index + 1;
+
+      while (cursor < blocks.length && isDeveloperNoiseToken(blocks[cursor])) {
+        cursor += 1;
+      }
+
+      if (blocks[cursor]?.trim().toLowerCase() === "media type:") {
+        const mediaLabel = blocks[cursor].trim().endsWith(":") ? "Media types:" : blocks[cursor];
+        cursor += 1;
+        while (cursor < blocks.length && isDeveloperNoiseToken(blocks[cursor])) {
+          cursor += 1;
+        }
+
+        if (cursor < blocks.length) {
+          sectionBlocks.push(`${mediaLabel} ${splitConcatenatedMediaTypes(blocks[cursor])}`);
+          cursor += 1;
+        }
+
+        while (cursor < blocks.length && isDeveloperNoiseToken(blocks[cursor])) {
+          cursor += 1;
+        }
+      }
+
+      const rows: Array<{
+        name: string;
+        type: string;
+        flags: string[];
+        descriptions: string[];
+        constraints: string[];
+      }> = [];
+
+      while (cursor < blocks.length) {
+        if (isDeveloperNoiseToken(blocks[cursor])) {
+          cursor += 1;
+          continue;
+        }
+
+        if (!isDeveloperPropertyStart(blocks, cursor)) {
+          break;
+        }
+
+        const row = {
+          name: blocks[cursor].replace(/\\_/g, "_"),
+          type: blocks[cursor + 1].replace(/\\_/g, "_"),
+          flags: [] as string[],
+          descriptions: [] as string[],
+          constraints: [] as string[],
+        };
+        cursor += 2;
+
+        while (cursor < blocks.length) {
+          const token = blocks[cursor];
+
+          if (isDeveloperNoiseToken(token)) {
+            cursor += 1;
+            continue;
+          }
+
+          if (isDeveloperPropertyStart(blocks, cursor)) {
+            break;
+          }
+
+          if (token.startsWith("#") || token.startsWith("```") || token === "Example" || isDeveloperStatusToken(token)) {
+            break;
+          }
+
+          if (token === "Required") {
+            row.flags.push("Required");
+            cursor += 1;
+            continue;
+          }
+
+          if (isDeveloperConstraintToken(token)) {
+            row.constraints.push(token);
+            cursor += 1;
+            continue;
+          }
+
+          row.descriptions.push(token);
+          cursor += 1;
+        }
+
+        rows.push(row);
+      }
+
+      if (rows.length > 0) {
+        sectionBlocks.push(renderDeveloperPropertyTable(block, rows));
+        normalizedBlocks.push(...sectionBlocks);
+        index = cursor;
+        continue;
+      }
+    }
+
+    if (!isDeveloperNoiseToken(normalizedBlock)) {
+      if (normalizedBlock.trim().toLowerCase() === "media type:" && index + 1 < blocks.length) {
+        const nextBlock = blocks[index + 1];
+        if (!isDeveloperNoiseToken(nextBlock)) {
+          normalizedBlocks.push(`Media types: ${splitConcatenatedMediaTypes(nextBlock)}`);
+          index += 2;
+          continue;
+        }
+      }
+
+      normalizedBlocks.push(normalizedBlock);
+    }
+
+    index += 1;
+  }
+
+  return untokenizeMarkdownBlocks(normalizedBlocks);
+}
+
+function getDeveloperMetaTitle(pageUrl: string): string | null {
+  try {
+    const meta = new URL(pageUrl).searchParams.get("meta");
+    if (!meta) return null;
+
+    const normalized = meta.replace(/\+/g, " ").replace(/\s+/g, " ").trim();
+    return normalized.length > 0 ? normalized : null;
+  } catch {
+    return null;
+  }
+}
+
+function getDeveloperPreferredTitle(pageUrl: string, title: string | null): string | null {
+  const metaTitle = getDeveloperMetaTitle(pageUrl);
+  if (metaTitle) {
+    return metaTitle;
+  }
+
+  const trimmedTitle = title?.split("|")[0]?.trim() || null;
+  return trimmedTitle && trimmedTitle.length > 0 ? trimmedTitle : null;
+}
+
+function findDeveloperSectionStart(markdown: string, sectionTitle: string): number {
+  const normalizedTitle = sectionTitle.trim().toLowerCase();
+  if (!normalizedTitle) return -1;
+
+  const lines = markdown.split("\n");
+  let offset = 0;
+  let operationIdOffset = -1;
+
+  for (const line of lines) {
+    const normalizedLine = line.trim().toLowerCase();
+
+    if (normalizedLine === normalizedTitle || normalizedLine === `# ${normalizedTitle}`) {
+      return offset;
+    }
+
+    if (normalizedLine === `operation id: ${normalizedTitle}` && operationIdOffset < 0) {
+      operationIdOffset = offset;
+    }
+
+    offset += line.length + 1;
+  }
+
+  return operationIdOffset;
+}
+
 export function formatHelpArticleMarkdown(markdown: string, title: string | null): string {
   let output = markdown.replace(/\u00a0/g, " ");
 
@@ -294,6 +592,40 @@ export function formatHelpArticleMarkdown(markdown: string, title: string | null
 
   output = ensureTitleHeading(output, title);
   output = removeLeadingBreadcrumbChrome(output, title);
+  return output;
+}
+
+export function formatDeveloperArticleMarkdown(
+  markdown: string,
+  pageUrl: string,
+  title: string | null
+): string {
+  let output = markdown.replace(/\u00a0/g, " ");
+  const metaTitle = getDeveloperMetaTitle(pageUrl);
+  if (!metaTitle) {
+    return output;
+  }
+
+  const preferredTitle = getDeveloperPreferredTitle(pageUrl, title);
+
+  if (preferredTitle) {
+    const sectionStart = findDeveloperSectionStart(output, preferredTitle);
+    if (sectionStart > 0) {
+      output = output.slice(sectionStart);
+    }
+  }
+
+  output = cutAtFirstMarker(output, [
+    "\n## developer centers",
+    "\n## popular resources",
+    "\n## community",
+    "\n[commerce cloud](https://developer.salesforce.com/developer-centers/commerce-cloud)",
+    "\n[![salesforce logo]",
+  ]);
+
+  output = normalizeDeveloperPropertySections(output);
+  output = ensureTitleHeading(output, preferredTitle);
+
   return output;
 }
 

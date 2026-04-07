@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { convertHtmlToMarkdown, formatHelpArticleMarkdown } from "./helpScraper";
+import {
+  convertHtmlToMarkdown,
+  formatDeveloperArticleMarkdown,
+  formatHelpArticleMarkdown,
+} from "./helpScraper";
 
 describe("convertHtmlToMarkdown", () => {
   it("renders dx-code-block as fenced code", () => {
@@ -153,5 +157,93 @@ describe("formatHelpArticleMarkdown", () => {
     expect((markdown.match(/# Enable Agentforce for Guided Shopping/g) || []).length).toBe(1);
     expect(markdown).not.toContain("You are here:");
     expect(markdown).toContain("Body content starts here.");
+  });
+});
+
+describe("formatDeveloperArticleMarkdown", () => {
+  it("leaves non-meta developer docs unchanged", () => {
+    const raw = [
+      "# OCAPI OAuth 2.0",
+      "",
+      "1.  **Register your client application using Account Manager:**",
+      "    ",
+      "    All client applications that access the Open Commerce API must be registered through the Commerce Cloud Account Manager.",
+    ].join("\n");
+
+    const markdown = formatDeveloperArticleMarkdown(
+      raw,
+      "https://developer.salesforce.com/docs/commerce/b2c-commerce/references/b2c-commerce-ocapi/oauth.html",
+      "OCAPI OAuth 2.0 | B2C Commerce | Salesforce Developers"
+    );
+
+    expect(markdown).toBe(raw);
+  });
+
+  it("trims developer reference chrome and focuses meta-targeted operation content", () => {
+    const raw = [
+      "**DID THIS ARTICLE SOLVE YOUR ISSUE?**",
+      "Share your feedback",
+      "[Open Commerce API](https://developer.salesforce.com/docs/commerce/b2c-commerce/references/b2c-commerce-ocapi)",
+      "[Get campaign](https://developer.salesforce.com/docs/commerce/b2c-commerce/references/ocapi-data-campaigns?meta=Get%2BCampaign)",
+      "Get Campaign",
+      "Operation ID: Get Campaign",
+      "Action to get campaign information.",
+      "Request",
+      "Hide",
+      "Security",
+      "Show",
+      "### Settings",
+      "URI parameters",
+      "false",
+      "site\\_id",
+      "string",
+      "Required",
+      "The site the requested campaign belongs to.",
+      "Minimum characters: 1",
+      "campaign\\_id",
+      "string",
+      "Required",
+      "The id of the requested campaign.",
+      "Minimum characters: 1",
+      "404default",
+      "`CampaignNotFoundException` - Thrown in case the campaign does not exist matching the given id",
+      "Body",
+      "Media type:",
+      "application/jsontext/xml",
+      "false",
+      "arguments",
+      "object",
+      "A map that provides fault arguments.",
+      "Data can be used to provide error messages on the client side.",
+      "[Commerce Cloud](https://developer.salesforce.com/developer-centers/commerce-cloud)",
+    ].join("\n");
+
+    const markdown = formatDeveloperArticleMarkdown(
+      raw,
+      "https://developer.salesforce.com/docs/commerce/b2c-commerce/references/ocapi-data-campaigns?meta=Get%2BCampaign",
+      "Get campaign | Data Campaigns | B2C Commerce | Salesforce Developers"
+    );
+
+    expect(markdown.startsWith("# Get Campaign")).toBe(true);
+    expect(markdown).toContain("Operation ID: Get Campaign");
+    expect(markdown).toContain("Action to get campaign information.");
+    expect(markdown).toContain("Request");
+    expect(markdown).toContain("| Name | Type | Required | Description | Constraints |");
+    expect(markdown).toContain("| site_id | string | Yes | The site the requested campaign belongs to. | Minimum characters: 1 |");
+    expect(markdown).toContain("| campaign_id | string | Yes | The id of the requested campaign. | Minimum characters: 1 |");
+    expect(markdown).toContain("404 default");
+    expect(markdown).toContain("Media types: application/json, text/xml");
+    expect(markdown).toContain("| Field | Type | Flags | Description | Constraints |");
+    expect(markdown).toContain(
+      "| arguments | object |  | A map that provides fault arguments. Data can be used to provide error messages on the client side. |  |"
+    );
+    expect(markdown).not.toContain("DID THIS ARTICLE SOLVE YOUR ISSUE?");
+    expect(markdown).not.toContain("Share your feedback");
+    expect(markdown).not.toContain("[Get campaign](");
+    expect(markdown).not.toContain("[Commerce Cloud](");
+    expect(markdown).not.toContain("\nHide\n");
+    expect(markdown).not.toContain("\nShow\n");
+    expect(markdown).not.toContain("\nfalse\n");
+    expect(markdown).not.toContain("application/jsontext/xml");
   });
 });

@@ -8,12 +8,15 @@ import { acceptOneTrust } from "./browserConsent";
 import {
   convertHtmlToMarkdown,
   createTurndown,
+  formatDeveloperArticleMarkdown,
   formatHelpArticleMarkdown,
 } from "./helpScraperMarkdown";
 import { getErrorMessage } from "./errorUtils";
 import { firstFulfilled } from "./promiseUtils";
 
 export { convertHtmlToMarkdown, formatHelpArticleMarkdown } from "./helpScraperMarkdown";
+
+export { formatDeveloperArticleMarkdown } from "./helpScraperMarkdown";
 
 const DEFAULT_TIMEOUT_MS = 45_000;
 const DEFAULT_WAIT_MS = 2500;
@@ -370,6 +373,79 @@ async function extractDeveloperShadowDomHtml(page: Page): Promise<string> {
   );
 }
 
+async function extractFocusedDeveloperShadowDomHtml(page: Page): Promise<string> {
+  return page.evaluate(
+    (params: { chains: string[][]; skipTags: string[] }) => {
+      const skipTags = new Set(params.skipTags);
+
+      function collectShadowHtml(node: Element, depth: number): string {
+        if (depth > 15) return "";
+        let html = "";
+
+        const host = node as Element & { shadowRoot?: ShadowRoot | null };
+        if (host.shadowRoot) {
+          const fragment = document.createElement("div");
+          for (const child of Array.from(host.shadowRoot.children)) {
+            const tag = child.tagName.toLowerCase();
+            if (tag === "style" || tag === "script" || tag === "link") continue;
+            fragment.appendChild(child.cloneNode(true));
+          }
+          html += fragment.innerHTML;
+
+          for (const el of Array.from(host.shadowRoot.querySelectorAll("*"))) {
+            const nested = el as Element & { shadowRoot?: ShadowRoot | null };
+            if (nested.shadowRoot && !skipTags.has(el.tagName.toLowerCase())) {
+              html += collectShadowHtml(el, depth + 1);
+            }
+          }
+        }
+
+        return html;
+      }
+
+      function findTarget(chain: string[]): Element | null {
+        let currentRoot: Document | ShadowRoot = document;
+        let current: Element | null = null;
+
+        for (const selector of chain) {
+          current = currentRoot.querySelector(selector);
+          if (!current) return null;
+
+          const currentShadowRoot: ShadowRoot | null | undefined = (
+            current as Element & { shadowRoot?: ShadowRoot | null }
+          ).shadowRoot;
+          if (currentShadowRoot) {
+            currentRoot = currentShadowRoot;
+          }
+        }
+
+        return current;
+      }
+
+      for (const chain of params.chains) {
+        const target = findTarget(chain);
+        if (!target) continue;
+
+        const html = collectShadowHtml(target, 0).trim();
+        if (html.length > 0) {
+          return html;
+        }
+      }
+
+      return "";
+    },
+    {
+      chains: [
+        ["doc-amf-reference", "doc-amf-topic", "api-method-documentation"],
+        ["doc-amf-reference", "doc-amf-topic", "api-resource-documentation"],
+        ["doc-amf-reference", "doc-amf-topic", "api-type-documentation"],
+        ["doc-amf-reference", "doc-amf-topic"],
+      ],
+      skipTags: DEV_SHADOW_SKIP_TAGS,
+    }
+  );
+}
+
 async function extractDeveloperCodeBlocks(page: Page): Promise<Array<{ language: string; code: string }>> {
   return page.evaluate(() => {
     const blocks = Array.from(document.querySelectorAll("dx-code-block"));
@@ -466,6 +542,15 @@ async function scrapeDeveloperMarkdown(
       title = extracted.title;
     }
 
+    const focusedShadowHtml = await extractFocusedDeveloperShadowDomHtml(page).catch((error) => {
+      if (debug) {
+        console.error(
+          `[debug] Failed extracting focused developer shadow DOM HTML: ${getErrorMessage(error)}`
+        );
+      }
+      return "";
+    });
+
     let primaryHtml: string | null = null;
     try {
       primaryHtml = await page.locator("main, article").first().evaluate((el) => (el as HTMLElement).outerHTML);
@@ -476,14 +561,23 @@ async function scrapeDeveloperMarkdown(
       primaryHtml = null;
     }
 
-    const htmlCandidates = [primaryHtml, extracted.html].filter(
+    const htmlCandidates = [focusedShadowHtml, primaryHtml, extracted.html].filter(
       (value, index, values): value is string => Boolean(value) && values.indexOf(value) === index
     );
 
     let markdown = "";
     let selectedHtml: string | null = null;
     for (const candidateHtml of htmlCandidates) {
-      const candidateMarkdown = stripGarbage(turndown.turndown(candidateHtml));
+      const candidateMarkdown = formatDeveloperArticleMarkdown(
+        stripGarbage(turndown.turndown(candidateHtml)),
+        page.url(),
+        title
+      );
+      if (candidateMarkdown.length >= MIN_CONTENT_LENGTH) {
+        markdown = candidateMarkdown;
+        selectedHtml = candidateHtml;
+        break;
+      }
       if (candidateMarkdown.length > markdown.length) {
         markdown = candidateMarkdown;
         selectedHtml = candidateHtml;
@@ -511,7 +605,11 @@ async function scrapeDeveloperMarkdown(
     }
 
     if (markdown.length < MIN_CONTENT_LENGTH && docsApiContent) {
-      markdown = stripGarbage(turndown.turndown(docsApiContent));
+      markdown = formatDeveloperArticleMarkdown(
+        stripGarbage(turndown.turndown(docsApiContent)),
+        page.url(),
+        docsApiTitle || title
+      );
       title = docsApiTitle || title;
       selectedHtml = docsApiContent;
     }
@@ -527,7 +625,11 @@ async function scrapeDeveloperMarkdown(
         const cleanedShadow = shadowHtml
           .replace(/<style[\s\S]*?<\/style>/gi, "")
           .replace(/<script[\s\S]*?<\/script>/gi, "");
-        const shadowMarkdown = stripGarbage(turndown.turndown(cleanedShadow));
+        const shadowMarkdown = formatDeveloperArticleMarkdown(
+          stripGarbage(turndown.turndown(cleanedShadow)),
+          page.url(),
+          title
+        );
         if (shadowMarkdown.length > markdown.length) {
           markdown = shadowMarkdown;
           selectedHtml = cleanedShadow;
@@ -542,7 +644,7 @@ async function scrapeDeveloperMarkdown(
     }
 
     if (markdown.length < MIN_CONTENT_LENGTH) {
-      const textFallback = stripGarbage(bodyText);
+      const textFallback = formatDeveloperArticleMarkdown(stripGarbage(bodyText), page.url(), title);
       if (textFallback.length >= MIN_CONTENT_LENGTH) {
         markdown = textFallback;
       }

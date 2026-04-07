@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.formatHelpArticleMarkdown = exports.convertHtmlToMarkdown = void 0;
+exports.formatDeveloperArticleMarkdown = exports.formatHelpArticleMarkdown = exports.convertHtmlToMarkdown = void 0;
 exports.createScraperSession = createScraperSession;
 exports.getDetailSourceType = getDetailSourceType;
 exports.getHelpDetails = getHelpDetails;
@@ -12,9 +12,12 @@ const urlPolicy_1 = require("./urlPolicy");
 const browserConsent_1 = require("./browserConsent");
 const helpScraperMarkdown_1 = require("./helpScraperMarkdown");
 const errorUtils_1 = require("./errorUtils");
+const promiseUtils_1 = require("./promiseUtils");
 var helpScraperMarkdown_2 = require("./helpScraperMarkdown");
 Object.defineProperty(exports, "convertHtmlToMarkdown", { enumerable: true, get: function () { return helpScraperMarkdown_2.convertHtmlToMarkdown; } });
 Object.defineProperty(exports, "formatHelpArticleMarkdown", { enumerable: true, get: function () { return helpScraperMarkdown_2.formatHelpArticleMarkdown; } });
+var helpScraperMarkdown_3 = require("./helpScraperMarkdown");
+Object.defineProperty(exports, "formatDeveloperArticleMarkdown", { enumerable: true, get: function () { return helpScraperMarkdown_3.formatDeveloperArticleMarkdown; } });
 const DEFAULT_TIMEOUT_MS = 45000;
 const DEFAULT_WAIT_MS = 2500;
 const MIN_CONTENT_LENGTH = 100;
@@ -139,29 +142,19 @@ function extractBestContent(document) {
     return { html: best.innerHTML, title: document.title || null };
 }
 async function isAuraErrorVisible(page) {
-    for (const selector of HELP_ERROR_SELECTORS) {
-        const locator = page.locator(selector).first();
-        if (await locator.isVisible({ timeout: 1500 }).catch(() => false)) {
-            return true;
-        }
-    }
-    return false;
+    const results = await Promise.all(HELP_ERROR_SELECTORS.map((selector) => page.locator(selector).first().isVisible({ timeout: 1500 }).catch(() => false)));
+    return results.some(Boolean);
 }
 async function waitForAnySelector(page, selectors, timeoutMs, debug, label) {
     if (selectors.length === 0)
         return;
-    const perSelectorTimeout = Math.max(1200, Math.floor(timeoutMs / selectors.length));
-    for (const selector of selectors) {
-        const matched = await page
-            .locator(selector)
-            .first()
-            .waitFor({ state: "visible", timeout: perSelectorTimeout })
-            .then(() => true)
-            .catch(() => false);
-        if (matched) {
-            return;
-        }
-    }
+    const sharedTimeout = Math.max(1200, timeoutMs);
+    const matchedSelector = await (0, promiseUtils_1.firstFulfilled)(selectors.map(async (selector) => {
+        await page.locator(selector).first().waitFor({ state: "visible", timeout: sharedTimeout });
+        return selector;
+    }));
+    if (matchedSelector)
+        return;
     if (debug) {
         console.error(`[debug] Timed out waiting for ${label} selectors (${selectors.join(", ")}).`);
     }
@@ -288,6 +281,66 @@ async function extractDeveloperShadowDomHtml(page) {
         return all;
     }, { hosts: DEV_DOC_SHADOW_HOSTS, skipTags: DEV_SHADOW_SKIP_TAGS });
 }
+async function extractFocusedDeveloperShadowDomHtml(page) {
+    return page.evaluate((params) => {
+        const skipTags = new Set(params.skipTags);
+        function collectShadowHtml(node, depth) {
+            if (depth > 15)
+                return "";
+            let html = "";
+            const host = node;
+            if (host.shadowRoot) {
+                const fragment = document.createElement("div");
+                for (const child of Array.from(host.shadowRoot.children)) {
+                    const tag = child.tagName.toLowerCase();
+                    if (tag === "style" || tag === "script" || tag === "link")
+                        continue;
+                    fragment.appendChild(child.cloneNode(true));
+                }
+                html += fragment.innerHTML;
+                for (const el of Array.from(host.shadowRoot.querySelectorAll("*"))) {
+                    const nested = el;
+                    if (nested.shadowRoot && !skipTags.has(el.tagName.toLowerCase())) {
+                        html += collectShadowHtml(el, depth + 1);
+                    }
+                }
+            }
+            return html;
+        }
+        function findTarget(chain) {
+            let currentRoot = document;
+            let current = null;
+            for (const selector of chain) {
+                current = currentRoot.querySelector(selector);
+                if (!current)
+                    return null;
+                const currentShadowRoot = current.shadowRoot;
+                if (currentShadowRoot) {
+                    currentRoot = currentShadowRoot;
+                }
+            }
+            return current;
+        }
+        for (const chain of params.chains) {
+            const target = findTarget(chain);
+            if (!target)
+                continue;
+            const html = collectShadowHtml(target, 0).trim();
+            if (html.length > 0) {
+                return html;
+            }
+        }
+        return "";
+    }, {
+        chains: [
+            ["doc-amf-reference", "doc-amf-topic", "api-method-documentation"],
+            ["doc-amf-reference", "doc-amf-topic", "api-resource-documentation"],
+            ["doc-amf-reference", "doc-amf-topic", "api-type-documentation"],
+            ["doc-amf-reference", "doc-amf-topic"],
+        ],
+        skipTags: DEV_SHADOW_SKIP_TAGS,
+    });
+}
 async function extractDeveloperCodeBlocks(page) {
     return page.evaluate(() => {
         const blocks = Array.from(document.querySelectorAll("dx-code-block"));
@@ -362,6 +415,12 @@ async function scrapeDeveloperMarkdown(context, url, timeoutMs, waitMs, includeR
         if (!title) {
             title = extracted.title;
         }
+        const focusedShadowHtml = await extractFocusedDeveloperShadowDomHtml(page).catch((error) => {
+            if (debug) {
+                console.error(`[debug] Failed extracting focused developer shadow DOM HTML: ${(0, errorUtils_1.getErrorMessage)(error)}`);
+            }
+            return "";
+        });
         let primaryHtml = null;
         try {
             primaryHtml = await page.locator("main, article").first().evaluate((el) => el.outerHTML);
@@ -372,11 +431,16 @@ async function scrapeDeveloperMarkdown(context, url, timeoutMs, waitMs, includeR
             }
             primaryHtml = null;
         }
-        const htmlCandidates = [primaryHtml, extracted.html].filter((value, index, values) => Boolean(value) && values.indexOf(value) === index);
+        const htmlCandidates = [focusedShadowHtml, primaryHtml, extracted.html].filter((value, index, values) => Boolean(value) && values.indexOf(value) === index);
         let markdown = "";
         let selectedHtml = null;
         for (const candidateHtml of htmlCandidates) {
-            const candidateMarkdown = stripGarbage(turndown.turndown(candidateHtml));
+            const candidateMarkdown = (0, helpScraperMarkdown_1.formatDeveloperArticleMarkdown)(stripGarbage(turndown.turndown(candidateHtml)), page.url(), title);
+            if (candidateMarkdown.length >= MIN_CONTENT_LENGTH) {
+                markdown = candidateMarkdown;
+                selectedHtml = candidateHtml;
+                break;
+            }
             if (candidateMarkdown.length > markdown.length) {
                 markdown = candidateMarkdown;
                 selectedHtml = candidateHtml;
@@ -401,7 +465,7 @@ async function scrapeDeveloperMarkdown(context, url, timeoutMs, waitMs, includeR
             }
         }
         if (markdown.length < MIN_CONTENT_LENGTH && docsApiContent) {
-            markdown = stripGarbage(turndown.turndown(docsApiContent));
+            markdown = (0, helpScraperMarkdown_1.formatDeveloperArticleMarkdown)(stripGarbage(turndown.turndown(docsApiContent)), page.url(), docsApiTitle || title);
             title = docsApiTitle || title;
             selectedHtml = docsApiContent;
         }
@@ -416,7 +480,7 @@ async function scrapeDeveloperMarkdown(context, url, timeoutMs, waitMs, includeR
                 const cleanedShadow = shadowHtml
                     .replace(/<style[\s\S]*?<\/style>/gi, "")
                     .replace(/<script[\s\S]*?<\/script>/gi, "");
-                const shadowMarkdown = stripGarbage(turndown.turndown(cleanedShadow));
+                const shadowMarkdown = (0, helpScraperMarkdown_1.formatDeveloperArticleMarkdown)(stripGarbage(turndown.turndown(cleanedShadow)), page.url(), title);
                 if (shadowMarkdown.length > markdown.length) {
                     markdown = shadowMarkdown;
                     selectedHtml = cleanedShadow;
@@ -430,7 +494,7 @@ async function scrapeDeveloperMarkdown(context, url, timeoutMs, waitMs, includeR
             }
         }
         if (markdown.length < MIN_CONTENT_LENGTH) {
-            const textFallback = stripGarbage(bodyText);
+            const textFallback = (0, helpScraperMarkdown_1.formatDeveloperArticleMarkdown)(stripGarbage(bodyText), page.url(), title);
             if (textFallback.length >= MIN_CONTENT_LENGTH) {
                 markdown = textFallback;
             }
