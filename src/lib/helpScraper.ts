@@ -8,12 +8,15 @@ import { acceptOneTrust } from "./browserConsent";
 import {
   convertHtmlToMarkdown,
   createTurndown,
+  type DeveloperRequestBodySection,
   type DeveloperResponseBodyVariant,
   type DeveloperResponseRow,
   type DeveloperResponseSection,
   formatDeveloperArticleMarkdown,
   formatHelpArticleMarkdown,
+  renderDeveloperRequestBodySection,
   renderDeveloperResponseSections,
+  replaceDeveloperRequestBodySection,
   replaceDeveloperResponsesSection,
 } from "./helpScraperMarkdown";
 import { getErrorMessage } from "./errorUtils";
@@ -22,7 +25,9 @@ import { firstFulfilled } from "./promiseUtils";
 export {
   convertHtmlToMarkdown,
   formatHelpArticleMarkdown,
+  renderDeveloperRequestBodySection,
   renderDeveloperResponseSections,
+  replaceDeveloperRequestBodySection,
   replaceDeveloperResponsesSection,
 } from "./helpScraperMarkdown";
 
@@ -663,6 +668,208 @@ async function extractStructuredDeveloperResponseRows(responseBody: ReturnType<P
   });
 }
 
+async function extractStructuredDeveloperRequestBody(
+  page: Page,
+  debug: boolean
+): Promise<DeveloperRequestBodySection | null> {
+  return page
+    .evaluate(async () => {
+      const waitForUpdate = async (): Promise<void> => {
+        await new Promise((resolve) => setTimeout(resolve, 120));
+      };
+
+      const normalizeText = (value: string | null | undefined): string =>
+        (value || "").replace(/\s+/g, " ").trim();
+
+      const normalizeCode = (value: string | null | undefined): string =>
+        (value || "").replace(/\r\n/g, "\n").replace(/\r/g, "\n").trim();
+
+      const deepElements = (root: Document | ShadowRoot | Element): Element[] => {
+        const results: Element[] = [];
+        const visit = (currentRoot: Document | ShadowRoot | Element): void => {
+          const children = Array.from(currentRoot.children || []);
+          for (const child of children) {
+            results.push(child);
+            const childWithShadow = child as Element & { shadowRoot?: ShadowRoot | null };
+            if (childWithShadow.shadowRoot) {
+              visit(childWithShadow.shadowRoot);
+            }
+            visit(child);
+          }
+        };
+
+        visit(root);
+        return results;
+      };
+
+      const getRowName = (host: Element): string => {
+        const hostShadowRoot = (host as Element & { shadowRoot?: ShadowRoot | null }).shadowRoot;
+        return normalizeText(hostShadowRoot?.querySelector(".property-title")?.textContent);
+      };
+
+      const getParentRowHost = (host: Element): Element | null => {
+        let current: Node | null = host;
+        while (current) {
+          if (current.parentNode) {
+            current = current.parentNode;
+          } else {
+            const rootNode = current.getRootNode();
+            current = rootNode instanceof ShadowRoot ? rootNode.host : null;
+          }
+
+          if (
+            current instanceof Element &&
+            current !== host &&
+            current.tagName.toLowerCase() === "property-shape-document"
+          ) {
+            return current;
+          }
+        }
+
+        return null;
+      };
+
+      const buildFieldPath = (host: Element): string[] => {
+        const segments: string[] = [];
+        let current: Element | null = host;
+        while (current) {
+          const segment = getRowName(current);
+          if (segment.length > 0) {
+            segments.unshift(segment);
+          }
+          current = getParentRowHost(current);
+        }
+        return segments;
+      };
+
+      const methodRoot = document
+        .querySelector("doc-amf-reference")
+        ?.shadowRoot?.querySelector("doc-amf-topic")
+        ?.shadowRoot?.querySelector("api-method-documentation")
+        ?.shadowRoot;
+      const requestBody = methodRoot?.querySelector("api-body-document[isrequestsection]") as
+        | (Element & { shadowRoot?: ShadowRoot | null })
+        | null;
+      const bodyRoot = requestBody?.shadowRoot;
+
+      if (!bodyRoot) {
+        return null;
+      }
+
+      let example = "";
+      const mediaButtons = deepElements(bodyRoot)
+        .filter(
+          (element) =>
+            element.tagName.toLowerCase() === "anypoint-button" &&
+            element.classList.contains("media-toggle")
+        )
+        .map((element) => ({ element: element as HTMLElement, label: normalizeText(element.textContent) }));
+
+      const uniqueMediaButtons = mediaButtons.length > 0 ? mediaButtons : [{ element: null, label: "" }];
+      const grouped = new Map<string, DeveloperResponseBodyVariant>();
+
+      for (const mediaButton of uniqueMediaButtons) {
+        if (mediaButton.element) {
+          mediaButton.element.click();
+          await waitForUpdate();
+        }
+
+        const refreshedBodyRoot = requestBody?.shadowRoot;
+        if (!refreshedBodyRoot) {
+          continue;
+        }
+
+        if (example.length === 0) {
+          const exampleHost = deepElements(refreshedBodyRoot).find(
+            (element) =>
+              element.tagName.toLowerCase() === "code" &&
+              (element.id === "output" || element.closest("pre.parsed-content") !== null)
+          );
+          example = normalizeCode(exampleHost?.textContent);
+        }
+
+        const rowHosts = deepElements(refreshedBodyRoot).filter(
+          (element) => element.tagName.toLowerCase() === "property-shape-document"
+        );
+
+        const rows = rowHosts
+          .map((rowHost) => {
+            const shadowRoot = (rowHost as Element & { shadowRoot?: ShadowRoot | null }).shadowRoot;
+            if (!shadowRoot) return null;
+
+            const pathSegments = buildFieldPath(rowHost);
+            const name = pathSegments.join(".");
+            const type = normalizeText(
+              Array.from(shadowRoot.querySelectorAll(".data-type"))
+                .map((node) => node.textContent || "")
+                .join(" ")
+            );
+            const flags = Array.from(shadowRoot.querySelectorAll(".badge"))
+              .map((node) => normalizeText(node.textContent))
+              .filter((value) => value.length > 0);
+            const descriptions = Array.from(shadowRoot.querySelectorAll(".markdown-body"))
+              .map((node) => normalizeText(node.textContent))
+              .filter((value) => value.length > 0);
+            const constraints = Array.from(shadowRoot.querySelectorAll(".property-attribute"))
+              .map((node) => normalizeText(node.textContent))
+              .filter((value) => value.length > 0);
+
+            if (name.length === 0) {
+              return null;
+            }
+
+            if (type === "unknown type" || type === "recursive") {
+              return null;
+            }
+
+            if (pathSegments[pathSegments.length - 1] === "additionalProperties") {
+              return null;
+            }
+
+            if (
+              type.length === 0 &&
+              flags.length === 0 &&
+              descriptions.length === 0 &&
+              constraints.length === 0
+            ) {
+              return null;
+            }
+
+            return { name, type, flags, descriptions, constraints };
+          })
+          .filter((row): row is DeveloperResponseRow => row !== null);
+
+        const key = JSON.stringify(rows);
+        const existing = grouped.get(key);
+        if (existing) {
+          if (mediaButton.label.length > 0 && !existing.mediaTypes.includes(mediaButton.label)) {
+            existing.mediaTypes.push(mediaButton.label);
+          }
+        } else {
+          grouped.set(key, {
+            mediaTypes: mediaButton.label.length > 0 ? [mediaButton.label] : [],
+            rows,
+          });
+        }
+      }
+
+      return {
+        example,
+        bodies: Array.from(grouped.values()).filter(
+          (variant) => variant.rows.length > 0 || variant.mediaTypes.length > 0
+        ),
+      };
+    })
+    .catch((error) => {
+      if (debug) {
+        console.error(
+          `[debug] Failed extracting structured developer request body: ${getErrorMessage(error)}`
+        );
+      }
+      return null;
+    });
+}
+
 async function extractStructuredDeveloperResponses(
   page: Page,
   debug: boolean
@@ -1085,6 +1292,12 @@ async function scrapeDeveloperMarkdown(
       if (textFallback.length >= MIN_CONTENT_LENGTH) {
         markdown = textFallback;
       }
+    }
+
+    const structuredRequestBody = await extractStructuredDeveloperRequestBody(page, debug);
+    if (structuredRequestBody) {
+      const renderedRequestBody = renderDeveloperRequestBodySection(structuredRequestBody);
+      markdown = replaceDeveloperRequestBodySection(markdown, renderedRequestBody);
     }
 
     const structuredResponses = await extractStructuredDeveloperResponses(page, debug);

@@ -3,7 +3,9 @@ import {
   convertHtmlToMarkdown,
   formatDeveloperArticleMarkdown,
   formatHelpArticleMarkdown,
+  renderDeveloperRequestBodySection,
   renderDeveloperResponseSections,
+  replaceDeveloperRequestBodySection,
   replaceDeveloperResponsesSection,
 } from "./helpScraper";
 
@@ -323,5 +325,57 @@ describe("structured developer responses", () => {
     expect(replaced).toContain("Body before responses.");
     expect(replaced).toContain("### 404");
     expect(replaced).not.toContain("Old content");
+  });
+
+  it("renders a structured request body section", () => {
+    const markdown = renderDeveloperRequestBodySection({
+      example: '{\n  "campaign_id": "my-campaign"\n}',
+      bodies: [
+        {
+          mediaTypes: ["application/json", "text/xml"],
+          rows: [
+            {
+              name: "campaign_id",
+              type: "string",
+              flags: [],
+              descriptions: ["The ID of the campaign."],
+              constraints: ["Minimum characters: 1", "Maximum characters: 256"],
+            },
+          ],
+        },
+      ],
+    });
+
+    expect(markdown).toContain("### Body");
+    expect(markdown).toContain("Media types: application/json, text/xml");
+    expect(markdown).toContain("### Example");
+    expect(markdown).toContain("| campaign_id | string |  | The ID of the campaign. | Minimum characters: 1; Maximum characters: 256 |");
+  });
+
+  it("replaces an existing request body section", () => {
+    const input = [
+      "# Update Campaign",
+      "",
+      "## Request",
+      "",
+      "### Request Example",
+      "",
+      "Old request example",
+      "",
+      "### Body",
+      "",
+      "Old body",
+      "",
+      "## Security",
+      "",
+      "Security content",
+    ].join("\n");
+
+    const replaced = replaceDeveloperRequestBodySection(input, "### Body\n\nMedia types: application/json\n\n### Example\n\n```\n{}\n```\n");
+
+    expect(replaced).toContain("### Request Example");
+    expect(replaced).toContain("Media types: application/json");
+    expect(replaced).not.toContain("Old body");
+    expect(replaced).toContain("## Security");
   });
 });

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.formatDeveloperArticleMarkdown = exports.replaceDeveloperResponsesSection = exports.renderDeveloperResponseSections = exports.formatHelpArticleMarkdown = exports.convertHtmlToMarkdown = void 0;
+exports.formatDeveloperArticleMarkdown = exports.replaceDeveloperResponsesSection = exports.replaceDeveloperRequestBodySection = exports.renderDeveloperResponseSections = exports.renderDeveloperRequestBodySection = exports.formatHelpArticleMarkdown = exports.convertHtmlToMarkdown = void 0;
 exports.createScraperSession = createScraperSession;
 exports.getDetailSourceType = getDetailSourceType;
 exports.getHelpDetails = getHelpDetails;
@@ -16,7 +16,9 @@ const promiseUtils_1 = require("./promiseUtils");
 var helpScraperMarkdown_2 = require("./helpScraperMarkdown");
 Object.defineProperty(exports, "convertHtmlToMarkdown", { enumerable: true, get: function () { return helpScraperMarkdown_2.convertHtmlToMarkdown; } });
 Object.defineProperty(exports, "formatHelpArticleMarkdown", { enumerable: true, get: function () { return helpScraperMarkdown_2.formatHelpArticleMarkdown; } });
+Object.defineProperty(exports, "renderDeveloperRequestBodySection", { enumerable: true, get: function () { return helpScraperMarkdown_2.renderDeveloperRequestBodySection; } });
 Object.defineProperty(exports, "renderDeveloperResponseSections", { enumerable: true, get: function () { return helpScraperMarkdown_2.renderDeveloperResponseSections; } });
+Object.defineProperty(exports, "replaceDeveloperRequestBodySection", { enumerable: true, get: function () { return helpScraperMarkdown_2.replaceDeveloperRequestBodySection; } });
 Object.defineProperty(exports, "replaceDeveloperResponsesSection", { enumerable: true, get: function () { return helpScraperMarkdown_2.replaceDeveloperResponsesSection; } });
 var helpScraperMarkdown_3 = require("./helpScraperMarkdown");
 Object.defineProperty(exports, "formatDeveloperArticleMarkdown", { enumerable: true, get: function () { return helpScraperMarkdown_3.formatDeveloperArticleMarkdown; } });
@@ -508,6 +510,159 @@ async function extractStructuredDeveloperResponseRows(responseBody) {
             .filter((row) => row !== null);
     });
 }
+async function extractStructuredDeveloperRequestBody(page, debug) {
+    return page
+        .evaluate(async () => {
+        const waitForUpdate = async () => {
+            await new Promise((resolve) => setTimeout(resolve, 120));
+        };
+        const normalizeText = (value) => (value || "").replace(/\s+/g, " ").trim();
+        const normalizeCode = (value) => (value || "").replace(/\r\n/g, "\n").replace(/\r/g, "\n").trim();
+        const deepElements = (root) => {
+            const results = [];
+            const visit = (currentRoot) => {
+                const children = Array.from(currentRoot.children || []);
+                for (const child of children) {
+                    results.push(child);
+                    const childWithShadow = child;
+                    if (childWithShadow.shadowRoot) {
+                        visit(childWithShadow.shadowRoot);
+                    }
+                    visit(child);
+                }
+            };
+            visit(root);
+            return results;
+        };
+        const getRowName = (host) => {
+            const hostShadowRoot = host.shadowRoot;
+            return normalizeText(hostShadowRoot?.querySelector(".property-title")?.textContent);
+        };
+        const getParentRowHost = (host) => {
+            let current = host;
+            while (current) {
+                if (current.parentNode) {
+                    current = current.parentNode;
+                }
+                else {
+                    const rootNode = current.getRootNode();
+                    current = rootNode instanceof ShadowRoot ? rootNode.host : null;
+                }
+                if (current instanceof Element &&
+                    current !== host &&
+                    current.tagName.toLowerCase() === "property-shape-document") {
+                    return current;
+                }
+            }
+            return null;
+        };
+        const buildFieldPath = (host) => {
+            const segments = [];
+            let current = host;
+            while (current) {
+                const segment = getRowName(current);
+                if (segment.length > 0) {
+                    segments.unshift(segment);
+                }
+                current = getParentRowHost(current);
+            }
+            return segments;
+        };
+        const methodRoot = document
+            .querySelector("doc-amf-reference")
+            ?.shadowRoot?.querySelector("doc-amf-topic")
+            ?.shadowRoot?.querySelector("api-method-documentation")
+            ?.shadowRoot;
+        const requestBody = methodRoot?.querySelector("api-body-document[isrequestsection]");
+        const bodyRoot = requestBody?.shadowRoot;
+        if (!bodyRoot) {
+            return null;
+        }
+        let example = "";
+        const mediaButtons = deepElements(bodyRoot)
+            .filter((element) => element.tagName.toLowerCase() === "anypoint-button" &&
+            element.classList.contains("media-toggle"))
+            .map((element) => ({ element: element, label: normalizeText(element.textContent) }));
+        const uniqueMediaButtons = mediaButtons.length > 0 ? mediaButtons : [{ element: null, label: "" }];
+        const grouped = new Map();
+        for (const mediaButton of uniqueMediaButtons) {
+            if (mediaButton.element) {
+                mediaButton.element.click();
+                await waitForUpdate();
+            }
+            const refreshedBodyRoot = requestBody?.shadowRoot;
+            if (!refreshedBodyRoot) {
+                continue;
+            }
+            if (example.length === 0) {
+                const exampleHost = deepElements(refreshedBodyRoot).find((element) => element.tagName.toLowerCase() === "code" &&
+                    (element.id === "output" || element.closest("pre.parsed-content") !== null));
+                example = normalizeCode(exampleHost?.textContent);
+            }
+            const rowHosts = deepElements(refreshedBodyRoot).filter((element) => element.tagName.toLowerCase() === "property-shape-document");
+            const rows = rowHosts
+                .map((rowHost) => {
+                const shadowRoot = rowHost.shadowRoot;
+                if (!shadowRoot)
+                    return null;
+                const pathSegments = buildFieldPath(rowHost);
+                const name = pathSegments.join(".");
+                const type = normalizeText(Array.from(shadowRoot.querySelectorAll(".data-type"))
+                    .map((node) => node.textContent || "")
+                    .join(" "));
+                const flags = Array.from(shadowRoot.querySelectorAll(".badge"))
+                    .map((node) => normalizeText(node.textContent))
+                    .filter((value) => value.length > 0);
+                const descriptions = Array.from(shadowRoot.querySelectorAll(".markdown-body"))
+                    .map((node) => normalizeText(node.textContent))
+                    .filter((value) => value.length > 0);
+                const constraints = Array.from(shadowRoot.querySelectorAll(".property-attribute"))
+                    .map((node) => normalizeText(node.textContent))
+                    .filter((value) => value.length > 0);
+                if (name.length === 0) {
+                    return null;
+                }
+                if (type === "unknown type" || type === "recursive") {
+                    return null;
+                }
+                if (pathSegments[pathSegments.length - 1] === "additionalProperties") {
+                    return null;
+                }
+                if (type.length === 0 &&
+                    flags.length === 0 &&
+                    descriptions.length === 0 &&
+                    constraints.length === 0) {
+                    return null;
+                }
+                return { name, type, flags, descriptions, constraints };
+            })
+                .filter((row) => row !== null);
+            const key = JSON.stringify(rows);
+            const existing = grouped.get(key);
+            if (existing) {
+                if (mediaButton.label.length > 0 && !existing.mediaTypes.includes(mediaButton.label)) {
+                    existing.mediaTypes.push(mediaButton.label);
+                }
+            }
+            else {
+                grouped.set(key, {
+                    mediaTypes: mediaButton.label.length > 0 ? [mediaButton.label] : [],
+                    rows,
+                });
+            }
+        }
+        return {
+            example,
+            bodies: Array.from(grouped.values()).filter((variant) => variant.rows.length > 0 || variant.mediaTypes.length > 0),
+        };
+    })
+        .catch((error) => {
+        if (debug) {
+            console.error(`[debug] Failed extracting structured developer request body: ${(0, errorUtils_1.getErrorMessage)(error)}`);
+        }
+        return null;
+    });
+}
 async function extractStructuredDeveloperResponses(page, debug) {
     return page
         .evaluate(async () => {
@@ -829,6 +984,11 @@ async function scrapeDeveloperMarkdown(context, url, timeoutMs, waitMs, includeR
             if (textFallback.length >= MIN_CONTENT_LENGTH) {
                 markdown = textFallback;
             }
+        }
+        const structuredRequestBody = await extractStructuredDeveloperRequestBody(page, debug);
+        if (structuredRequestBody) {
+            const renderedRequestBody = (0, helpScraperMarkdown_1.renderDeveloperRequestBodySection)(structuredRequestBody);
+            markdown = (0, helpScraperMarkdown_1.replaceDeveloperRequestBodySection)(markdown, renderedRequestBody);
         }
         const structuredResponses = await extractStructuredDeveloperResponses(page, debug);
         if (structuredResponses.length > 0) {

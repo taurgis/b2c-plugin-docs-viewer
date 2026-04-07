@@ -35,6 +35,11 @@ export type DeveloperResponseSection = {
   bodies: DeveloperResponseBodyVariant[];
 };
 
+export type DeveloperRequestBodySection = {
+  example: string;
+  bodies: DeveloperResponseBodyVariant[];
+};
+
 function extractTableCellText(cell: Element): string {
   const clone = cell.cloneNode(true) as Element;
 
@@ -721,6 +726,41 @@ export function renderDeveloperResponseSections(sections: DeveloperResponseSecti
   return blocks.join("\n\n");
 }
 
+export function renderDeveloperRequestBodySection(section: DeveloperRequestBodySection): string {
+  const hasContent =
+    section.example.trim().length > 0 ||
+    section.bodies.some((body) => body.rows.length > 0 || body.mediaTypes.length > 0);
+
+  if (!hasContent) {
+    return "";
+  }
+
+  const blocks: string[] = ["### Body"];
+
+  if (section.bodies.length > 0) {
+    const mergedMediaTypes = Array.from(
+      new Set(section.bodies.flatMap((body) => body.mediaTypes).filter((value) => value.trim().length > 0))
+    );
+
+    if (mergedMediaTypes.length > 0) {
+      blocks.push(`Media types: ${mergedMediaTypes.join(", ")}`);
+    }
+  }
+
+  if (section.example.trim().length > 0) {
+    blocks.push("### Example");
+    blocks.push(`\`\`\`\n${section.example.trim()}\n\`\`\``);
+  }
+
+  for (const body of section.bodies) {
+    if (body.rows.length > 0) {
+      blocks.push(renderDeveloperResponseTable(body.rows));
+    }
+  }
+
+  return blocks.join("\n\n");
+}
+
 export function replaceDeveloperResponsesSection(
   markdown: string,
   renderedResponses: string
@@ -737,6 +777,34 @@ export function replaceDeveloperResponsesSection(
   }
 
   return `${markdown.trimEnd()}\n\n${replacement}`;
+}
+
+export function replaceDeveloperRequestBodySection(
+  markdown: string,
+  renderedRequestBody: string
+): string {
+  const replacement = renderedRequestBody.trim();
+  if (replacement.length === 0) {
+    return markdown;
+  }
+
+  const requestMarker = "\n## Request";
+  const requestIndex = markdown.indexOf(requestMarker);
+  if (requestIndex < 0) {
+    return markdown;
+  }
+
+  const nextSecurityIndex = markdown.indexOf("\n## Security", requestIndex + requestMarker.length);
+  const nextResponsesIndex = markdown.indexOf("\n## Responses", requestIndex + requestMarker.length);
+  const sectionEndCandidates = [nextSecurityIndex, nextResponsesIndex].filter((index) => index >= 0);
+  const sectionEnd = sectionEndCandidates.length > 0 ? Math.min(...sectionEndCandidates) : markdown.length;
+  const bodyIndex = markdown.indexOf("\n### Body", requestIndex + requestMarker.length);
+
+  if (bodyIndex >= 0 && bodyIndex < sectionEnd) {
+    return `${markdown.slice(0, bodyIndex).trimEnd()}\n\n${replacement}\n\n${markdown.slice(sectionEnd).trimStart()}`;
+  }
+
+  return `${markdown.slice(0, sectionEnd).trimEnd()}\n\n${replacement}\n\n${markdown.slice(sectionEnd).trimStart()}`;
 }
 
 function getDeveloperMetaTitle(pageUrl: string): string | null {
