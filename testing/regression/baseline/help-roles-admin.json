@@ -24,7 +24,7 @@
       "role-matrix",
       "ordered-lists"
     ],
-    "fetchedAt": "2026-03-16T07:00:30.554Z",
+    "fetchedAt": "2026-04-07T19:52:33.413Z",
     "current": {
       "chars": 16450,
       "codeBlocks": 1,
@@ -35,7 +35,7 @@
       "headings": 14
     },
     "baseline": {
-      "chars": 16454,
+      "chars": 16450,
       "codeBlocks": 1,
       "tables": 5,
       "images": 1,
@@ -43,9 +43,9 @@
       "bullets": 10,
       "headings": 14
     },
-    "exactMatch": false,
-    "charDelta": -4,
-    "charDeltaPct": -0.02,
+    "exactMatch": true,
+    "charDelta": 0,
+    "charDeltaPct": 0,
     "baselineExists": true,
     "error": null
   }

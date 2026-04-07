@@ -24,7 +24,7 @@
       "tables",
       "image-guidance"
     ],
-    "fetchedAt": "2026-03-16T07:01:20.854Z",
+    "fetchedAt": "2026-04-07T19:53:24.696Z",
     "current": {
       "chars": 5862,
       "codeBlocks": 0,
@@ -35,7 +35,7 @@
       "headings": 5
     },
     "baseline": {
-      "chars": 5883,
+      "chars": 5862,
       "codeBlocks": 0,
       "tables": 2,
       "images": 3,
@@ -43,9 +43,9 @@
       "bullets": 0,
       "headings": 5
     },
-    "exactMatch": false,
-    "charDelta": -21,
-    "charDeltaPct": -0.36,
+    "exactMatch": true,
+    "charDelta": 0,
+    "charDeltaPct": 0,
     "baselineExists": true,
     "error": null
   }

@@ -1,0 +1,52 @@
+{
+  "fixture": {
+    "id": "dev-ocapi-updatecampaign",
+    "kind": "developer",
+    "url": "https://developer.salesforce.com/docs/commerce/b2c-commerce/references/ocapi-data-campaigns?meta=Update%2BCampaign",
+    "focus": [
+      "request-body-table",
+      "request-example",
+      "response-body-table"
+    ]
+  },
+  "detail": {
+    "url": "https://developer.salesforce.com/docs/commerce/b2c-commerce/references/ocapi-data-campaigns?meta=Update%2BCampaign",
+    "title": "Update Campaign",
+    "markdown": "# Update Campaign\n\nOperation ID: Update Campaign\n\n**PATCH** `https://{host}/s/-/dw/data/v25\\_6/sites/{site\\_id}/campaigns/{campaign\\_id}`\n\nUpdates the campaign with the specified information.\n\nThis endpoint may return the following faults:\n\n-   400 - CampaignDuplicateException - if a campaign exists already in the site with the given campaign id.\n\n-   404 - CampaignNotFoundException - Thrown in case the campaign does not exist matching the given id\n\n## Request\n\n### Request Example\n\n`curl \"https://{host}/s/-/dw/data/v25_6/sites/{site_id}/campaigns/{campaign_id}\" \\ -X PATCH \\ -H \"content-type: application/json\" \\ -d '{ \"coupons\": [ \"testCoupon\" ], \"customer_groups\": [ \"Registered\" ], \"description\": \"My Campaign\", \"enabled\": true, \"end_date\": \"2015-07-31T23:09:08.000Z\", \"link\": \"https://example.com/s/-/dw/data/{version}/sites/SiteGenesis/campaigns/my-campaign\", \"source_code_groups\": [ \"WapiSourceCodeGroup1\" ], \"start_date\": \"2015-04-01T11:30:15.000Z\" }'`\n\n### Body\n\nMedia types: application/json, text/xml\n\n### Example\n\n```\n{\n  \"coupons\": [\n    \"testCoupon\"\n  ],\n  \"customer_groups\": [\n    \"Registered\"\n  ],\n  \"description\": \"My Campaign\",\n  \"enabled\": true,\n  \"end_date\": \"2015-07-31T23:09:08.000Z\",\n  \"link\": \"https://example.com/s/-/dw/data/{version}/sites/SiteGenesis/campaigns/my-campaign\",\n  \"source_code_groups\": [\n    \"WapiSourceCodeGroup1\"\n  ],\n  \"start_date\": \"2015-04-01T11:30:15.000Z\"\n}\n```\n\n| Field | Type | Flags | Description | Constraints |\n| --- | --- | --- | --- | --- |\n| campaign_id | string |  | The ID of the campaign. |  |\n| coupons | array of string |  | The array of assigned coupon IDs, not sorted |  |\n| customer_groups | array of string |  | The array of assigned customer groups, not sorted |  |\n| description | string |  | The description of the campaign. |  |\n| enabled | boolean |  | The enabled flag for campaign. |  |\n| end_date | datetime |  | The date that the Scenario ends |  |\n| link | string |  | link for convenience |  |\n| source_code_groups | array of string |  | The array of assigned source code groups, not sorted |  |\n| start_date | datetime |  | The date that the Scenario begins |  |\n\n## Security\n\n### OAuth 2.0\n\nAuthentication flow with client ID and password with account manager.\n\n#### Settings\n\n#### URI Parameters\n\n| Name | Type | Required | Description | Constraints |\n| --- | --- | --- | --- | --- |\n| site_id | string | Yes | The site context. | Minimum characters: 1 |\n| campaign_id | string | Yes | The id of the requested campaign. | Minimum characters: 1 |\n\n### Body\n\nMedia types: application/json, text/xml\n\n### Example\n\n```\n{\n  \"coupons\": [\n    \"testCoupon\"\n  ],\n  \"customer_groups\": [\n    \"Registered\"\n  ],\n  \"description\": \"My Campaign\",\n  \"enabled\": true,\n  \"end_date\": \"2015-07-31T23:09:08.000Z\",\n  \"link\": \"{version}/sites/SiteGenesis/campaigns/my-campaign\",\n  \"source_code_groups\": [\n    \"WapiSourceCodeGroup1\"\n  ],\n  \"start_date\": \"2015-04-01T11:30:15.000Z\"\n}\n```\n\ncampaign\\_id\n\nstring\n\nThe ID of the campaign.\n\nMinimum characters: 1\n\nMaximum characters: 256\n\ncoupons\n\narray of string\n\nThe array of assigned coupon IDs, not sorted\n\ncustomer\\_groups\n\narray of string\n\nThe array of assigned customer groups, not sorted\n\ndescription\n\nstring\n\nThe description of the campaign.\n\nMaximum characters: 4000\n\nenabled\n\nboolean\n\nThe enabled flag for campaign.\n\nend\\_date\n\ndatetime\n\nThe date that the Scenario ends\n\nlink\n\nstring\n\nlink for convenience\n\nsource\\_code\\_groups\n\narray of string\n\nThe array of assigned source code groups, not sorted\n\nstart\\_date\n\ndatetime\n\nThe date that the Scenario begins\n\n## Responses\n\n### 400\n\nCampaignDuplicateException - if a campaign exists already in the site with the given campaign id.\n\n#### Example\n\n```\n{\n  \"arguments\": {},\n  \"cause\": {\n    \"cause\": \"\",\n    \"message\": \"\",\n    \"type\": \"\"\n  },\n  \"display_message_pattern\": \"\",\n  \"message\": \"\",\n  \"stack_trace\": \"\",\n  \"type\": \"\"\n}\n```\n\n#### Body\n\nMedia types: application/json, text/xml\n\n| Field | Type | Flags | Description | Constraints |\n| --- | --- | --- | --- | --- |\n| arguments | object |  | A map that provides fault arguments. Data can be used to provide error messages on the client side. |  |\n| cause | object |  |  |  |\n| cause.message | string |  |  |  |\n| cause.type | string |  |  |  |\n| display_message_pattern | string |  | The localized display message pattern, if the request parameter display_locale was given |  |\n| message | string |  | The message text of the java exception. |  |\n| stack_trace | string |  |  |  |\n| type | string |  | The name of the java exception. |  |\n\n### 404\n\nCampaignNotFoundException - Thrown in case the campaign does not exist matching the given id\n\n#### Example\n\n```\n{\n  \"arguments\": {},\n  \"cause\": {\n    \"cause\": \"\",\n    \"message\": \"\",\n    \"type\": \"\"\n  },\n  \"display_message_pattern\": \"\",\n  \"message\": \"\",\n  \"stack_trace\": \"\",\n  \"type\": \"\"\n}\n```\n\n#### Body\n\nMedia types: application/json, text/xml\n\n| Field | Type | Flags | Description | Constraints |\n| --- | --- | --- | --- | --- |\n| arguments | object |  | A map that provides fault arguments. Data can be used to provide error messages on the client side. |  |\n| cause | object |  |  |  |\n| cause.message | string |  |  |  |\n| cause.type | string |  |  |  |\n| display_message_pattern | string |  | The localized display message pattern, if the request parameter display_locale was given |  |\n| message | string |  | The message text of the java exception. |  |\n| stack_trace | string |  |  |  |\n| type | string |  | The name of the java exception. |  |\n\n### default\n\n#### Example\n\n```\n{\n  \"coupons\": [\n    \"testCoupon\"\n  ],\n  \"customer_groups\": [\n    \"Registered\"\n  ],\n  \"description\": \"My Campaign\",\n  \"enabled\": true,\n  \"end_date\": \"2015-07-31T23:09:08.000Z\",\n  \"link\": \"https://example.com/s/-/dw/data/{version}/sites/SiteGenesis/campaigns/my-campaign\",\n  \"source_code_groups\": [\n    \"WapiSourceCodeGroup1\"\n  ],\n  \"start_date\": \"2015-04-01T11:30:15.000Z\"\n}\n```\n\n#### Body\n\nMedia types: application/json, text/xml\n\n| Field | Type | Flags | Description | Constraints |\n| --- | --- | --- | --- | --- |\n| campaign_id | string |  | The ID of the campaign. |  |\n| coupons | array of string |  | The array of assigned coupon IDs, not sorted |  |\n| creation_date | datetime | Read-only | Returns the value of attribute 'creationDate'. |  |\n| customer_groups | array of string |  | The array of assigned customer groups, not sorted |  |\n| description | string |  | The description of the campaign. |  |\n| enabled | boolean |  | The enabled flag for campaign. |  |\n| end_date | datetime |  | The date that the Scenario ends |  |\n| last_modified | datetime | Read-only | Returns the value of attribute 'lastModified'. |  |\n| link | string |  | link for convenience |  |\n| source_code_groups | array of string |  | The array of assigned source code groups, not sorted |  |\n| start_date | datetime |  | The date that the Scenario begins |  |"
+  },
+  "analysis": {
+    "id": "dev-ocapi-updatecampaign",
+    "kind": "developer",
+    "url": "https://developer.salesforce.com/docs/commerce/b2c-commerce/references/ocapi-data-campaigns?meta=Update%2BCampaign",
+    "title": "Update Campaign",
+    "focus": [
+      "request-body-table",
+      "request-example",
+      "response-body-table"
+    ],
+    "fetchedAt": "2026-04-07T19:54:03.894Z",
+    "current": {
+      "chars": 6893,
+      "codeBlocks": 5,
+      "tables": 5,
+      "images": 0,
+      "orderedSteps": 0,
+      "bullets": 2,
+      "headings": 21
+    },
+    "baseline": {
+      "chars": 6893,
+      "codeBlocks": 5,
+      "tables": 5,
+      "images": 0,
+      "orderedSteps": 0,
+      "bullets": 2,
+      "headings": 21
+    },
+    "exactMatch": true,
+    "charDelta": 0,
+    "charDeltaPct": 0,
+    "baselineExists": true,
+    "error": null
+  }
+}

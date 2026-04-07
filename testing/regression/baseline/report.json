@@ -1,14 +1,14 @@
 {
   "summary": {
-    "startedAt": "2026-03-16T06:59:40.786Z",
-    "finishedAt": "2026-03-16T07:01:56.962Z",
-    "fixtureCount": 21,
-    "ok": 21,
+    "startedAt": "2026-04-07T19:51:53.797Z",
+    "finishedAt": "2026-04-07T19:54:17.575Z",
+    "fixtureCount": 24,
+    "ok": 24,
     "failed": 0,
-    "compared": 21,
-    "changed": 4,
-    "unchanged": 17,
-    "newBaselineCandidates": 0,
+    "compared": 23,
+    "changed": 0,
+    "unchanged": 23,
+    "newBaselineCandidates": 1,
     "promoted": true
   },
   "results": [
@@ -22,7 +22,7 @@
         "links",
         "basic-sections"
       ],
-      "fetchedAt": "2026-03-16T06:59:48.868Z",
+      "fetchedAt": "2026-04-07T19:52:00.010Z",
       "current": {
         "chars": 1116,
         "codeBlocks": 0,
@@ -57,7 +57,7 @@
         "images",
         "inline-formatting"
       ],
-      "fetchedAt": "2026-03-16T06:59:57.326Z",
+      "fetchedAt": "2026-04-07T19:52:07.512Z",
       "current": {
         "chars": 1386,
         "codeBlocks": 0,
@@ -92,7 +92,7 @@
         "images",
         "tables"
       ],
-      "fetchedAt": "2026-03-16T07:00:05.302Z",
+      "fetchedAt": "2026-04-07T19:52:13.627Z",
       "current": {
         "chars": 6906,
         "codeBlocks": 0,
@@ -127,7 +127,7 @@
         "notes",
         "section-headings"
       ],
-      "fetchedAt": "2026-03-16T07:00:13.231Z",
+      "fetchedAt": "2026-04-07T19:52:19.748Z",
       "current": {
         "chars": 12258,
         "codeBlocks": 0,
@@ -162,7 +162,7 @@
         "tables",
         "code-snippet"
       ],
-      "fetchedAt": "2026-03-16T07:00:21.927Z",
+      "fetchedAt": "2026-04-07T19:52:26.469Z",
       "current": {
         "chars": 7895,
         "codeBlocks": 1,
@@ -173,7 +173,7 @@
         "headings": 12
       },
       "baseline": {
-        "chars": 7897,
+        "chars": 7895,
         "codeBlocks": 1,
         "tables": 6,
         "images": 1,
@@ -181,9 +181,9 @@
         "bullets": 0,
         "headings": 12
       },
-      "exactMatch": false,
-      "charDelta": -2,
-      "charDeltaPct": -0.03,
+      "exactMatch": true,
+      "charDelta": 0,
+      "charDeltaPct": 0,
       "baselineExists": true,
       "error": null
     },
@@ -197,7 +197,7 @@
         "role-matrix",
         "ordered-lists"
       ],
-      "fetchedAt": "2026-03-16T07:00:30.554Z",
+      "fetchedAt": "2026-04-07T19:52:33.413Z",
       "current": {
         "chars": 16450,
         "codeBlocks": 1,
@@ -208,7 +208,7 @@
         "headings": 14
       },
       "baseline": {
-        "chars": 16454,
+        "chars": 16450,
         "codeBlocks": 1,
         "tables": 5,
         "images": 1,
@@ -216,9 +216,9 @@
         "bullets": 10,
         "headings": 14
       },
-      "exactMatch": false,
-      "charDelta": -4,
-      "charDeltaPct": -0.02,
+      "exactMatch": true,
+      "charDelta": 0,
+      "charDeltaPct": 0,
       "baselineExists": true,
       "error": null
     },
@@ -231,7 +231,7 @@
         "dx-code-block",
         "request-response-example"
       ],
-      "fetchedAt": "2026-03-16T07:00:35.342Z",
+      "fetchedAt": "2026-04-07T19:52:38.299Z",
       "current": {
         "chars": 1979,
         "codeBlocks": 2,
@@ -265,7 +265,7 @@
         "large-table",
         "long-rows"
       ],
-      "fetchedAt": "2026-03-16T07:00:39.967Z",
+      "fetchedAt": "2026-04-07T19:52:43.140Z",
       "current": {
         "chars": 9068,
         "codeBlocks": 0,
@@ -300,7 +300,7 @@
         "tables",
         "code"
       ],
-      "fetchedAt": "2026-03-16T07:00:44.866Z",
+      "fetchedAt": "2026-04-07T19:52:48.100Z",
       "current": {
         "chars": 10740,
         "codeBlocks": 3,
@@ -335,7 +335,7 @@
         "images",
         "examples"
       ],
-      "fetchedAt": "2026-03-16T07:00:49.214Z",
+      "fetchedAt": "2026-04-07T19:52:53.381Z",
       "current": {
         "chars": 13283,
         "codeBlocks": 6,
@@ -369,7 +369,7 @@
         "schema-table",
         "property-list"
       ],
-      "fetchedAt": "2026-03-16T07:00:54.005Z",
+      "fetchedAt": "2026-04-07T19:52:58.111Z",
       "current": {
         "chars": 1997,
         "codeBlocks": 0,
@@ -404,7 +404,7 @@
         "batch-format",
         "request-examples"
       ],
-      "fetchedAt": "2026-03-16T07:00:58.892Z",
+      "fetchedAt": "2026-04-07T19:53:03.140Z",
       "current": {
         "chars": 10443,
         "codeBlocks": 6,
@@ -439,7 +439,7 @@
         "method-examples",
         "long-markdown"
       ],
-      "fetchedAt": "2026-03-16T07:01:03.681Z",
+      "fetchedAt": "2026-04-07T19:53:10.800Z",
       "current": {
         "chars": 8990,
         "codeBlocks": 9,
@@ -475,7 +475,7 @@
         "images",
         "admin-workflow"
       ],
-      "fetchedAt": "2026-03-16T07:01:12.227Z",
+      "fetchedAt": "2026-04-07T19:53:17.775Z",
       "current": {
         "chars": 14943,
         "codeBlocks": 0,
@@ -486,7 +486,7 @@
         "headings": 21
       },
       "baseline": {
-        "chars": 14945,
+        "chars": 14943,
         "codeBlocks": 0,
         "tables": 9,
         "images": 3,
@@ -494,9 +494,9 @@
         "bullets": 16,
         "headings": 21
       },
-      "exactMatch": false,
-      "charDelta": -2,
-      "charDeltaPct": -0.01,
+      "exactMatch": true,
+      "charDelta": 0,
+      "charDeltaPct": 0,
       "baselineExists": true,
       "error": null
     },
@@ -510,7 +510,7 @@
         "tables",
         "image-guidance"
       ],
-      "fetchedAt": "2026-03-16T07:01:20.854Z",
+      "fetchedAt": "2026-04-07T19:53:24.696Z",
       "current": {
         "chars": 5862,
         "codeBlocks": 0,
@@ -521,7 +521,7 @@
         "headings": 5
       },
       "baseline": {
-        "chars": 5883,
+        "chars": 5862,
         "codeBlocks": 0,
         "tables": 2,
         "images": 3,
@@ -529,9 +529,9 @@
         "bullets": 0,
         "headings": 5
       },
-      "exactMatch": false,
-      "charDelta": -21,
-      "charDeltaPct": -0.36,
+      "exactMatch": true,
+      "charDelta": 0,
+      "charDeltaPct": 0,
       "baselineExists": true,
       "error": null
     },
@@ -545,7 +545,7 @@
         "many-code-snippets",
         "data-import-export"
       ],
-      "fetchedAt": "2026-03-16T07:01:29.435Z",
+      "fetchedAt": "2026-04-07T19:53:32.066Z",
       "current": {
         "chars": 6189,
         "codeBlocks": 15,
@@ -580,7 +580,7 @@
         "code-samples",
         "procedural-steps"
       ],
-      "fetchedAt": "2026-03-16T07:01:34.194Z",
+      "fetchedAt": "2026-04-07T19:53:37.014Z",
       "current": {
         "chars": 12362,
         "codeBlocks": 12,
@@ -615,7 +615,7 @@
         "code",
         "request-sequences"
       ],
-      "fetchedAt": "2026-03-16T07:01:39.014Z",
+      "fetchedAt": "2026-04-07T19:53:41.842Z",
       "current": {
         "chars": 10393,
         "codeBlocks": 4,
@@ -650,7 +650,7 @@
         "tables",
         "code-samples"
       ],
-      "fetchedAt": "2026-03-16T07:01:43.790Z",
+      "fetchedAt": "2026-04-07T19:53:46.563Z",
       "current": {
         "chars": 4865,
         "codeBlocks": 4,
@@ -685,7 +685,7 @@
         "tables",
         "examples"
       ],
-      "fetchedAt": "2026-03-16T07:01:48.591Z",
+      "fetchedAt": "2026-04-07T19:53:51.380Z",
       "current": {
         "chars": 5386,
         "codeBlocks": 1,
@@ -711,6 +711,103 @@
       "error": null
     },
     {
+      "id": "dev-ocapi-getcampaign",
+      "kind": "developer",
+      "url": "https://developer.salesforce.com/docs/commerce/b2c-commerce/references/ocapi-data-campaigns?meta=Get%2BCampaign",
+      "title": "Get Campaign",
+      "focus": [
+        "response-example",
+        "response-body-table",
+        "status-tabs"
+      ],
+      "fetchedAt": "2026-04-07T19:53:57.297Z",
+      "current": {
+        "chars": 3201,
+        "codeBlocks": 2,
+        "tables": 3,
+        "images": 0,
+        "orderedSteps": 0,
+        "bullets": 1,
+        "headings": 14
+      },
+      "baseline": {
+        "chars": 3201,
+        "codeBlocks": 2,
+        "tables": 3,
+        "images": 0,
+        "orderedSteps": 0,
+        "bullets": 1,
+        "headings": 14
+      },
+      "exactMatch": true,
+      "charDelta": 0,
+      "charDeltaPct": 0,
+      "baselineExists": true,
+      "error": null
+    },
+    {
+      "id": "dev-ocapi-updatecampaign",
+      "kind": "developer",
+      "url": "https://developer.salesforce.com/docs/commerce/b2c-commerce/references/ocapi-data-campaigns?meta=Update%2BCampaign",
+      "title": "Update Campaign",
+      "focus": [
+        "request-body-table",
+        "request-example",
+        "response-body-table"
+      ],
+      "fetchedAt": "2026-04-07T19:54:03.894Z",
+      "current": {
+        "chars": 6893,
+        "codeBlocks": 5,
+        "tables": 5,
+        "images": 0,
+        "orderedSteps": 0,
+        "bullets": 2,
+        "headings": 21
+      },
+      "baseline": {
+        "chars": 6893,
+        "codeBlocks": 5,
+        "tables": 5,
+        "images": 0,
+        "orderedSteps": 0,
+        "bullets": 2,
+        "headings": 21
+      },
+      "exactMatch": true,
+      "charDelta": 0,
+      "charDeltaPct": 0,
+      "baselineExists": true,
+      "error": null
+    },
+    {
+      "id": "dev-ocapi-createcustomer",
+      "kind": "developer",
+      "url": "https://developer.salesforce.com/docs/commerce/b2c-commerce/references/ocapi-data-customer-lists?meta=Create%2Bcustomer",
+      "title": "Create customer",
+      "focus": [
+        "nested-request-body",
+        "request-example",
+        "response-body-table"
+      ],
+      "fetchedAt": "2026-04-07T19:54:11.009Z",
+      "current": {
+        "chars": 16138,
+        "codeBlocks": 5,
+        "tables": 5,
+        "images": 0,
+        "orderedSteps": 0,
+        "bullets": 12,
+        "headings": 23
+      },
+      "baseline": null,
+      "exactMatch": null,
+      "charDelta": null,
+      "charDeltaPct": null,
+      "baselineExists": false,
+      "error": null
+    },
+    {
       "id": "help-site-import-export-development-testing",
       "kind": "help",
       "url": "https://help.salesforce.com/s/articleView?id=cc.b2c_using_site_import_export_for_development_testing.htm&type=5&release=2.0.1&language=en_us",
@@ -720,7 +817,7 @@
         "ordered-steps",
         "images"
       ],
-      "fetchedAt": "2026-03-16T07:01:56.956Z",
+      "fetchedAt": "2026-04-07T19:54:17.566Z",
       "current": {
         "chars": 2845,
         "codeBlocks": 0,

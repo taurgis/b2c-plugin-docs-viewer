@@ -24,7 +24,7 @@
       "tables",
       "code-snippet"
     ],
-    "fetchedAt": "2026-03-16T07:00:21.927Z",
+    "fetchedAt": "2026-04-07T19:52:26.469Z",
     "current": {
       "chars": 7895,
       "codeBlocks": 1,
@@ -35,7 +35,7 @@
       "headings": 12
     },
     "baseline": {
-      "chars": 7897,
+      "chars": 7895,
       "codeBlocks": 1,
       "tables": 6,
       "images": 1,
@@ -43,9 +43,9 @@
       "bullets": 0,
       "headings": 12
     },
-    "exactMatch": false,
-    "charDelta": -2,
-    "charDeltaPct": -0.03,
+    "exactMatch": true,
+    "charDelta": 0,
+    "charDeltaPct": 0,
     "baselineExists": true,
     "error": null
   }

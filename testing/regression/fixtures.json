@@ -120,6 +120,24 @@
     "focus": ["schema-details", "tables", "examples"]
   },
   {
+    "id": "dev-ocapi-getcampaign",
+    "kind": "developer",
+    "url": "https://developer.salesforce.com/docs/commerce/b2c-commerce/references/ocapi-data-campaigns?meta=Get%2BCampaign",
+    "focus": ["response-example", "response-body-table", "status-tabs"]
+  },
+  {
+    "id": "dev-ocapi-updatecampaign",
+    "kind": "developer",
+    "url": "https://developer.salesforce.com/docs/commerce/b2c-commerce/references/ocapi-data-campaigns?meta=Update%2BCampaign",
+    "focus": ["request-body-table", "request-example", "response-body-table"]
+  },
+  {
+    "id": "dev-ocapi-createcustomer",
+    "kind": "developer",
+    "url": "https://developer.salesforce.com/docs/commerce/b2c-commerce/references/ocapi-data-customer-lists?meta=Create%2Bcustomer",
+    "focus": ["nested-request-body", "request-example", "response-body-table"]
+  },
+  {
     "id": "help-site-import-export-development-testing",
     "kind": "help",
     "url": "https://help.salesforce.com/s/articleView?id=cc.b2c_using_site_import_export_for_development_testing.htm&type=5&release=2.0.1&language=en_us",
