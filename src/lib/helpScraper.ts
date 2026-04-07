@@ -725,12 +725,25 @@ async function extractStructuredDeveloperResponses(
         const summary = normalizeText(
           summaryHost?.querySelector("div[slot='markdown-html'], .markdown-body")?.textContent
         );
-        const exampleCode = methodResponse?.querySelector(".parsed-content code#output, .parsed-content code");
-        const example = normalizeCode(exampleCode?.textContent);
+        const responseBodies = methodResponse
+          ? Array.from(methodResponse.querySelectorAll("api-body-document")) as Array<
+              Element & { shadowRoot?: ShadowRoot | null }
+            >
+          : [];
+        const exampleBody = responseBodies.find((body) => body.hasAttribute("isexample")) || null;
+        const schemaBody = responseBodies.find((body) => !body.hasAttribute("isexample")) || null;
 
-        const bodyRoot = (responsesRoot.querySelector("api-body-document") as
-          | (Element & { shadowRoot?: ShadowRoot | null })
-          | null)?.shadowRoot;
+        const exampleRoot = exampleBody?.shadowRoot || null;
+        const exampleCodeHost = exampleRoot
+          ? deepElements(exampleRoot).find(
+              (element) =>
+                element.tagName.toLowerCase() === "code" &&
+                (element.id === "output" || element.closest("pre.parsed-content") !== null)
+            )
+          : null;
+        const example = normalizeCode(exampleCodeHost?.textContent);
+
+        const bodyRoot = schemaBody?.shadowRoot || null;
 
         const variants: DeveloperResponseBodyVariant[] = [];
         if (bodyRoot) {
@@ -751,9 +764,7 @@ async function extractStructuredDeveloperResponses(
               await waitForUpdate();
             }
 
-            const refreshedBodyRoot = (responsesRoot.querySelector("api-body-document") as
-              | (Element & { shadowRoot?: ShadowRoot | null })
-              | null)?.shadowRoot;
+            const refreshedBodyRoot = schemaBody?.shadowRoot || null;
             if (!refreshedBodyRoot) {
               continue;
             }
@@ -767,7 +778,48 @@ async function extractStructuredDeveloperResponses(
                 const shadowRoot = (rowHost as Element & { shadowRoot?: ShadowRoot | null }).shadowRoot;
                 if (!shadowRoot) return null;
 
-                const name = normalizeText(shadowRoot.querySelector(".property-title")?.textContent);
+                const getRowName = (host: Element): string => {
+                  const hostShadowRoot = (host as Element & { shadowRoot?: ShadowRoot | null }).shadowRoot;
+                  return normalizeText(hostShadowRoot?.querySelector(".property-title")?.textContent);
+                };
+
+                const getParentRowHost = (host: Element): Element | null => {
+                  let current: Node | null = host;
+                  while (current) {
+                    if (current.parentNode) {
+                      current = current.parentNode;
+                    } else {
+                      const rootNode = current.getRootNode();
+                      current = rootNode instanceof ShadowRoot ? rootNode.host : null;
+                    }
+
+                    if (
+                      current instanceof Element &&
+                      current !== host &&
+                      current.tagName.toLowerCase() === "property-shape-document"
+                    ) {
+                      return current;
+                    }
+                  }
+
+                  return null;
+                };
+
+                const buildFieldPath = (host: Element): string[] => {
+                  const segments: string[] = [];
+                  let current: Element | null = host;
+                  while (current) {
+                    const segment = getRowName(current);
+                    if (segment.length > 0) {
+                      segments.unshift(segment);
+                    }
+                    current = getParentRowHost(current);
+                  }
+                  return segments;
+                };
+
+                const pathSegments = buildFieldPath(rowHost);
+                const name = pathSegments.join(".");
                 const type = normalizeText(
                   Array.from(shadowRoot.querySelectorAll(".data-type"))
                     .map((node) => node.textContent || "")
@@ -783,8 +835,19 @@ async function extractStructuredDeveloperResponses(
                   .map((node) => normalizeText(node.textContent))
                   .filter((value) => value.length > 0);
 
+                if (name.length === 0) {
+                  return null;
+                }
+
+                if (type === "unknown type" || type === "recursive") {
+                  return null;
+                }
+
+                if (pathSegments[pathSegments.length - 1] === "additionalProperties") {
+                  return null;
+                }
+
                 if (
-                  name.length === 0 &&
                   type.length === 0 &&
                   flags.length === 0 &&
                   descriptions.length === 0 &&

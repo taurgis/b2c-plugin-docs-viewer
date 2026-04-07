@@ -553,9 +553,18 @@ async function extractStructuredDeveloperResponses(page, debug) {
                 ? Array.from(methodResponse.children).find((child) => child.tagName.toLowerCase() === "arc-marked")
                 : null;
             const summary = normalizeText(summaryHost?.querySelector("div[slot='markdown-html'], .markdown-body")?.textContent);
-            const exampleCode = methodResponse?.querySelector(".parsed-content code#output, .parsed-content code");
-            const example = normalizeCode(exampleCode?.textContent);
-            const bodyRoot = responsesRoot.querySelector("api-body-document")?.shadowRoot;
+            const responseBodies = methodResponse
+                ? Array.from(methodResponse.querySelectorAll("api-body-document"))
+                : [];
+            const exampleBody = responseBodies.find((body) => body.hasAttribute("isexample")) || null;
+            const schemaBody = responseBodies.find((body) => !body.hasAttribute("isexample")) || null;
+            const exampleRoot = exampleBody?.shadowRoot || null;
+            const exampleCodeHost = exampleRoot
+                ? deepElements(exampleRoot).find((element) => element.tagName.toLowerCase() === "code" &&
+                    (element.id === "output" || element.closest("pre.parsed-content") !== null))
+                : null;
+            const example = normalizeCode(exampleCodeHost?.textContent);
+            const bodyRoot = schemaBody?.shadowRoot || null;
             const variants = [];
             if (bodyRoot) {
                 const mediaButtons = deepElements(bodyRoot)
@@ -569,7 +578,7 @@ async function extractStructuredDeveloperResponses(page, debug) {
                         mediaButton.element.click();
                         await waitForUpdate();
                     }
-                    const refreshedBodyRoot = responsesRoot.querySelector("api-body-document")?.shadowRoot;
+                    const refreshedBodyRoot = schemaBody?.shadowRoot || null;
                     if (!refreshedBodyRoot) {
                         continue;
                     }
@@ -579,7 +588,42 @@ async function extractStructuredDeveloperResponses(page, debug) {
                         const shadowRoot = rowHost.shadowRoot;
                         if (!shadowRoot)
                             return null;
-                        const name = normalizeText(shadowRoot.querySelector(".property-title")?.textContent);
+                        const getRowName = (host) => {
+                            const hostShadowRoot = host.shadowRoot;
+                            return normalizeText(hostShadowRoot?.querySelector(".property-title")?.textContent);
+                        };
+                        const getParentRowHost = (host) => {
+                            let current = host;
+                            while (current) {
+                                if (current.parentNode) {
+                                    current = current.parentNode;
+                                }
+                                else {
+                                    const rootNode = current.getRootNode();
+                                    current = rootNode instanceof ShadowRoot ? rootNode.host : null;
+                                }
+                                if (current instanceof Element &&
+                                    current !== host &&
+                                    current.tagName.toLowerCase() === "property-shape-document") {
+                                    return current;
+                                }
+                            }
+                            return null;
+                        };
+                        const buildFieldPath = (host) => {
+                            const segments = [];
+                            let current = host;
+                            while (current) {
+                                const segment = getRowName(current);
+                                if (segment.length > 0) {
+                                    segments.unshift(segment);
+                                }
+                                current = getParentRowHost(current);
+                            }
+                            return segments;
+                        };
+                        const pathSegments = buildFieldPath(rowHost);
+                        const name = pathSegments.join(".");
                         const type = normalizeText(Array.from(shadowRoot.querySelectorAll(".data-type"))
                             .map((node) => node.textContent || "")
                             .join(" "));
@@ -592,8 +636,16 @@ async function extractStructuredDeveloperResponses(page, debug) {
                         const constraints = Array.from(shadowRoot.querySelectorAll(".property-attribute"))
                             .map((node) => normalizeText(node.textContent))
                             .filter((value) => value.length > 0);
-                        if (name.length === 0 &&
-                            type.length === 0 &&
+                        if (name.length === 0) {
+                            return null;
+                        }
+                        if (type === "unknown type" || type === "recursive") {
+                            return null;
+                        }
+                        if (pathSegments[pathSegments.length - 1] === "additionalProperties") {
+                            return null;
+                        }
+                        if (type.length === 0 &&
                             flags.length === 0 &&
                             descriptions.length === 0 &&
                             constraints.length === 0) {
