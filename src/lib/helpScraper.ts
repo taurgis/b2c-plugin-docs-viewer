@@ -8,13 +8,23 @@ import { acceptOneTrust } from "./browserConsent";
 import {
   convertHtmlToMarkdown,
   createTurndown,
+  type DeveloperResponseBodyVariant,
+  type DeveloperResponseRow,
+  type DeveloperResponseSection,
   formatDeveloperArticleMarkdown,
   formatHelpArticleMarkdown,
+  renderDeveloperResponseSections,
+  replaceDeveloperResponsesSection,
 } from "./helpScraperMarkdown";
 import { getErrorMessage } from "./errorUtils";
 import { firstFulfilled } from "./promiseUtils";
 
-export { convertHtmlToMarkdown, formatHelpArticleMarkdown } from "./helpScraperMarkdown";
+export {
+  convertHtmlToMarkdown,
+  formatHelpArticleMarkdown,
+  renderDeveloperResponseSections,
+  replaceDeveloperResponsesSection,
+} from "./helpScraperMarkdown";
 
 export { formatDeveloperArticleMarkdown } from "./helpScraperMarkdown";
 
@@ -332,29 +342,62 @@ async function extractDeveloperShadowDomHtml(page: Page): Promise<string> {
     (params: { hosts: string[]; skipTags: string[] }) => {
       const skipTags = new Set(params.skipTags);
 
-      function collectShadowHtml(node: Element, depth: number): string {
-        if (depth > 15) return "";
-        let html = "";
+      function appendExpandedNode(
+        sourceNode: Node,
+        targetParent: Element,
+        depth: number
+      ): void {
+        if (depth > 15) return;
 
-        const host = node as Element & { shadowRoot?: ShadowRoot | null };
-        if (host.shadowRoot) {
-          const fragment = document.createElement("div");
-          for (const child of Array.from(host.shadowRoot.children)) {
-            const tag = child.tagName.toLowerCase();
-            if (tag === "style" || tag === "script" || tag === "link") continue;
-            fragment.appendChild(child.cloneNode(true));
-          }
-          html += fragment.innerHTML;
-
-          for (const el of Array.from(host.shadowRoot.querySelectorAll("*"))) {
-            const nested = el as Element & { shadowRoot?: ShadowRoot | null };
-            if (nested.shadowRoot && !skipTags.has(el.tagName.toLowerCase())) {
-              html += collectShadowHtml(el, depth + 1);
-            }
-          }
+        if (sourceNode.nodeType === Node.TEXT_NODE) {
+          targetParent.appendChild(document.createTextNode(sourceNode.textContent || ""));
+          return;
         }
 
-        return html;
+        if (sourceNode.nodeType !== Node.ELEMENT_NODE) {
+          return;
+        }
+
+        const element = sourceNode as Element & { shadowRoot?: ShadowRoot | null };
+        const tag = element.tagName.toLowerCase();
+        if (tag === "style" || tag === "script" || tag === "link") return;
+  if (element.getAttribute("data-copilot-skip") === "true") return;
+
+        const hasMeaningfulLightDom = Array.from(element.childNodes).some((childNode) => {
+          if (childNode.nodeType === Node.TEXT_NODE) {
+            return (childNode.textContent || "").trim().length > 0;
+          }
+
+          return childNode.nodeType === Node.ELEMENT_NODE;
+        });
+
+        if (element.shadowRoot && !skipTags.has(tag) && !hasMeaningfulLightDom) {
+          for (const child of Array.from(element.shadowRoot.childNodes)) {
+            appendExpandedNode(child, targetParent, depth + 1);
+          }
+          return;
+        }
+
+        const clone = element.cloneNode(false) as Element;
+        targetParent.appendChild(clone);
+
+        for (const child of Array.from(element.childNodes)) {
+          appendExpandedNode(child, clone, depth + 1);
+        }
+      }
+
+      function collectShadowHtml(node: Element, depth: number): string {
+        if (depth > 15) return "";
+
+        const host = node as Element & { shadowRoot?: ShadowRoot | null };
+        if (!host.shadowRoot) return "";
+
+        const fragment = document.createElement("div");
+        for (const child of Array.from(host.shadowRoot.childNodes)) {
+          appendExpandedNode(child, fragment, depth + 1);
+        }
+
+        return fragment.innerHTML;
       }
 
       let all = "";
@@ -378,29 +421,62 @@ async function extractFocusedDeveloperShadowDomHtml(page: Page): Promise<string>
     (params: { chains: string[][]; skipTags: string[] }) => {
       const skipTags = new Set(params.skipTags);
 
-      function collectShadowHtml(node: Element, depth: number): string {
-        if (depth > 15) return "";
-        let html = "";
+      function appendExpandedNode(
+        sourceNode: Node,
+        targetParent: Element,
+        depth: number
+      ): void {
+        if (depth > 15) return;
 
-        const host = node as Element & { shadowRoot?: ShadowRoot | null };
-        if (host.shadowRoot) {
-          const fragment = document.createElement("div");
-          for (const child of Array.from(host.shadowRoot.children)) {
-            const tag = child.tagName.toLowerCase();
-            if (tag === "style" || tag === "script" || tag === "link") continue;
-            fragment.appendChild(child.cloneNode(true));
-          }
-          html += fragment.innerHTML;
-
-          for (const el of Array.from(host.shadowRoot.querySelectorAll("*"))) {
-            const nested = el as Element & { shadowRoot?: ShadowRoot | null };
-            if (nested.shadowRoot && !skipTags.has(el.tagName.toLowerCase())) {
-              html += collectShadowHtml(el, depth + 1);
-            }
-          }
+        if (sourceNode.nodeType === Node.TEXT_NODE) {
+          targetParent.appendChild(document.createTextNode(sourceNode.textContent || ""));
+          return;
         }
 
-        return html;
+        if (sourceNode.nodeType !== Node.ELEMENT_NODE) {
+          return;
+        }
+
+        const element = sourceNode as Element & { shadowRoot?: ShadowRoot | null };
+        const tag = element.tagName.toLowerCase();
+        if (tag === "style" || tag === "script" || tag === "link") return;
+  if (element.getAttribute("data-copilot-skip") === "true") return;
+
+        const hasMeaningfulLightDom = Array.from(element.childNodes).some((childNode) => {
+          if (childNode.nodeType === Node.TEXT_NODE) {
+            return (childNode.textContent || "").trim().length > 0;
+          }
+
+          return childNode.nodeType === Node.ELEMENT_NODE;
+        });
+
+        if (element.shadowRoot && !skipTags.has(tag) && !hasMeaningfulLightDom) {
+          for (const child of Array.from(element.shadowRoot.childNodes)) {
+            appendExpandedNode(child, targetParent, depth + 1);
+          }
+          return;
+        }
+
+        const clone = element.cloneNode(false) as Element;
+        targetParent.appendChild(clone);
+
+        for (const child of Array.from(element.childNodes)) {
+          appendExpandedNode(child, clone, depth + 1);
+        }
+      }
+
+      function collectShadowHtml(node: Element, depth: number): string {
+        if (depth > 15) return "";
+
+        const host = node as Element & { shadowRoot?: ShadowRoot | null };
+        if (!host.shadowRoot) return "";
+
+        const fragment = document.createElement("div");
+        for (const child of Array.from(host.shadowRoot.childNodes)) {
+          appendExpandedNode(child, fragment, depth + 1);
+        }
+
+        return fragment.innerHTML;
       }
 
       function findTarget(chain: string[]): Element | null {
@@ -446,6 +522,75 @@ async function extractFocusedDeveloperShadowDomHtml(page: Page): Promise<string>
   );
 }
 
+async function prepareDeveloperMethodForExtraction(page: Page, debug: boolean): Promise<void> {
+  await page
+    .evaluate(async () => {
+      const methodRoot = document
+        .querySelector("doc-amf-reference")
+        ?.shadowRoot?.querySelector("doc-amf-topic")
+        ?.shadowRoot?.querySelector("api-method-documentation")
+        ?.shadowRoot;
+
+      if (!methodRoot) return;
+
+      const waitForUpdate = async (): Promise<void> => {
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      };
+
+      const getText = (element: Element | null | undefined): string =>
+        (element?.textContent || "").replace(/\s+/g, " ").trim();
+
+      const deepElements = (root: Document | ShadowRoot | Element): Element[] => {
+        const results: Element[] = [];
+        const visit = (currentRoot: Document | ShadowRoot | Element): void => {
+          const children = Array.from(currentRoot.children || []);
+          for (const child of children) {
+            results.push(child);
+            const childWithShadow = child as Element & { shadowRoot?: ShadowRoot | null };
+            if (childWithShadow.shadowRoot) {
+              visit(childWithShadow.shadowRoot);
+            }
+            visit(child);
+          }
+        };
+
+        visit(root);
+        return results;
+      };
+
+      const clickButton = async (element: Element | null | undefined): Promise<void> => {
+        if (!(element instanceof HTMLElement)) return;
+        element.click();
+        await waitForUpdate();
+      };
+
+      const clickShowButtons = async (root: Document | ShadowRoot | Element): Promise<void> => {
+        const candidates = deepElements(root).filter((element) => {
+          if (!(element instanceof HTMLElement)) return false;
+          const text = getText(element);
+          if (!/^show$/i.test(text)) return false;
+          return (
+            element.tagName.toLowerCase() === "anypoint-button" ||
+            element.classList.contains("complex-toggle")
+          );
+        });
+
+        for (const candidate of candidates) {
+          if (/^show$/i.test(getText(candidate))) {
+            await clickButton(candidate);
+          }
+        }
+      };
+
+      await clickShowButtons(methodRoot);
+    })
+    .catch((error) => {
+      if (debug) {
+        console.error(`[debug] Failed preparing developer method sections: ${getErrorMessage(error)}`);
+      }
+    });
+}
+
 async function extractDeveloperCodeBlocks(page: Page): Promise<Array<{ language: string; code: string }>> {
   return page.evaluate(() => {
     const blocks = Array.from(document.querySelectorAll("dx-code-block"));
@@ -460,6 +605,233 @@ async function extractDeveloperCodeBlocks(page: Page): Promise<Array<{ language:
       })
       .filter((item) => item.code.length > 0);
   });
+}
+
+function normalizeLocatorText(value: string | null | undefined): string {
+  return (value || "").replace(/\s+/g, " ").trim();
+}
+
+function normalizeCodeBlock(value: string | null | undefined): string {
+  return (value || "").replace(/\r\n/g, "\n").replace(/\r/g, "\n").trim();
+}
+
+async function extractStructuredDeveloperResponseRows(responseBody: ReturnType<Page["locator"]>): Promise<DeveloperResponseRow[]> {
+  const rowLocator = responseBody.locator("property-shape-document");
+  const rowCount = await rowLocator.count();
+  if (rowCount === 0) {
+    return [];
+  }
+
+  return rowLocator.evaluateAll((elements) => {
+    const normalize = (value: string | null | undefined): string =>
+      (value || "").replace(/\s+/g, " ").trim();
+
+    return elements
+      .map((element) => {
+        const shadowRoot = (element as Element & { shadowRoot?: ShadowRoot | null }).shadowRoot;
+        if (!shadowRoot) return null;
+
+        const name = normalize(shadowRoot.querySelector(".property-title")?.textContent);
+        const type = normalize(
+          Array.from(shadowRoot.querySelectorAll(".data-type"))
+            .map((node) => node.textContent || "")
+            .join(" ")
+        );
+        const flags = Array.from(shadowRoot.querySelectorAll(".badge"))
+          .map((node) => normalize(node.textContent))
+          .filter((value) => value.length > 0);
+        const descriptions = Array.from(shadowRoot.querySelectorAll(".markdown-body"))
+          .map((node) => normalize(node.textContent))
+          .filter((value) => value.length > 0);
+        const constraints = Array.from(shadowRoot.querySelectorAll(".property-attribute"))
+          .map((node) => normalize(node.textContent))
+          .filter((value) => value.length > 0);
+
+        if (
+          name.length === 0 &&
+          type.length === 0 &&
+          flags.length === 0 &&
+          descriptions.length === 0 &&
+          constraints.length === 0
+        ) {
+          return null;
+        }
+
+        return { name, type, flags, descriptions, constraints };
+      })
+      .filter((row): row is DeveloperResponseRow => row !== null);
+  });
+}
+
+async function extractStructuredDeveloperResponses(
+  page: Page,
+  debug: boolean
+): Promise<DeveloperResponseSection[]> {
+  return page
+    .evaluate(async () => {
+      const waitForUpdate = async (): Promise<void> => {
+        await new Promise((resolve) => setTimeout(resolve, 120));
+      };
+
+      const normalizeText = (value: string | null | undefined): string =>
+        (value || "").replace(/\s+/g, " ").trim();
+
+      const normalizeCode = (value: string | null | undefined): string =>
+        (value || "").replace(/\r\n/g, "\n").replace(/\r/g, "\n").trim();
+
+      const deepElements = (root: Document | ShadowRoot | Element): Element[] => {
+        const results: Element[] = [];
+        const visit = (currentRoot: Document | ShadowRoot | Element): void => {
+          const children = Array.from(currentRoot.children || []);
+          for (const child of children) {
+            results.push(child);
+            const childWithShadow = child as Element & { shadowRoot?: ShadowRoot | null };
+            if (childWithShadow.shadowRoot) {
+              visit(childWithShadow.shadowRoot);
+            }
+            visit(child);
+          }
+        };
+
+        visit(root);
+        return results;
+      };
+
+      const methodRoot = document
+        .querySelector("doc-amf-reference")
+        ?.shadowRoot?.querySelector("doc-amf-topic")
+        ?.shadowRoot?.querySelector("api-method-documentation")
+        ?.shadowRoot;
+      const responsesRoot = methodRoot?.querySelector("api-responses-document")?.shadowRoot;
+
+      if (!responsesRoot) {
+        return [];
+      }
+
+      const tabs = Array.from(responsesRoot.querySelectorAll("anypoint-tab"))
+        .map((tab) => ({ element: tab as HTMLElement, label: normalizeText(tab.textContent) }))
+        .filter((tab) => tab.label.length > 0);
+
+      const sections: DeveloperResponseSection[] = [];
+
+      for (const tab of tabs) {
+        tab.element.click();
+        await waitForUpdate();
+
+        const methodResponse = responsesRoot.querySelector(".method-response") as Element | null;
+        const summaryHost = methodResponse
+          ? Array.from(methodResponse.children).find((child) => child.tagName.toLowerCase() === "arc-marked")
+          : null;
+        const summary = normalizeText(
+          summaryHost?.querySelector("div[slot='markdown-html'], .markdown-body")?.textContent
+        );
+        const exampleCode = methodResponse?.querySelector(".parsed-content code#output, .parsed-content code");
+        const example = normalizeCode(exampleCode?.textContent);
+
+        const bodyRoot = (responsesRoot.querySelector("api-body-document") as
+          | (Element & { shadowRoot?: ShadowRoot | null })
+          | null)?.shadowRoot;
+
+        const variants: DeveloperResponseBodyVariant[] = [];
+        if (bodyRoot) {
+          const mediaButtons = deepElements(bodyRoot)
+            .filter(
+              (element) =>
+                element.tagName.toLowerCase() === "anypoint-button" &&
+                element.classList.contains("media-toggle")
+            )
+            .map((element) => ({ element: element as HTMLElement, label: normalizeText(element.textContent) }));
+
+          const uniqueMediaButtons = mediaButtons.length > 0 ? mediaButtons : [{ element: null, label: "" }];
+          const grouped = new Map<string, DeveloperResponseBodyVariant>();
+
+          for (const mediaButton of uniqueMediaButtons) {
+            if (mediaButton.element) {
+              mediaButton.element.click();
+              await waitForUpdate();
+            }
+
+            const refreshedBodyRoot = (responsesRoot.querySelector("api-body-document") as
+              | (Element & { shadowRoot?: ShadowRoot | null })
+              | null)?.shadowRoot;
+            if (!refreshedBodyRoot) {
+              continue;
+            }
+
+            const rowHosts = deepElements(refreshedBodyRoot).filter(
+              (element) => element.tagName.toLowerCase() === "property-shape-document"
+            );
+
+            const rows = rowHosts
+              .map((rowHost) => {
+                const shadowRoot = (rowHost as Element & { shadowRoot?: ShadowRoot | null }).shadowRoot;
+                if (!shadowRoot) return null;
+
+                const name = normalizeText(shadowRoot.querySelector(".property-title")?.textContent);
+                const type = normalizeText(
+                  Array.from(shadowRoot.querySelectorAll(".data-type"))
+                    .map((node) => node.textContent || "")
+                    .join(" ")
+                );
+                const flags = Array.from(shadowRoot.querySelectorAll(".badge"))
+                  .map((node) => normalizeText(node.textContent))
+                  .filter((value) => value.length > 0);
+                const descriptions = Array.from(shadowRoot.querySelectorAll(".markdown-body"))
+                  .map((node) => normalizeText(node.textContent))
+                  .filter((value) => value.length > 0);
+                const constraints = Array.from(shadowRoot.querySelectorAll(".property-attribute"))
+                  .map((node) => normalizeText(node.textContent))
+                  .filter((value) => value.length > 0);
+
+                if (
+                  name.length === 0 &&
+                  type.length === 0 &&
+                  flags.length === 0 &&
+                  descriptions.length === 0 &&
+                  constraints.length === 0
+                ) {
+                  return null;
+                }
+
+                return { name, type, flags, descriptions, constraints };
+              })
+              .filter((row): row is DeveloperResponseRow => row !== null);
+
+            const key = JSON.stringify(rows);
+            const existing = grouped.get(key);
+            if (existing) {
+              if (mediaButton.label.length > 0 && !existing.mediaTypes.includes(mediaButton.label)) {
+                existing.mediaTypes.push(mediaButton.label);
+              }
+            } else {
+              grouped.set(key, {
+                mediaTypes: mediaButton.label.length > 0 ? [mediaButton.label] : [],
+                rows,
+              });
+            }
+          }
+
+          variants.push(...grouped.values());
+        }
+
+        sections.push({
+          statusLabel: tab.label,
+          summary,
+          example,
+          bodies: variants.filter((variant) => variant.rows.length > 0 || variant.mediaTypes.length > 0),
+        });
+      }
+
+      return sections;
+    })
+    .catch((error) => {
+      if (debug) {
+        console.error(
+          `[debug] Failed extracting structured developer responses: ${getErrorMessage(error)}`
+        );
+      }
+      return [] as DeveloperResponseSection[];
+    });
 }
 
 async function scrapeDeveloperMarkdown(
@@ -541,6 +913,8 @@ async function scrapeDeveloperMarkdown(
     if (!title) {
       title = extracted.title;
     }
+
+    await prepareDeveloperMethodForExtraction(page, debug);
 
     const focusedShadowHtml = await extractFocusedDeveloperShadowDomHtml(page).catch((error) => {
       if (debug) {
@@ -648,6 +1022,12 @@ async function scrapeDeveloperMarkdown(
       if (textFallback.length >= MIN_CONTENT_LENGTH) {
         markdown = textFallback;
       }
+    }
+
+    const structuredResponses = await extractStructuredDeveloperResponses(page, debug);
+    if (structuredResponses.length > 0) {
+      const renderedResponses = renderDeveloperResponseSections(structuredResponses);
+      markdown = replaceDeveloperResponsesSection(markdown, renderedResponses);
     }
 
     if (markdown.length < MIN_CONTENT_LENGTH) {

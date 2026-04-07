@@ -15,6 +15,26 @@ function escapeTableCell(value: string): string {
   return value.replace(/\|/g, "\\|").replace(/\n/g, "<br>");
 }
 
+export type DeveloperResponseRow = {
+  name: string;
+  type: string;
+  flags: string[];
+  descriptions: string[];
+  constraints: string[];
+};
+
+export type DeveloperResponseBodyVariant = {
+  mediaTypes: string[];
+  rows: DeveloperResponseRow[];
+};
+
+export type DeveloperResponseSection = {
+  statusLabel: string;
+  summary: string;
+  example: string;
+  bodies: DeveloperResponseBodyVariant[];
+};
+
 function extractTableCellText(cell: Element): string {
   const clone = cell.cloneNode(true) as Element;
 
@@ -300,6 +320,19 @@ function tokenizeMarkdownBlocks(markdown: string): string[] {
       continue;
     }
 
+    if (lines[index].trim().startsWith("|")) {
+      const tableLines = [lines[index].trimEnd()];
+      index += 1;
+
+      while (index < lines.length && lines[index].trim().startsWith("|")) {
+        tableLines.push(lines[index].trimEnd());
+        index += 1;
+      }
+
+      blocks.push(tableLines.join("\n"));
+      continue;
+    }
+
     blocks.push(lines[index].trim());
     index += 1;
   }
@@ -325,7 +358,7 @@ function isDeveloperTypeToken(token: string): boolean {
   if (normalized.length === 0 || normalized.length > 60) return false;
   if (/[,:]/.test(normalized)) return false;
 
-  return /^(?:string|object|number|integer|boolean|array|null|enum|date(?:-time)?|datetime|time|uri|url|file|binary|any|[A-Z][A-Za-z0-9_.<>-]*(?:\[\])?)$/i.test(
+  return /^(?:string|object|number|integer|boolean|array|null|enum|date(?:-time)?|datetime|time|uri|url|file|binary|any|map<[^>]+>|array<[^>]+>|\[[^\]]+\])$/i.test(
     normalized
   );
 }
@@ -363,6 +396,26 @@ function splitConcatenatedMediaTypes(token: string): string {
   }
 
   return normalized.replace(/,\s+,/g, ", ").trim();
+}
+
+function isDeveloperMethodToken(token: string): boolean {
+  return /^(GET|POST|PUT|PATCH|DELETE|HEAD|OPTIONS)$/i.test(token.trim());
+}
+
+function isDeveloperUrlToken(token: string): boolean {
+  return /^https?:\/\//i.test(token.trim());
+}
+
+function isDeveloperSnippetLanguageToken(token: string): boolean {
+  return /^(cURL|HTTP|JavaScript-Fetch|JavaScript-Async|JavaScript-Node|JavaScript-XHR|Python-Requests|Python-2\.7|Python-3\.1|C|Java-HTTP|Java-Spring)$/i.test(
+    token.trim()
+  );
+}
+
+function isDeveloperSectionToken(token: string): boolean {
+  return /^(Request|Request Example|Security|Responses|Body|Example|URI parameters|Query parameters|Headers)$/i.test(
+    token.trim()
+  );
 }
 
 function isDeveloperPropertyStart(blocks: string[], index: number): boolean {
@@ -474,7 +527,13 @@ function normalizeDeveloperPropertySections(markdown: string): string {
             break;
           }
 
-          if (token.startsWith("#") || token.startsWith("```") || token === "Example" || isDeveloperStatusToken(token)) {
+          if (
+            token.startsWith("#") ||
+            token.startsWith("```") ||
+            token === "Example" ||
+            isDeveloperStatusToken(token) ||
+            isDeveloperSectionToken(token)
+          ) {
             break;
           }
 
@@ -522,6 +581,162 @@ function normalizeDeveloperPropertySections(markdown: string): string {
   }
 
   return untokenizeMarkdownBlocks(normalizedBlocks);
+}
+
+function normalizeDeveloperSectionStructure(markdown: string): string {
+  const blocks = tokenizeMarkdownBlocks(markdown);
+  const normalizedBlocks: string[] = [];
+
+  for (let index = 0; index < blocks.length; index += 1) {
+    const block = blocks[index];
+
+    if (isDeveloperMethodToken(block) && index + 1 < blocks.length && isDeveloperUrlToken(blocks[index + 1])) {
+      normalizedBlocks.push(`**${block.trim().toUpperCase()}** \`${blocks[index + 1].trim()}\``);
+      index += 1;
+      continue;
+    }
+
+    if (isDeveloperSnippetLanguageToken(block)) {
+      continue;
+    }
+
+    if (block === "Request") {
+      normalizedBlocks.push("## Request");
+      continue;
+    }
+
+    if (block === "Request Example") {
+      normalizedBlocks.push("### Request Example");
+      continue;
+    }
+
+    if (block === "Security") {
+      normalizedBlocks.push("## Security");
+      continue;
+    }
+
+    if (block === "Responses") {
+      normalizedBlocks.push("## Responses");
+      continue;
+    }
+
+    if (block === "Body") {
+      normalizedBlocks.push("### Body");
+      continue;
+    }
+
+    if (block === "Example") {
+      normalizedBlocks.push("### Example");
+      continue;
+    }
+
+    if (block === "URI parameters") {
+      normalizedBlocks.push("#### URI Parameters");
+      continue;
+    }
+
+    if (block === "Query parameters") {
+      normalizedBlocks.push("#### Query Parameters");
+      continue;
+    }
+
+    if (block === "Headers") {
+      normalizedBlocks.push("#### Headers");
+      continue;
+    }
+
+    if (isDeveloperStatusToken(block)) {
+      normalizedBlocks.push(`### ${normalizeDeveloperStatusToken(block).toUpperCase()}`);
+      continue;
+    }
+
+    normalizedBlocks.push(block);
+  }
+
+  return untokenizeMarkdownBlocks(normalizedBlocks)
+    .replace(/^## OAuth 2\.0$/m, "### OAuth 2.0")
+    .replace(/^### Settings$/m, "#### Settings");
+}
+
+function renderDeveloperResponseTable(rows: DeveloperResponseRow[]): string {
+  const header = "| Field | Type | Flags | Description | Constraints |";
+  const separator = "| --- | --- | --- | --- | --- |";
+  const body = rows.map((row) => {
+    const flags = row.flags.join(", ");
+    const descriptions = row.descriptions.join(" ");
+    const constraints = row.constraints.join("; ");
+
+    return `| ${escapeTableCell(row.name)} | ${escapeTableCell(row.type)} | ${escapeTableCell(
+      flags
+    )} | ${escapeTableCell(descriptions)} | ${escapeTableCell(constraints)} |`;
+  });
+
+  return [header, separator, ...body].join("\n");
+}
+
+export function renderDeveloperResponseSections(sections: DeveloperResponseSection[]): string {
+  const normalizedSections = sections.filter(
+    (section) =>
+      section.statusLabel.trim().length > 0 ||
+      section.summary.trim().length > 0 ||
+      section.example.trim().length > 0 ||
+      section.bodies.some((body) => body.rows.length > 0 || body.mediaTypes.length > 0)
+  );
+
+  if (normalizedSections.length === 0) {
+    return "";
+  }
+
+  const blocks: string[] = ["## Responses"];
+
+  for (const section of normalizedSections) {
+    blocks.push(`### ${section.statusLabel}`);
+
+    if (section.summary.trim().length > 0) {
+      blocks.push(section.summary.trim());
+    }
+
+    if (section.example.trim().length > 0) {
+      blocks.push("#### Example");
+      blocks.push(`\`\`\`\n${section.example.trim()}\n\`\`\``);
+    }
+
+    for (const body of section.bodies) {
+      if (body.rows.length === 0 && body.mediaTypes.length === 0) {
+        continue;
+      }
+
+      blocks.push("#### Body");
+
+      if (body.mediaTypes.length > 0) {
+        blocks.push(`Media types: ${body.mediaTypes.join(", ")}`);
+      }
+
+      if (body.rows.length > 0) {
+        blocks.push(renderDeveloperResponseTable(body.rows));
+      }
+    }
+  }
+
+  return blocks.join("\n\n");
+}
+
+export function replaceDeveloperResponsesSection(
+  markdown: string,
+  renderedResponses: string
+): string {
+  const replacement = renderedResponses.trim();
+  if (replacement.length === 0) {
+    return markdown;
+  }
+
+  const marker = "\n## Responses";
+  const markerIndex = markdown.indexOf(marker);
+  if (markerIndex >= 0) {
+    return `${markdown.slice(0, markerIndex).trimEnd()}\n\n${replacement}`;
+  }
+
+  return `${markdown.trimEnd()}\n\n${replacement}`;
 }
 
 function getDeveloperMetaTitle(pageUrl: string): string | null {
@@ -624,6 +839,7 @@ export function formatDeveloperArticleMarkdown(
   ]);
 
   output = normalizeDeveloperPropertySections(output);
+  output = normalizeDeveloperSectionStructure(output);
   output = ensureTitleHeading(output, preferredTitle);
 
   return output;

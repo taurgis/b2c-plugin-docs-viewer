@@ -3,6 +3,8 @@ import {
   convertHtmlToMarkdown,
   formatDeveloperArticleMarkdown,
   formatHelpArticleMarkdown,
+  renderDeveloperResponseSections,
+  replaceDeveloperResponsesSection,
 } from "./helpScraper";
 
 describe("convertHtmlToMarkdown", () => {
@@ -187,8 +189,16 @@ describe("formatDeveloperArticleMarkdown", () => {
       "[Get campaign](https://developer.salesforce.com/docs/commerce/b2c-commerce/references/ocapi-data-campaigns?meta=Get%2BCampaign)",
       "Get Campaign",
       "Operation ID: Get Campaign",
+      "GET",
+      "https://{host}/s/-/dw/data/v25_6/sites/{site_id}/campaigns/{campaign_id}",
       "Action to get campaign information.",
+      "This endpoint may return the following faults:",
+      "- 404 - CampaignNotFoundException - Thrown in case the campaign does not exist matching the given id",
       "Request",
+      "Request Example",
+      "cURL",
+      "HTTP",
+      "`curl \"https://{host}/s/-/dw/data/v25_6/sites/{site_id}/campaigns/{campaign_id}\"`",
       "Hide",
       "Security",
       "Show",
@@ -205,8 +215,15 @@ describe("formatDeveloperArticleMarkdown", () => {
       "Required",
       "The id of the requested campaign.",
       "Minimum characters: 1",
+      "Responses",
       "404default",
       "`CampaignNotFoundException` - Thrown in case the campaign does not exist matching the given id",
+      "Example",
+      "```",
+      "{",
+      '  "arguments": {},',
+      "}",
+      "```",
       "Body",
       "Media type:",
       "application/jsontext/xml",
@@ -226,12 +243,18 @@ describe("formatDeveloperArticleMarkdown", () => {
 
     expect(markdown.startsWith("# Get Campaign")).toBe(true);
     expect(markdown).toContain("Operation ID: Get Campaign");
+    expect(markdown).toContain("**GET** `https://{host}/s/-/dw/data/v25_6/sites/{site_id}/campaigns/{campaign_id}`");
     expect(markdown).toContain("Action to get campaign information.");
-    expect(markdown).toContain("Request");
+    expect(markdown).toContain("This endpoint may return the following faults:");
+    expect(markdown).toContain("## Request");
+    expect(markdown).toContain("## Security");
+    expect(markdown).toContain("## Responses");
+    expect(markdown).toContain("### Request Example");
+    expect(markdown).toContain("#### URI Parameters");
     expect(markdown).toContain("| Name | Type | Required | Description | Constraints |");
     expect(markdown).toContain("| site_id | string | Yes | The site the requested campaign belongs to. | Minimum characters: 1 |");
     expect(markdown).toContain("| campaign_id | string | Yes | The id of the requested campaign. | Minimum characters: 1 |");
-    expect(markdown).toContain("404 default");
+    expect(markdown).toContain("### 404 DEFAULT");
     expect(markdown).toContain("Media types: application/json, text/xml");
     expect(markdown).toContain("| Field | Type | Flags | Description | Constraints |");
     expect(markdown).toContain(
@@ -245,5 +268,60 @@ describe("formatDeveloperArticleMarkdown", () => {
     expect(markdown).not.toContain("\nShow\n");
     expect(markdown).not.toContain("\nfalse\n");
     expect(markdown).not.toContain("application/jsontext/xml");
+    expect(markdown).not.toContain("\nJavaScript-Fetch\n");
+  });
+});
+
+describe("structured developer responses", () => {
+  it("renders status sections and body tables", () => {
+    const markdown = renderDeveloperResponseSections([
+      {
+        statusLabel: "404",
+        summary: "CampaignNotFoundException - Thrown in case the campaign does not exist matching the given id",
+        example: '{\n  "message": "not found"\n}',
+        bodies: [
+          {
+            mediaTypes: ["application/json", "text/xml"],
+            rows: [
+              {
+                name: "message",
+                type: "string",
+                flags: [],
+                descriptions: ["The message text of the java exception."],
+                constraints: [],
+              },
+            ],
+          },
+        ],
+      },
+    ]);
+
+    expect(markdown).toContain("## Responses");
+    expect(markdown).toContain("### 404");
+    expect(markdown).toContain("#### Example");
+    expect(markdown).toContain("#### Body");
+    expect(markdown).toContain("Media types: application/json, text/xml");
+    expect(markdown).toContain("| Field | Type | Flags | Description | Constraints |");
+    expect(markdown).toContain("| message | string |  | The message text of the java exception. |  |");
+  });
+
+  it("replaces an existing responses section", () => {
+    const input = [
+      "# Get Campaign",
+      "",
+      "## Request",
+      "",
+      "Body before responses.",
+      "",
+      "## Responses",
+      "",
+      "Old content",
+    ].join("\n");
+
+    const replaced = replaceDeveloperResponsesSection(input, "## Responses\n\n### 404\n\nUpdated");
+
+    expect(replaced).toContain("Body before responses.");
+    expect(replaced).toContain("### 404");
+    expect(replaced).not.toContain("Old content");
   });
 });

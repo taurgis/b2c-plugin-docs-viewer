@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.formatDeveloperArticleMarkdown = exports.formatHelpArticleMarkdown = exports.convertHtmlToMarkdown = void 0;
+exports.formatDeveloperArticleMarkdown = exports.replaceDeveloperResponsesSection = exports.renderDeveloperResponseSections = exports.formatHelpArticleMarkdown = exports.convertHtmlToMarkdown = void 0;
 exports.createScraperSession = createScraperSession;
 exports.getDetailSourceType = getDetailSourceType;
 exports.getHelpDetails = getHelpDetails;
@@ -16,6 +16,8 @@ const promiseUtils_1 = require("./promiseUtils");
 var helpScraperMarkdown_2 = require("./helpScraperMarkdown");
 Object.defineProperty(exports, "convertHtmlToMarkdown", { enumerable: true, get: function () { return helpScraperMarkdown_2.convertHtmlToMarkdown; } });
 Object.defineProperty(exports, "formatHelpArticleMarkdown", { enumerable: true, get: function () { return helpScraperMarkdown_2.formatHelpArticleMarkdown; } });
+Object.defineProperty(exports, "renderDeveloperResponseSections", { enumerable: true, get: function () { return helpScraperMarkdown_2.renderDeveloperResponseSections; } });
+Object.defineProperty(exports, "replaceDeveloperResponsesSection", { enumerable: true, get: function () { return helpScraperMarkdown_2.replaceDeveloperResponsesSection; } });
 var helpScraperMarkdown_3 = require("./helpScraperMarkdown");
 Object.defineProperty(exports, "formatDeveloperArticleMarkdown", { enumerable: true, get: function () { return helpScraperMarkdown_3.formatDeveloperArticleMarkdown; } });
 const DEFAULT_TIMEOUT_MS = 45000;
@@ -246,28 +248,51 @@ async function scrapeHelpMarkdown(context, url, timeoutMs, waitMs, includeRawHtm
 async function extractDeveloperShadowDomHtml(page) {
     return page.evaluate((params) => {
         const skipTags = new Set(params.skipTags);
+        function appendExpandedNode(sourceNode, targetParent, depth) {
+            if (depth > 15)
+                return;
+            if (sourceNode.nodeType === Node.TEXT_NODE) {
+                targetParent.appendChild(document.createTextNode(sourceNode.textContent || ""));
+                return;
+            }
+            if (sourceNode.nodeType !== Node.ELEMENT_NODE) {
+                return;
+            }
+            const element = sourceNode;
+            const tag = element.tagName.toLowerCase();
+            if (tag === "style" || tag === "script" || tag === "link")
+                return;
+            if (element.getAttribute("data-copilot-skip") === "true")
+                return;
+            const hasMeaningfulLightDom = Array.from(element.childNodes).some((childNode) => {
+                if (childNode.nodeType === Node.TEXT_NODE) {
+                    return (childNode.textContent || "").trim().length > 0;
+                }
+                return childNode.nodeType === Node.ELEMENT_NODE;
+            });
+            if (element.shadowRoot && !skipTags.has(tag) && !hasMeaningfulLightDom) {
+                for (const child of Array.from(element.shadowRoot.childNodes)) {
+                    appendExpandedNode(child, targetParent, depth + 1);
+                }
+                return;
+            }
+            const clone = element.cloneNode(false);
+            targetParent.appendChild(clone);
+            for (const child of Array.from(element.childNodes)) {
+                appendExpandedNode(child, clone, depth + 1);
+            }
+        }
         function collectShadowHtml(node, depth) {
             if (depth > 15)
                 return "";
-            let html = "";
             const host = node;
-            if (host.shadowRoot) {
-                const fragment = document.createElement("div");
-                for (const child of Array.from(host.shadowRoot.children)) {
-                    const tag = child.tagName.toLowerCase();
-                    if (tag === "style" || tag === "script" || tag === "link")
-                        continue;
-                    fragment.appendChild(child.cloneNode(true));
-                }
-                html += fragment.innerHTML;
-                for (const el of Array.from(host.shadowRoot.querySelectorAll("*"))) {
-                    const nested = el;
-                    if (nested.shadowRoot && !skipTags.has(el.tagName.toLowerCase())) {
-                        html += collectShadowHtml(el, depth + 1);
-                    }
-                }
+            if (!host.shadowRoot)
+                return "";
+            const fragment = document.createElement("div");
+            for (const child of Array.from(host.shadowRoot.childNodes)) {
+                appendExpandedNode(child, fragment, depth + 1);
             }
-            return html;
+            return fragment.innerHTML;
         }
         let all = "";
         for (const tag of params.hosts) {
@@ -284,28 +309,51 @@ async function extractDeveloperShadowDomHtml(page) {
 async function extractFocusedDeveloperShadowDomHtml(page) {
     return page.evaluate((params) => {
         const skipTags = new Set(params.skipTags);
+        function appendExpandedNode(sourceNode, targetParent, depth) {
+            if (depth > 15)
+                return;
+            if (sourceNode.nodeType === Node.TEXT_NODE) {
+                targetParent.appendChild(document.createTextNode(sourceNode.textContent || ""));
+                return;
+            }
+            if (sourceNode.nodeType !== Node.ELEMENT_NODE) {
+                return;
+            }
+            const element = sourceNode;
+            const tag = element.tagName.toLowerCase();
+            if (tag === "style" || tag === "script" || tag === "link")
+                return;
+            if (element.getAttribute("data-copilot-skip") === "true")
+                return;
+            const hasMeaningfulLightDom = Array.from(element.childNodes).some((childNode) => {
+                if (childNode.nodeType === Node.TEXT_NODE) {
+                    return (childNode.textContent || "").trim().length > 0;
+                }
+                return childNode.nodeType === Node.ELEMENT_NODE;
+            });
+            if (element.shadowRoot && !skipTags.has(tag) && !hasMeaningfulLightDom) {
+                for (const child of Array.from(element.shadowRoot.childNodes)) {
+                    appendExpandedNode(child, targetParent, depth + 1);
+                }
+                return;
+            }
+            const clone = element.cloneNode(false);
+            targetParent.appendChild(clone);
+            for (const child of Array.from(element.childNodes)) {
+                appendExpandedNode(child, clone, depth + 1);
+            }
+        }
         function collectShadowHtml(node, depth) {
             if (depth > 15)
                 return "";
-            let html = "";
             const host = node;
-            if (host.shadowRoot) {
-                const fragment = document.createElement("div");
-                for (const child of Array.from(host.shadowRoot.children)) {
-                    const tag = child.tagName.toLowerCase();
-                    if (tag === "style" || tag === "script" || tag === "link")
-                        continue;
-                    fragment.appendChild(child.cloneNode(true));
-                }
-                html += fragment.innerHTML;
-                for (const el of Array.from(host.shadowRoot.querySelectorAll("*"))) {
-                    const nested = el;
-                    if (nested.shadowRoot && !skipTags.has(el.tagName.toLowerCase())) {
-                        html += collectShadowHtml(el, depth + 1);
-                    }
-                }
+            if (!host.shadowRoot)
+                return "";
+            const fragment = document.createElement("div");
+            for (const child of Array.from(host.shadowRoot.childNodes)) {
+                appendExpandedNode(child, fragment, depth + 1);
             }
-            return html;
+            return fragment.innerHTML;
         }
         function findTarget(chain) {
             let currentRoot = document;
@@ -341,6 +389,66 @@ async function extractFocusedDeveloperShadowDomHtml(page) {
         skipTags: DEV_SHADOW_SKIP_TAGS,
     });
 }
+async function prepareDeveloperMethodForExtraction(page, debug) {
+    await page
+        .evaluate(async () => {
+        const methodRoot = document
+            .querySelector("doc-amf-reference")
+            ?.shadowRoot?.querySelector("doc-amf-topic")
+            ?.shadowRoot?.querySelector("api-method-documentation")
+            ?.shadowRoot;
+        if (!methodRoot)
+            return;
+        const waitForUpdate = async () => {
+            await new Promise((resolve) => setTimeout(resolve, 100));
+        };
+        const getText = (element) => (element?.textContent || "").replace(/\s+/g, " ").trim();
+        const deepElements = (root) => {
+            const results = [];
+            const visit = (currentRoot) => {
+                const children = Array.from(currentRoot.children || []);
+                for (const child of children) {
+                    results.push(child);
+                    const childWithShadow = child;
+                    if (childWithShadow.shadowRoot) {
+                        visit(childWithShadow.shadowRoot);
+                    }
+                    visit(child);
+                }
+            };
+            visit(root);
+            return results;
+        };
+        const clickButton = async (element) => {
+            if (!(element instanceof HTMLElement))
+                return;
+            element.click();
+            await waitForUpdate();
+        };
+        const clickShowButtons = async (root) => {
+            const candidates = deepElements(root).filter((element) => {
+                if (!(element instanceof HTMLElement))
+                    return false;
+                const text = getText(element);
+                if (!/^show$/i.test(text))
+                    return false;
+                return (element.tagName.toLowerCase() === "anypoint-button" ||
+                    element.classList.contains("complex-toggle"));
+            });
+            for (const candidate of candidates) {
+                if (/^show$/i.test(getText(candidate))) {
+                    await clickButton(candidate);
+                }
+            }
+        };
+        await clickShowButtons(methodRoot);
+    })
+        .catch((error) => {
+        if (debug) {
+            console.error(`[debug] Failed preparing developer method sections: ${(0, errorUtils_1.getErrorMessage)(error)}`);
+        }
+    });
+}
 async function extractDeveloperCodeBlocks(page) {
     return page.evaluate(() => {
         const blocks = Array.from(document.querySelectorAll("dx-code-block"));
@@ -354,6 +462,176 @@ async function extractDeveloperCodeBlocks(page) {
             return { language, code };
         })
             .filter((item) => item.code.length > 0);
+    });
+}
+function normalizeLocatorText(value) {
+    return (value || "").replace(/\s+/g, " ").trim();
+}
+function normalizeCodeBlock(value) {
+    return (value || "").replace(/\r\n/g, "\n").replace(/\r/g, "\n").trim();
+}
+async function extractStructuredDeveloperResponseRows(responseBody) {
+    const rowLocator = responseBody.locator("property-shape-document");
+    const rowCount = await rowLocator.count();
+    if (rowCount === 0) {
+        return [];
+    }
+    return rowLocator.evaluateAll((elements) => {
+        const normalize = (value) => (value || "").replace(/\s+/g, " ").trim();
+        return elements
+            .map((element) => {
+            const shadowRoot = element.shadowRoot;
+            if (!shadowRoot)
+                return null;
+            const name = normalize(shadowRoot.querySelector(".property-title")?.textContent);
+            const type = normalize(Array.from(shadowRoot.querySelectorAll(".data-type"))
+                .map((node) => node.textContent || "")
+                .join(" "));
+            const flags = Array.from(shadowRoot.querySelectorAll(".badge"))
+                .map((node) => normalize(node.textContent))
+                .filter((value) => value.length > 0);
+            const descriptions = Array.from(shadowRoot.querySelectorAll(".markdown-body"))
+                .map((node) => normalize(node.textContent))
+                .filter((value) => value.length > 0);
+            const constraints = Array.from(shadowRoot.querySelectorAll(".property-attribute"))
+                .map((node) => normalize(node.textContent))
+                .filter((value) => value.length > 0);
+            if (name.length === 0 &&
+                type.length === 0 &&
+                flags.length === 0 &&
+                descriptions.length === 0 &&
+                constraints.length === 0) {
+                return null;
+            }
+            return { name, type, flags, descriptions, constraints };
+        })
+            .filter((row) => row !== null);
+    });
+}
+async function extractStructuredDeveloperResponses(page, debug) {
+    return page
+        .evaluate(async () => {
+        const waitForUpdate = async () => {
+            await new Promise((resolve) => setTimeout(resolve, 120));
+        };
+        const normalizeText = (value) => (value || "").replace(/\s+/g, " ").trim();
+        const normalizeCode = (value) => (value || "").replace(/\r\n/g, "\n").replace(/\r/g, "\n").trim();
+        const deepElements = (root) => {
+            const results = [];
+            const visit = (currentRoot) => {
+                const children = Array.from(currentRoot.children || []);
+                for (const child of children) {
+                    results.push(child);
+                    const childWithShadow = child;
+                    if (childWithShadow.shadowRoot) {
+                        visit(childWithShadow.shadowRoot);
+                    }
+                    visit(child);
+                }
+            };
+            visit(root);
+            return results;
+        };
+        const methodRoot = document
+            .querySelector("doc-amf-reference")
+            ?.shadowRoot?.querySelector("doc-amf-topic")
+            ?.shadowRoot?.querySelector("api-method-documentation")
+            ?.shadowRoot;
+        const responsesRoot = methodRoot?.querySelector("api-responses-document")?.shadowRoot;
+        if (!responsesRoot) {
+            return [];
+        }
+        const tabs = Array.from(responsesRoot.querySelectorAll("anypoint-tab"))
+            .map((tab) => ({ element: tab, label: normalizeText(tab.textContent) }))
+            .filter((tab) => tab.label.length > 0);
+        const sections = [];
+        for (const tab of tabs) {
+            tab.element.click();
+            await waitForUpdate();
+            const methodResponse = responsesRoot.querySelector(".method-response");
+            const summaryHost = methodResponse
+                ? Array.from(methodResponse.children).find((child) => child.tagName.toLowerCase() === "arc-marked")
+                : null;
+            const summary = normalizeText(summaryHost?.querySelector("div[slot='markdown-html'], .markdown-body")?.textContent);
+            const exampleCode = methodResponse?.querySelector(".parsed-content code#output, .parsed-content code");
+            const example = normalizeCode(exampleCode?.textContent);
+            const bodyRoot = responsesRoot.querySelector("api-body-document")?.shadowRoot;
+            const variants = [];
+            if (bodyRoot) {
+                const mediaButtons = deepElements(bodyRoot)
+                    .filter((element) => element.tagName.toLowerCase() === "anypoint-button" &&
+                    element.classList.contains("media-toggle"))
+                    .map((element) => ({ element: element, label: normalizeText(element.textContent) }));
+                const uniqueMediaButtons = mediaButtons.length > 0 ? mediaButtons : [{ element: null, label: "" }];
+                const grouped = new Map();
+                for (const mediaButton of uniqueMediaButtons) {
+                    if (mediaButton.element) {
+                        mediaButton.element.click();
+                        await waitForUpdate();
+                    }
+                    const refreshedBodyRoot = responsesRoot.querySelector("api-body-document")?.shadowRoot;
+                    if (!refreshedBodyRoot) {
+                        continue;
+                    }
+                    const rowHosts = deepElements(refreshedBodyRoot).filter((element) => element.tagName.toLowerCase() === "property-shape-document");
+                    const rows = rowHosts
+                        .map((rowHost) => {
+                        const shadowRoot = rowHost.shadowRoot;
+                        if (!shadowRoot)
+                            return null;
+                        const name = normalizeText(shadowRoot.querySelector(".property-title")?.textContent);
+                        const type = normalizeText(Array.from(shadowRoot.querySelectorAll(".data-type"))
+                            .map((node) => node.textContent || "")
+                            .join(" "));
+                        const flags = Array.from(shadowRoot.querySelectorAll(".badge"))
+                            .map((node) => normalizeText(node.textContent))
+                            .filter((value) => value.length > 0);
+                        const descriptions = Array.from(shadowRoot.querySelectorAll(".markdown-body"))
+                            .map((node) => normalizeText(node.textContent))
+                            .filter((value) => value.length > 0);
+                        const constraints = Array.from(shadowRoot.querySelectorAll(".property-attribute"))
+                            .map((node) => normalizeText(node.textContent))
+                            .filter((value) => value.length > 0);
+                        if (name.length === 0 &&
+                            type.length === 0 &&
+                            flags.length === 0 &&
+                            descriptions.length === 0 &&
+                            constraints.length === 0) {
+                            return null;
+                        }
+                        return { name, type, flags, descriptions, constraints };
+                    })
+                        .filter((row) => row !== null);
+                    const key = JSON.stringify(rows);
+                    const existing = grouped.get(key);
+                    if (existing) {
+                        if (mediaButton.label.length > 0 && !existing.mediaTypes.includes(mediaButton.label)) {
+                            existing.mediaTypes.push(mediaButton.label);
+                        }
+                    }
+                    else {
+                        grouped.set(key, {
+                            mediaTypes: mediaButton.label.length > 0 ? [mediaButton.label] : [],
+                            rows,
+                        });
+                    }
+                }
+                variants.push(...grouped.values());
+            }
+            sections.push({
+                statusLabel: tab.label,
+                summary,
+                example,
+                bodies: variants.filter((variant) => variant.rows.length > 0 || variant.mediaTypes.length > 0),
+            });
+        }
+        return sections;
+    })
+        .catch((error) => {
+        if (debug) {
+            console.error(`[debug] Failed extracting structured developer responses: ${(0, errorUtils_1.getErrorMessage)(error)}`);
+        }
+        return [];
     });
 }
 async function scrapeDeveloperMarkdown(context, url, timeoutMs, waitMs, includeRawHtml, debug) {
@@ -415,6 +693,7 @@ async function scrapeDeveloperMarkdown(context, url, timeoutMs, waitMs, includeR
         if (!title) {
             title = extracted.title;
         }
+        await prepareDeveloperMethodForExtraction(page, debug);
         const focusedShadowHtml = await extractFocusedDeveloperShadowDomHtml(page).catch((error) => {
             if (debug) {
                 console.error(`[debug] Failed extracting focused developer shadow DOM HTML: ${(0, errorUtils_1.getErrorMessage)(error)}`);
@@ -498,6 +777,11 @@ async function scrapeDeveloperMarkdown(context, url, timeoutMs, waitMs, includeR
             if (textFallback.length >= MIN_CONTENT_LENGTH) {
                 markdown = textFallback;
             }
+        }
+        const structuredResponses = await extractStructuredDeveloperResponses(page, debug);
+        if (structuredResponses.length > 0) {
+            const renderedResponses = (0, helpScraperMarkdown_1.renderDeveloperResponseSections)(structuredResponses);
+            markdown = (0, helpScraperMarkdown_1.replaceDeveloperResponsesSection)(markdown, renderedResponses);
         }
         if (markdown.length < MIN_CONTENT_LENGTH) {
             throw new Error("Extracted content was too short.");
