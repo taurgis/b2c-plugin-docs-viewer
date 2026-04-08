@@ -1,14 +1,14 @@
 {
   "summary": {
-    "startedAt": "2026-04-07T19:51:53.797Z",
-    "finishedAt": "2026-04-07T19:54:17.575Z",
-    "fixtureCount": 24,
-    "ok": 24,
+    "startedAt": "2026-04-08T07:29:12.664Z",
+    "finishedAt": "2026-04-08T07:32:02.316Z",
+    "fixtureCount": 28,
+    "ok": 28,
     "failed": 0,
-    "compared": 23,
+    "compared": 26,
     "changed": 0,
-    "unchanged": 23,
-    "newBaselineCandidates": 1,
+    "unchanged": 26,
+    "newBaselineCandidates": 2,
     "promoted": true
   },
   "results": [
@@ -22,7 +22,7 @@
         "links",
         "basic-sections"
       ],
-      "fetchedAt": "2026-04-07T19:52:00.010Z",
+      "fetchedAt": "2026-04-08T07:29:19.407Z",
       "current": {
         "chars": 1116,
         "codeBlocks": 0,
@@ -57,7 +57,7 @@
         "images",
         "inline-formatting"
       ],
-      "fetchedAt": "2026-04-07T19:52:07.512Z",
+      "fetchedAt": "2026-04-08T07:29:26.129Z",
       "current": {
         "chars": 1386,
         "codeBlocks": 0,
@@ -92,7 +92,7 @@
         "images",
         "tables"
       ],
-      "fetchedAt": "2026-04-07T19:52:13.627Z",
+      "fetchedAt": "2026-04-08T07:29:32.598Z",
       "current": {
         "chars": 6906,
         "codeBlocks": 0,
@@ -127,7 +127,7 @@
         "notes",
         "section-headings"
       ],
-      "fetchedAt": "2026-04-07T19:52:19.748Z",
+      "fetchedAt": "2026-04-08T07:29:38.883Z",
       "current": {
         "chars": 12258,
         "codeBlocks": 0,
@@ -162,7 +162,7 @@
         "tables",
         "code-snippet"
       ],
-      "fetchedAt": "2026-04-07T19:52:26.469Z",
+      "fetchedAt": "2026-04-08T07:29:45.596Z",
       "current": {
         "chars": 7895,
         "codeBlocks": 1,
@@ -197,7 +197,7 @@
         "role-matrix",
         "ordered-lists"
       ],
-      "fetchedAt": "2026-04-07T19:52:33.413Z",
+      "fetchedAt": "2026-04-08T07:29:52.491Z",
       "current": {
         "chars": 16450,
         "codeBlocks": 1,
@@ -231,7 +231,7 @@
         "dx-code-block",
         "request-response-example"
       ],
-      "fetchedAt": "2026-04-07T19:52:38.299Z",
+      "fetchedAt": "2026-04-08T07:29:57.718Z",
       "current": {
         "chars": 1979,
         "codeBlocks": 2,
@@ -265,7 +265,7 @@
         "large-table",
         "long-rows"
       ],
-      "fetchedAt": "2026-04-07T19:52:43.140Z",
+      "fetchedAt": "2026-04-08T07:30:02.527Z",
       "current": {
         "chars": 9068,
         "codeBlocks": 0,
@@ -300,7 +300,7 @@
         "tables",
         "code"
       ],
-      "fetchedAt": "2026-04-07T19:52:48.100Z",
+      "fetchedAt": "2026-04-08T07:30:07.350Z",
       "current": {
         "chars": 10740,
         "codeBlocks": 3,
@@ -335,7 +335,7 @@
         "images",
         "examples"
       ],
-      "fetchedAt": "2026-04-07T19:52:53.381Z",
+      "fetchedAt": "2026-04-08T07:30:12.401Z",
       "current": {
         "chars": 13283,
         "codeBlocks": 6,
@@ -369,7 +369,7 @@
         "schema-table",
         "property-list"
       ],
-      "fetchedAt": "2026-04-07T19:52:58.111Z",
+      "fetchedAt": "2026-04-08T07:30:17.402Z",
       "current": {
         "chars": 1997,
         "codeBlocks": 0,
@@ -404,7 +404,7 @@
         "batch-format",
         "request-examples"
       ],
-      "fetchedAt": "2026-04-07T19:53:03.140Z",
+      "fetchedAt": "2026-04-08T07:30:22.527Z",
       "current": {
         "chars": 10443,
         "codeBlocks": 6,
@@ -439,7 +439,7 @@
         "method-examples",
         "long-markdown"
       ],
-      "fetchedAt": "2026-04-07T19:53:10.800Z",
+      "fetchedAt": "2026-04-08T07:30:27.480Z",
       "current": {
         "chars": 8990,
         "codeBlocks": 9,
@@ -475,7 +475,7 @@
         "images",
         "admin-workflow"
       ],
-      "fetchedAt": "2026-04-07T19:53:17.775Z",
+      "fetchedAt": "2026-04-08T07:30:34.641Z",
       "current": {
         "chars": 14943,
         "codeBlocks": 0,
@@ -510,7 +510,7 @@
         "tables",
         "image-guidance"
       ],
-      "fetchedAt": "2026-04-07T19:53:24.696Z",
+      "fetchedAt": "2026-04-08T07:30:41.385Z",
       "current": {
         "chars": 5862,
         "codeBlocks": 0,
@@ -545,7 +545,7 @@
         "many-code-snippets",
         "data-import-export"
       ],
-      "fetchedAt": "2026-04-07T19:53:32.066Z",
+      "fetchedAt": "2026-04-08T07:30:48.379Z",
       "current": {
         "chars": 6189,
         "codeBlocks": 15,
@@ -580,7 +580,7 @@
         "code-samples",
         "procedural-steps"
       ],
-      "fetchedAt": "2026-04-07T19:53:37.014Z",
+      "fetchedAt": "2026-04-08T07:30:53.338Z",
       "current": {
         "chars": 12362,
         "codeBlocks": 12,
@@ -615,7 +615,7 @@
         "code",
         "request-sequences"
       ],
-      "fetchedAt": "2026-04-07T19:53:41.842Z",
+      "fetchedAt": "2026-04-08T07:30:58.324Z",
       "current": {
         "chars": 10393,
         "codeBlocks": 4,
@@ -650,7 +650,7 @@
         "tables",
         "code-samples"
       ],
-      "fetchedAt": "2026-04-07T19:53:46.563Z",
+      "fetchedAt": "2026-04-08T07:31:03.423Z",
       "current": {
         "chars": 4865,
         "codeBlocks": 4,
@@ -685,7 +685,7 @@
         "tables",
         "examples"
       ],
-      "fetchedAt": "2026-04-07T19:53:51.380Z",
+      "fetchedAt": "2026-04-08T07:31:08.362Z",
       "current": {
         "chars": 5386,
         "codeBlocks": 1,
@@ -720,9 +720,9 @@
         "response-body-table",
         "status-tabs"
       ],
-      "fetchedAt": "2026-04-07T19:53:57.297Z",
+      "fetchedAt": "2026-04-08T07:31:14.642Z",
       "current": {
-        "chars": 3201,
+        "chars": 3271,
         "codeBlocks": 2,
         "tables": 3,
         "images": 0,
@@ -731,7 +731,7 @@
         "headings": 14
       },
       "baseline": {
-        "chars": 3201,
+        "chars": 3271,
         "codeBlocks": 2,
         "tables": 3,
         "images": 0,
@@ -755,24 +755,24 @@
         "request-example",
         "response-body-table"
       ],
-      "fetchedAt": "2026-04-07T19:54:03.894Z",
+      "fetchedAt": "2026-04-08T07:31:21.769Z",
       "current": {
-        "chars": 6893,
+        "chars": 6532,
         "codeBlocks": 5,
         "tables": 5,
         "images": 0,
         "orderedSteps": 0,
         "bullets": 2,
-        "headings": 21
+        "headings": 19
       },
       "baseline": {
-        "chars": 6893,
+        "chars": 6532,
         "codeBlocks": 5,
         "tables": 5,
         "images": 0,
         "orderedSteps": 0,
         "bullets": 2,
-        "headings": 21
+        "headings": 19
       },
       "exactMatch": true,
       "charDelta": 0,
@@ -790,15 +790,147 @@
         "request-example",
         "response-body-table"
       ],
-      "fetchedAt": "2026-04-07T19:54:11.009Z",
+      "fetchedAt": "2026-04-08T07:31:29.354Z",
       "current": {
-        "chars": 16138,
+        "chars": 13873,
         "codeBlocks": 5,
         "tables": 5,
         "images": 0,
         "orderedSteps": 0,
-        "bullets": 12,
-        "headings": 23
+        "bullets": 7,
+        "headings": 19
+      },
+      "baseline": {
+        "chars": 13873,
+        "codeBlocks": 5,
+        "tables": 5,
+        "images": 0,
+        "orderedSteps": 0,
+        "bullets": 7,
+        "headings": 19
+      },
+      "exactMatch": true,
+      "charDelta": 0,
+      "charDeltaPct": 0,
+      "baselineExists": true,
+      "error": null
+    },
+    {
+      "id": "dev-ocapi-removebasket",
+      "kind": "developer",
+      "url": "https://developer.salesforce.com/docs/commerce/b2c-commerce/references/ocapi-shop-baskets?meta=Remove%2Ba%2Bbasket",
+      "title": "Remove a basket",
+      "focus": [
+        "204-no-content",
+        "fault-responses",
+        "status-tabs"
+      ],
+      "fetchedAt": "2026-04-08T07:31:35.595Z",
+      "current": {
+        "chars": 3095,
+        "codeBlocks": 2,
+        "tables": 3,
+        "images": 0,
+        "orderedSteps": 0,
+        "bullets": 2,
+        "headings": 17
+      },
+      "baseline": {
+        "chars": 3095,
+        "codeBlocks": 2,
+        "tables": 3,
+        "images": 0,
+        "orderedSteps": 0,
+        "bullets": 2,
+        "headings": 17
+      },
+      "exactMatch": true,
+      "charDelta": 0,
+      "charDeltaPct": 0,
+      "baselineExists": true,
+      "error": null
+    },
+    {
+      "id": "dev-ocapi-createbasket",
+      "kind": "developer",
+      "url": "https://developer.salesforce.com/docs/commerce/b2c-commerce/references/ocapi-shop-baskets?meta=Create%2Bbasket",
+      "title": "Create basket",
+      "focus": [
+        "nested-request-body",
+        "request-json-xml-examples",
+        "deep-response-body"
+      ],
+      "fetchedAt": "2026-04-08T07:31:42.989Z",
+      "current": {
+        "chars": 35341,
+        "codeBlocks": 5,
+        "tables": 5,
+        "images": 0,
+        "orderedSteps": 0,
+        "bullets": 24,
+        "headings": 21
+      },
+      "baseline": {
+        "chars": 35341,
+        "codeBlocks": 5,
+        "tables": 5,
+        "images": 0,
+        "orderedSteps": 0,
+        "bullets": 24,
+        "headings": 21
+      },
+      "exactMatch": true,
+      "charDelta": 0,
+      "charDeltaPct": 0,
+      "baselineExists": true,
+      "error": null
+    },
+    {
+      "id": "dev-ocapi-getorder",
+      "kind": "developer",
+      "url": "https://developer.salesforce.com/docs/commerce/b2c-commerce/references/ocapi-shop-orders?meta=Get%2Border",
+      "title": "Get order",
+      "focus": [
+        "deep-response-body",
+        "response-example",
+        "status-tabs"
+      ],
+      "fetchedAt": "2026-04-08T07:31:49.086Z",
+      "current": {
+        "chars": 10291,
+        "codeBlocks": 2,
+        "tables": 3,
+        "images": 0,
+        "orderedSteps": 0,
+        "bullets": 1,
+        "headings": 16
+      },
+      "baseline": null,
+      "exactMatch": null,
+      "charDelta": null,
+      "charDeltaPct": null,
+      "baselineExists": false,
+      "error": null
+    },
+    {
+      "id": "dev-ocapi-registercustomer",
+      "kind": "developer",
+      "url": "https://developer.salesforce.com/docs/commerce/b2c-commerce/references/ocapi-shop-customers?meta=Register%2Bcustomer",
+      "title": "Register customer",
+      "focus": [
+        "request-json-xml-examples",
+        "request-constraints",
+        "response-body-table"
+      ],
+      "fetchedAt": "2026-04-08T07:31:55.717Z",
+      "current": {
+        "chars": 13688,
+        "codeBlocks": 4,
+        "tables": 3,
+        "images": 0,
+        "orderedSteps": 0,
+        "bullets": 8,
+        "headings": 17
       },
       "baseline": null,
       "exactMatch": null,
@@ -817,7 +949,7 @@
         "ordered-steps",
         "images"
       ],
-      "fetchedAt": "2026-04-07T19:54:17.566Z",
+      "fetchedAt": "2026-04-08T07:32:02.305Z",
       "current": {
         "chars": 2845,
         "codeBlocks": 0,

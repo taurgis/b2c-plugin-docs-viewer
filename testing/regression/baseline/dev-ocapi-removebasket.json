@@ -1,0 +1,52 @@
+{
+  "fixture": {
+    "id": "dev-ocapi-removebasket",
+    "kind": "developer",
+    "url": "https://developer.salesforce.com/docs/commerce/b2c-commerce/references/ocapi-shop-baskets?meta=Remove%2Ba%2Bbasket",
+    "focus": [
+      "204-no-content",
+      "fault-responses",
+      "status-tabs"
+    ]
+  },
+  "detail": {
+    "url": "https://developer.salesforce.com/docs/commerce/b2c-commerce/references/ocapi-shop-baskets?meta=Remove%2Ba%2Bbasket",
+    "title": "Remove a basket",
+    "markdown": "# Remove a basket\n\nOperation ID: Remove a basket\n\n**DELETE** `https://{host}/s/{siteId}/dw/shop/v25\\_6/baskets/{basket\\_id}`\n\nRemoves a basket.\n\nThis endpoint may return the following faults:\n\n-   400 - InvalidCustomerException - Indicates that the customer assigned to the basket does not match the verified customer represented by the JWT, not relevant when using OAuth.\n\n-   404 - BasketNotFoundException - Indicates that the basket with the given basket id is unknown.\n\n## Request\n\n### Request Example\n\n`curl \"https://{host}/s/{siteId}/dw/shop/v25_6/baskets/{basket_id}\" \\ -X DELETE`\n\n## Security\n\n## Basic Authentication\n\nUser authentication either for a registered or a guest customer (selectable in request body). Access via Base64 encoded customer:password string as 'Authorization: Basic' header.\n\n### OAuth 2.0\n\nAuthentication flow with client ID and password with account manager.\n\n#### Settings\n\n## Api Key\n\nAdd client ID for application identification. Alternative as 'client\\_id' query parameter.\n\n#### URI Parameters\n\n| Name | Type | Required | Description | Constraints |\n| --- | --- | --- | --- | --- |\n| basket_id | string | Yes | the id of the basket to be retrieved | Minimum characters: 1 |\n\n## Responses\n\n### 204\n\n### 400\n\nInvalidCustomerException - Indicates that the customer assigned to the basket does not match the verified customer represented by the JWT, not relevant when using OAuth.\n\n#### Example\n\n```\n{\n  \"arguments\": {},\n  \"cause\": {\n    \"cause\": \"\",\n    \"message\": \"\",\n    \"type\": \"\"\n  },\n  \"display_message_pattern\": \"\",\n  \"message\": \"\",\n  \"stack_trace\": \"\",\n  \"type\": \"\"\n}\n```\n\n#### Body\n\nMedia types: application/json, text/xml\n\n| Field | Type | Flags | Description | Constraints |\n| --- | --- | --- | --- | --- |\n| arguments | object |  | A map that provides fault arguments. Data can be used to provide error messages on the client side. |  |\n| cause | object |  |  |  |\n| display_message_pattern | string |  | The localized display message pattern, if the request parameter display_locale was given |  |\n| message | string |  | The message text of the java exception. |  |\n| stack_trace | string |  |  |  |\n| type | string |  | The name of the java exception. |  |\n\n### 404\n\nBasketNotFoundException - Indicates that the basket with the given basket id is unknown.\n\n#### Example\n\n```\n{\n  \"arguments\": {},\n  \"cause\": {\n    \"cause\": \"\",\n    \"message\": \"\",\n    \"type\": \"\"\n  },\n  \"display_message_pattern\": \"\",\n  \"message\": \"\",\n  \"stack_trace\": \"\",\n  \"type\": \"\"\n}\n```\n\n#### Body\n\nMedia types: application/json, text/xml\n\n| Field | Type | Flags | Description | Constraints |\n| --- | --- | --- | --- | --- |\n| arguments | object |  | A map that provides fault arguments. Data can be used to provide error messages on the client side. |  |\n| cause | object |  |  |  |\n| display_message_pattern | string |  | The localized display message pattern, if the request parameter display_locale was given |  |\n| message | string |  | The message text of the java exception. |  |\n| stack_trace | string |  |  |  |\n| type | string |  | The name of the java exception. |  |"
+  },
+  "analysis": {
+    "id": "dev-ocapi-removebasket",
+    "kind": "developer",
+    "url": "https://developer.salesforce.com/docs/commerce/b2c-commerce/references/ocapi-shop-baskets?meta=Remove%2Ba%2Bbasket",
+    "title": "Remove a basket",
+    "focus": [
+      "204-no-content",
+      "fault-responses",
+      "status-tabs"
+    ],
+    "fetchedAt": "2026-04-08T07:31:35.595Z",
+    "current": {
+      "chars": 3095,
+      "codeBlocks": 2,
+      "tables": 3,
+      "images": 0,
+      "orderedSteps": 0,
+      "bullets": 2,
+      "headings": 17
+    },
+    "baseline": {
+      "chars": 3095,
+      "codeBlocks": 2,
+      "tables": 3,
+      "images": 0,
+      "orderedSteps": 0,
+      "bullets": 2,
+      "headings": 17
+    },
+    "exactMatch": true,
+    "charDelta": 0,
+    "charDeltaPct": 0,
+    "baselineExists": true,
+    "error": null
+  }
+}

@@ -98,11 +98,11 @@ Media types: application/json, text/xml
 
 | Field | Type | Flags | Description | Constraints |
 | --- | --- | --- | --- | --- |
-| campaign_id | string |  | The ID of the campaign. |  |
+| campaign_id | string |  | The ID of the campaign. | Minimum characters: 1; Maximum characters: 256 |
 | coupons | array of string |  | The array of assigned coupon IDs, not sorted |  |
 | creation_date | datetime | Read-only | Returns the value of attribute 'creationDate'. |  |
 | customer_groups | array of string |  | The array of assigned customer groups, not sorted |  |
-| description | string |  | The description of the campaign. |  |
+| description | string |  | The description of the campaign. | Maximum characters: 4000 |
 | enabled | boolean |  | The enabled flag for campaign. |  |
 | end_date | datetime |  | The date that the Scenario ends |  |
 | last_modified | datetime | Read-only | Returns the value of attribute 'lastModified'. |  |

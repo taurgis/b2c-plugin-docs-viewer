@@ -28,6 +28,11 @@ export type DeveloperResponseBodyVariant = {
   rows: DeveloperResponseRow[];
 };
 
+export type DeveloperExampleVariant = {
+  mediaTypes: string[];
+  example: string;
+};
+
 export type DeveloperResponseSection = {
   statusLabel: string;
   summary: string;
@@ -36,7 +41,7 @@ export type DeveloperResponseSection = {
 };
 
 export type DeveloperRequestBodySection = {
-  example: string;
+  examples: DeveloperExampleVariant[];
   bodies: DeveloperResponseBodyVariant[];
 };
 
@@ -679,6 +684,13 @@ function renderDeveloperResponseTable(rows: DeveloperResponseRow[]): string {
   return [header, separator, ...body].join("\n");
 }
 
+function codeFenceLanguage(mediaTypes: string[]): string {
+  const normalized = mediaTypes.join(" ").toLowerCase();
+  if (normalized.includes("json")) return "json";
+  if (normalized.includes("xml")) return "xml";
+  return "";
+}
+
 export function renderDeveloperResponseSections(sections: DeveloperResponseSection[]): string {
   const normalizedSections = sections.filter(
     (section) =>
@@ -728,7 +740,7 @@ export function renderDeveloperResponseSections(sections: DeveloperResponseSecti
 
 export function renderDeveloperRequestBodySection(section: DeveloperRequestBodySection): string {
   const hasContent =
-    section.example.trim().length > 0 ||
+    section.examples.some((example) => example.example.trim().length > 0) ||
     section.bodies.some((body) => body.rows.length > 0 || body.mediaTypes.length > 0);
 
   if (!hasContent) {
@@ -747,9 +759,18 @@ export function renderDeveloperRequestBodySection(section: DeveloperRequestBodyS
     }
   }
 
-  if (section.example.trim().length > 0) {
+  const normalizedExamples = section.examples.filter((example) => example.example.trim().length > 0);
+  if (normalizedExamples.length > 0) {
     blocks.push("### Example");
-    blocks.push(`\`\`\`\n${section.example.trim()}\n\`\`\``);
+
+    for (const example of normalizedExamples) {
+      if (example.mediaTypes.length > 0) {
+        blocks.push(`Media types: ${example.mediaTypes.join(", ")}`);
+      }
+
+      const language = codeFenceLanguage(example.mediaTypes);
+      blocks.push(`\`\`\`${language}\n${example.example.trim()}\n\`\`\``);
+    }
   }
 
   for (const body of section.bodies) {
@@ -796,15 +817,33 @@ export function replaceDeveloperRequestBodySection(
 
   const nextSecurityIndex = markdown.indexOf("\n## Security", requestIndex + requestMarker.length);
   const nextResponsesIndex = markdown.indexOf("\n## Responses", requestIndex + requestMarker.length);
-  const sectionEndCandidates = [nextSecurityIndex, nextResponsesIndex].filter((index) => index >= 0);
-  const sectionEnd = sectionEndCandidates.length > 0 ? Math.min(...sectionEndCandidates) : markdown.length;
-  const bodyIndex = markdown.indexOf("\n### Body", requestIndex + requestMarker.length);
+  const responsesIndex = nextResponsesIndex >= 0 ? nextResponsesIndex : markdown.length;
+  const insertIndex =
+    nextSecurityIndex >= 0 && nextSecurityIndex < responsesIndex ? nextSecurityIndex : responsesIndex;
 
-  if (bodyIndex >= 0 && bodyIndex < sectionEnd) {
-    return `${markdown.slice(0, bodyIndex).trimEnd()}\n\n${replacement}\n\n${markdown.slice(sectionEnd).trimStart()}`;
+  let beforeInsert = markdown.slice(0, insertIndex);
+  let betweenInsertAndResponses = markdown.slice(insertIndex, responsesIndex);
+  const afterResponses = markdown.slice(responsesIndex);
+
+  const bodyIndexBeforeInsert = beforeInsert.indexOf("\n### Body", requestIndex + requestMarker.length);
+  if (bodyIndexBeforeInsert >= 0) {
+    beforeInsert = beforeInsert.slice(0, bodyIndexBeforeInsert).trimEnd();
+  } else {
+    beforeInsert = beforeInsert.trimEnd();
   }
 
-  return `${markdown.slice(0, sectionEnd).trimEnd()}\n\n${replacement}\n\n${markdown.slice(sectionEnd).trimStart()}`;
+  const strayBodyIndex = betweenInsertAndResponses.indexOf("\n### Body");
+  if (strayBodyIndex >= 0) {
+    betweenInsertAndResponses = betweenInsertAndResponses.slice(0, strayBodyIndex).trimEnd();
+  } else {
+    betweenInsertAndResponses = betweenInsertAndResponses.trim();
+  }
+
+  const blocks = [beforeInsert, replacement, betweenInsertAndResponses, afterResponses.trimStart()].filter(
+    (block) => block.length > 0
+  );
+
+  return `${blocks.join("\n\n")}`;
 }
 
 function getDeveloperMetaTitle(pageUrl: string): string | null {
@@ -875,6 +914,7 @@ export function formatHelpArticleMarkdown(markdown: string, title: string | null
 
   output = ensureTitleHeading(output, title);
   output = removeLeadingBreadcrumbChrome(output, title);
+  output = output.replace(/\n+Loading\s*$/i, "");
   return output;
 }
 

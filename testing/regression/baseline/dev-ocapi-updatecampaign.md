@@ -24,7 +24,9 @@ Media types: application/json, text/xml
 
 ### Example
 
-```
+Media types: application/json
+
+```json
 {
   "coupons": [
     "testCoupon"
@@ -43,12 +45,28 @@ Media types: application/json, text/xml
 }
 ```
 
+Media types: text/xml
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<campaign>
+  <coupons>testCoupon</coupons>
+  <customer_groups>Registered</customer_groups>
+  <description>My Campaign</description>
+  <enabled>true</enabled>
+  <end_date>2015-07-31T23:09:08.000Z</end_date>
+  <link>https://example.com/s/-/dw/data/{version}/sites/SiteGenesis/campaigns/my-campaign</link>
+  <source_code_groups>WapiSourceCodeGroup1</source_code_groups>
+  <start_date>2015-04-01T11:30:15.000Z</start_date>
+</campaign>
+```
+
 | Field | Type | Flags | Description | Constraints |
 | --- | --- | --- | --- | --- |
-| campaign_id | string |  | The ID of the campaign. |  |
+| campaign_id | string |  | The ID of the campaign. | Minimum characters: 1; Maximum characters: 256 |
 | coupons | array of string |  | The array of assigned coupon IDs, not sorted |  |
 | customer_groups | array of string |  | The array of assigned customer groups, not sorted |  |
-| description | string |  | The description of the campaign. |  |
+| description | string |  | The description of the campaign. | Maximum characters: 4000 |
 | enabled | boolean |  | The enabled flag for campaign. |  |
 | end_date | datetime |  | The date that the Scenario ends |  |
 | link | string |  | link for convenience |  |
@@ -69,91 +87,6 @@ Authentication flow with client ID and password with account manager.
 | --- | --- | --- | --- | --- |
 | site_id | string | Yes | The site context. | Minimum characters: 1 |
 | campaign_id | string | Yes | The id of the requested campaign. | Minimum characters: 1 |
-
-### Body
-
-Media types: application/json, text/xml
-
-### Example
-
-```
-{
-  "coupons": [
-    "testCoupon"
-  ],
-  "customer_groups": [
-    "Registered"
-  ],
-  "description": "My Campaign",
-  "enabled": true,
-  "end_date": "2015-07-31T23:09:08.000Z",
-  "link": "{version}/sites/SiteGenesis/campaigns/my-campaign",
-  "source_code_groups": [
-    "WapiSourceCodeGroup1"
-  ],
-  "start_date": "2015-04-01T11:30:15.000Z"
-}
-```
-
-campaign\_id
-
-string
-
-The ID of the campaign.
-
-Minimum characters: 1
-
-Maximum characters: 256
-
-coupons
-
-array of string
-
-The array of assigned coupon IDs, not sorted
-
-customer\_groups
-
-array of string
-
-The array of assigned customer groups, not sorted
-
-description
-
-string
-
-The description of the campaign.
-
-Maximum characters: 4000
-
-enabled
-
-boolean
-
-The enabled flag for campaign.
-
-end\_date
-
-datetime
-
-The date that the Scenario ends
-
-link
-
-string
-
-link for convenience
-
-source\_code\_groups
-
-array of string
-
-The array of assigned source code groups, not sorted
-
-start\_date
-
-datetime
-
-The date that the Scenario begins
 
 ## Responses
 
@@ -258,11 +191,11 @@ Media types: application/json, text/xml
 
 | Field | Type | Flags | Description | Constraints |
 | --- | --- | --- | --- | --- |
-| campaign_id | string |  | The ID of the campaign. |  |
+| campaign_id | string |  | The ID of the campaign. | Minimum characters: 1; Maximum characters: 256 |
 | coupons | array of string |  | The array of assigned coupon IDs, not sorted |  |
 | creation_date | datetime | Read-only | Returns the value of attribute 'creationDate'. |  |
 | customer_groups | array of string |  | The array of assigned customer groups, not sorted |  |
-| description | string |  | The description of the campaign. |  |
+| description | string |  | The description of the campaign. | Maximum characters: 4000 |
 | enabled | boolean |  | The enabled flag for campaign. |  |
 | end_date | datetime |  | The date that the Scenario ends |  |
 | last_modified | datetime | Read-only | Returns the value of attribute 'lastModified'. |  |

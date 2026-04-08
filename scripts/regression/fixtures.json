@@ -138,6 +138,30 @@
     "focus": ["nested-request-body", "request-example", "response-body-table"]
   },
   {
+    "id": "dev-ocapi-removebasket",
+    "kind": "developer",
+    "url": "https://developer.salesforce.com/docs/commerce/b2c-commerce/references/ocapi-shop-baskets?meta=Remove%2Ba%2Bbasket",
+    "focus": ["204-no-content", "fault-responses", "status-tabs"]
+  },
+  {
+    "id": "dev-ocapi-createbasket",
+    "kind": "developer",
+    "url": "https://developer.salesforce.com/docs/commerce/b2c-commerce/references/ocapi-shop-baskets?meta=Create%2Bbasket",
+    "focus": ["nested-request-body", "request-json-xml-examples", "deep-response-body"]
+  },
+  {
+    "id": "dev-ocapi-getorder",
+    "kind": "developer",
+    "url": "https://developer.salesforce.com/docs/commerce/b2c-commerce/references/ocapi-shop-orders?meta=Get%2Border",
+    "focus": ["deep-response-body", "response-example", "status-tabs"]
+  },
+  {
+    "id": "dev-ocapi-registercustomer",
+    "kind": "developer",
+    "url": "https://developer.salesforce.com/docs/commerce/b2c-commerce/references/ocapi-shop-customers?meta=Register%2Bcustomer",
+    "focus": ["request-json-xml-examples", "request-constraints", "response-body-table"]
+  },
+  {
     "id": "help-site-import-export-development-testing",
     "kind": "help",
     "url": "https://help.salesforce.com/s/articleView?id=cc.b2c_using_site_import_export_for_development_testing.htm&type=5&release=2.0.1&language=en_us",

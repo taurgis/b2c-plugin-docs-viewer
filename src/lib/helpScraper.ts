@@ -756,7 +756,7 @@ async function extractStructuredDeveloperRequestBody(
         return null;
       }
 
-      let example = "";
+      const exampleGroups = new Map<string, { mediaTypes: string[]; example: string }>();
       const mediaButtons = deepElements(bodyRoot)
         .filter(
           (element) =>
@@ -779,13 +779,24 @@ async function extractStructuredDeveloperRequestBody(
           continue;
         }
 
-        if (example.length === 0) {
-          const exampleHost = deepElements(refreshedBodyRoot).find(
-            (element) =>
-              element.tagName.toLowerCase() === "code" &&
-              (element.id === "output" || element.closest("pre.parsed-content") !== null)
-          );
-          example = normalizeCode(exampleHost?.textContent);
+        const exampleHost = deepElements(refreshedBodyRoot).find(
+          (element) =>
+            element.tagName.toLowerCase() === "code" &&
+            (element.id === "output" || element.closest("pre.parsed-content") !== null)
+        );
+        const example = normalizeCode(exampleHost?.textContent);
+        if (example.length > 0) {
+          const existingExample = exampleGroups.get(example);
+          if (existingExample) {
+            if (mediaButton.label.length > 0 && !existingExample.mediaTypes.includes(mediaButton.label)) {
+              existingExample.mediaTypes.push(mediaButton.label);
+            }
+          } else {
+            exampleGroups.set(example, {
+              mediaTypes: mediaButton.label.length > 0 ? [mediaButton.label] : [],
+              example,
+            });
+          }
         }
 
         const rowHosts = deepElements(refreshedBodyRoot).filter(
@@ -810,7 +821,15 @@ async function extractStructuredDeveloperRequestBody(
             const descriptions = Array.from(shadowRoot.querySelectorAll(".markdown-body"))
               .map((node) => normalizeText(node.textContent))
               .filter((value) => value.length > 0);
-            const constraints = Array.from(shadowRoot.querySelectorAll(".property-attribute"))
+            const rangeHosts = Array.from(shadowRoot.children).filter(
+              (node): node is Element =>
+                node instanceof Element && node.tagName.toLowerCase() === "property-range-document"
+            );
+            const constraints = rangeHosts
+              .flatMap((rangeHost) => {
+                const rangeShadowRoot = (rangeHost as Element & { shadowRoot?: ShadowRoot | null }).shadowRoot;
+                return Array.from(rangeShadowRoot?.querySelectorAll(".property-attribute") || []);
+              })
               .map((node) => normalizeText(node.textContent))
               .filter((value) => value.length > 0);
 
@@ -854,7 +873,7 @@ async function extractStructuredDeveloperRequestBody(
       }
 
       return {
-        example,
+        examples: Array.from(exampleGroups.values()),
         bodies: Array.from(grouped.values()).filter(
           (variant) => variant.rows.length > 0 || variant.mediaTypes.length > 0
         ),
@@ -1038,7 +1057,15 @@ async function extractStructuredDeveloperResponses(
                 const descriptions = Array.from(shadowRoot.querySelectorAll(".markdown-body"))
                   .map((node) => normalizeText(node.textContent))
                   .filter((value) => value.length > 0);
-                const constraints = Array.from(shadowRoot.querySelectorAll(".property-attribute"))
+                const rangeHosts = Array.from(shadowRoot.children).filter(
+                  (node): node is Element =>
+                    node instanceof Element && node.tagName.toLowerCase() === "property-range-document"
+                );
+                const constraints = rangeHosts
+                  .flatMap((rangeHost) => {
+                    const rangeShadowRoot = (rangeHost as Element & { shadowRoot?: ShadowRoot | null }).shadowRoot;
+                    return Array.from(rangeShadowRoot?.querySelectorAll(".property-attribute") || []);
+                  })
                   .map((node) => normalizeText(node.textContent))
                   .filter((value) => value.length > 0);
 

@@ -162,6 +162,19 @@ describe("formatHelpArticleMarkdown", () => {
     expect(markdown).not.toContain("You are here:");
     expect(markdown).toContain("Body content starts here.");
   });
+
+  it("removes a trailing standalone loading token", () => {
+    const raw = [
+      "Enable Agentforce for Guided Shopping",
+      "Body content starts here.",
+      "Loading",
+    ].join("\n");
+
+    const markdown = formatHelpArticleMarkdown(raw, "Enable Agentforce for Guided Shopping");
+
+    expect(markdown).toContain("Body content starts here.");
+    expect(markdown).not.toMatch(/\nLoading\s*$/);
+  });
 });
 
 describe("formatDeveloperArticleMarkdown", () => {
@@ -329,7 +342,16 @@ describe("structured developer responses", () => {
 
   it("renders a structured request body section", () => {
     const markdown = renderDeveloperRequestBodySection({
-      example: '{\n  "campaign_id": "my-campaign"\n}',
+      examples: [
+        {
+          mediaTypes: ["application/json"],
+          example: '{\n  "campaign_id": "my-campaign"\n}',
+        },
+        {
+          mediaTypes: ["text/xml"],
+          example: "<campaign><campaign_id>my-campaign</campaign_id></campaign>",
+        },
+      ],
       bodies: [
         {
           mediaTypes: ["application/json", "text/xml"],
@@ -349,6 +371,8 @@ describe("structured developer responses", () => {
     expect(markdown).toContain("### Body");
     expect(markdown).toContain("Media types: application/json, text/xml");
     expect(markdown).toContain("### Example");
+    expect(markdown).toContain("```json");
+    expect(markdown).toContain("```xml");
     expect(markdown).toContain("| campaign_id | string |  | The ID of the campaign. | Minimum characters: 1; Maximum characters: 256 |");
   });
 
@@ -377,5 +401,52 @@ describe("structured developer responses", () => {
     expect(replaced).toContain("Media types: application/json");
     expect(replaced).not.toContain("Old body");
     expect(replaced).toContain("## Security");
+  });
+
+  it("removes a stray generic request body that appears after security", () => {
+    const input = [
+      "# Create basket",
+      "",
+      "## Request",
+      "",
+      "### Request Example",
+      "",
+      "curl example",
+      "",
+      "## Security",
+      "",
+      "## Api Key",
+      "",
+      "#### Query Parameters",
+      "",
+      "| Field | Type | Required | Description | Constraints |",
+      "| --- | --- | --- | --- | --- |",
+      "| temporary | boolean | No | Temp basket flag |  |",
+      "",
+      "### Body",
+      "",
+      "Old flattened body",
+      "",
+      "### Example",
+      "",
+      "Old flattened example",
+      "",
+      "## Responses",
+      "",
+      "### 400",
+    ].join("\n");
+
+    const replaced = replaceDeveloperRequestBodySection(
+      input,
+      "### Body\n\nMedia types: application/json\n\n### Example\n\n```json\n{}\n```\n\n| Field | Type | Flags | Description | Constraints |\n| --- | --- | --- | --- | --- |\n| basket_id | string |  | Basket id |  |"
+    );
+
+    expect(replaced).toContain("## Security");
+    expect(replaced).toContain("#### Query Parameters");
+    expect(replaced).toContain("Media types: application/json");
+    expect(replaced).not.toContain("Old flattened body");
+    expect(replaced).not.toContain("Old flattened example");
+    expect(replaced.indexOf("### Body")).toBeLessThan(replaced.indexOf("## Security"));
+    expect(replaced).toContain("## Responses");
   });
 });
