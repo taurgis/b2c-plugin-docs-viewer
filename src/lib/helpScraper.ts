@@ -5,6 +5,7 @@ import { JSDOM } from "jsdom";
 import { buildCachePath, readCache, writeCache } from "./cache";
 import { normalizeAndValidateDocUrl } from "./urlPolicy";
 import { acceptOneTrust } from "./browserConsent";
+import { buildChromiumLaunchOptions } from "./browserLaunch";
 import {
   convertHtmlToMarkdown,
   createTurndown,
@@ -134,7 +135,7 @@ export type ScraperSession = {
 
 export async function createScraperSession(options?: { headed?: boolean }): Promise<ScraperSession> {
   const headed = options?.headed ?? false;
-  const browser = await chromium.launch({ headless: !headed });
+  const browser = await chromium.launch(buildChromiumLaunchOptions({ headed }));
   const context = await browser.newContext();
   let closed = false;
 

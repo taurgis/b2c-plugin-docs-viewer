@@ -17,17 +17,32 @@ Highlights:
 b2c plugins install b2c-plugin-help-docs-viewer
 ```
 
-If Playwright Chromium is not installed yet:
+If the Playwright headless browser is not installed yet:
+
+```bash
+# Lightweight install (no X11/Wayland/D-Bus deps; works on minimal Linux servers)
+npx playwright install --only-shell chromium
+```
+
+This downloads only the `chrome-headless-shell` binary, which is the dependency-light variant Chrome ships specifically for automation/scraping. It is what this plugin uses by default.
+
+If you also want to run the CLI with the `--headed` debug flag, install the full Chromium build instead:
 
 ```bash
 npx playwright install chromium
+```
+
+On Linux, you may additionally need the shared system libraries:
+
+```bash
+sudo npx playwright install-deps chromium
 ```
 
 ## Install (local development)
 
 ```bash
 npm install
-npx playwright install chromium
+npx playwright install --only-shell chromium
 npm run build
 b2c plugins link /path/to/b2c-plugin-help-docs-viewer
 ```
@@ -143,13 +158,15 @@ Notes:
 
 ## Troubleshooting
 
-- If Playwright is missing a browser, run `npx playwright install chromium`.
+- If Playwright is missing a browser, run `npx playwright install --only-shell chromium` (headless-only) or `npx playwright install chromium` (full, required for `--headed`).
+- On Linux, if the browser fails to start due to missing shared libraries, run `sudo npx playwright install-deps chromium`. The headless shell does **not** require X11, Wayland, or D-Bus.
 - If keychain access is blocked, allow your terminal to access the keychain and retry.
 
 ## Notes
 
 - Tokens are stored in the OS keychain (via keytar).
-- The CLI uses Playwright for Help site rendering; install the Chromium browser if needed.
+- The CLI uses Playwright's `chrome-headless-shell` for Help site rendering by default, so it runs on headless Linux servers without an X11/Wayland display.
+- The `--headed` flag is intended for local debugging and requires the full Chromium build (`npx playwright install chromium`).
 
 ## Unlink
 

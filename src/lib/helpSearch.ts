@@ -1,6 +1,7 @@
 import { chromium } from "playwright";
 import type { Response as PlaywrightResponse } from "playwright";
 import { buildCachePath, readCache, writeCache } from "./cache";
+import { buildChromiumLaunchOptions } from "./browserLaunch";
 import { storeLatestSearch } from "./latestSearch";
 import {
   isTokenValid,
@@ -75,7 +76,7 @@ async function searchViaBrowser(
   headed: boolean,
   debug: boolean
 ): Promise<SearchResult[]> {
-  const browser = await chromium.launch({ headless: !headed });
+  const browser = await chromium.launch(buildChromiumLaunchOptions({ headed }));
   const context = await browser.newContext();
   const page = await context.newPage();
   let captured: { data: any | null; requestPayload: any | null } | null = null;
