@@ -10,6 +10,7 @@ const jsdom_1 = require("jsdom");
 const cache_1 = require("./cache");
 const urlPolicy_1 = require("./urlPolicy");
 const browserConsent_1 = require("./browserConsent");
+const browserLaunch_1 = require("./browserLaunch");
 const helpScraperMarkdown_1 = require("./helpScraperMarkdown");
 const errorUtils_1 = require("./errorUtils");
 const promiseUtils_1 = require("./promiseUtils");
@@ -95,7 +96,7 @@ const GARBAGE_PATTERNS = [
 ];
 async function createScraperSession(options) {
     const headed = options?.headed ?? false;
-    const browser = await playwright_1.chromium.launch({ headless: !headed });
+    const browser = await playwright_1.chromium.launch((0, browserLaunch_1.buildChromiumLaunchOptions)({ headed }));
     const context = await browser.newContext();
     let closed = false;
     return {
