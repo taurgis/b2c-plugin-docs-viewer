@@ -1,3 +1,9 @@
+import {
+  InvalidUrlError,
+  UnsupportedHostError,
+  UnsupportedProtocolError,
+} from "../apiErrors";
+
 const ALLOWED_DOC_HOSTS = new Set(["help.salesforce.com", "developer.salesforce.com"]);
 
 export function getAllowedDocHosts(): string[] {
@@ -13,15 +19,15 @@ export function normalizeAndValidateDocUrl(rawUrl: string): string {
   try {
     parsed = new URL(rawUrl);
   } catch {
-    throw new Error("Invalid URL. Provide a valid Help or Developer docs URL.");
+    throw new InvalidUrlError();
   }
 
   if (parsed.protocol !== "https:") {
-    throw new Error("Unsupported URL protocol. Use https URLs only.");
+    throw new UnsupportedProtocolError();
   }
 
   if (!isAllowedDocHost(parsed.hostname)) {
-    throw new Error("Unsupported host. Only help.salesforce.com and developer.salesforce.com are allowed.");
+    throw new UnsupportedHostError();
   }
 
   return parsed.toString();

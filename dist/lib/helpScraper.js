@@ -7,6 +7,7 @@ exports.getHelpDetails = getHelpDetails;
 const playwright_1 = require("playwright");
 const readability_1 = require("@mozilla/readability");
 const jsdom_1 = require("jsdom");
+const apiErrors_1 = require("../apiErrors");
 const cache_1 = require("./cache");
 const urlPolicy_1 = require("./urlPolicy");
 const browserConsent_1 = require("./browserConsent");
@@ -96,7 +97,13 @@ const GARBAGE_PATTERNS = [
 ];
 async function createScraperSession(options) {
     const headed = options?.headed ?? false;
-    const browser = await playwright_1.chromium.launch((0, browserLaunch_1.buildChromiumLaunchOptions)({ headed }));
+    let browser;
+    try {
+        browser = await playwright_1.chromium.launch((0, browserLaunch_1.buildChromiumLaunchOptions)({ headed }));
+    }
+    catch (error) {
+        throw new apiErrors_1.BrowserLaunchError(undefined, { cause: error });
+    }
     const context = await browser.newContext();
     let closed = false;
     return {
@@ -204,7 +211,7 @@ async function scrapeHelpMarkdown(context, url, timeoutMs, waitMs, includeRawHtm
         }
         const bodyText = await page.innerText("body");
         if (await isAuraErrorVisible(page) || looksLikeErrorPage(bodyText)) {
-            throw new Error("Help article error page detected.");
+            throw new apiErrors_1.ArticleNotFoundError();
         }
         const html = await page.content();
         const dom = new jsdom_1.JSDOM(html, { url });
@@ -230,7 +237,7 @@ async function scrapeHelpMarkdown(context, url, timeoutMs, waitMs, includeRawHtm
             }
         }
         if (markdown.length < MIN_CONTENT_LENGTH) {
-            throw new Error("Extracted content was too short.");
+            throw new apiErrors_1.ExtractedContentTooShortError();
         }
         const normalizedMarkdown = normalizeMarkdown(markdown);
         const markdownTitle = extractMarkdownTitle(normalizedMarkdown);
@@ -905,7 +912,7 @@ async function scrapeDeveloperMarkdown(context, url, timeoutMs, waitMs, includeR
             return "";
         });
         if (looksLikeDeveloperErrorPage(bodyText)) {
-            throw new Error("Developer documentation error page detected.");
+            throw new apiErrors_1.ArticleNotFoundError();
         }
         const html = await page.content();
         const dom = new jsdom_1.JSDOM(html, { url: page.url() });
@@ -1019,10 +1026,10 @@ async function scrapeDeveloperMarkdown(context, url, timeoutMs, waitMs, includeR
             markdown = (0, helpScraperMarkdown_1.replaceDeveloperResponsesSection)(markdown, renderedResponses);
         }
         if (markdown.length < MIN_CONTENT_LENGTH) {
-            throw new Error("Extracted content was too short.");
+            throw new apiErrors_1.ExtractedContentTooShortError();
         }
         if (looksLikeDeveloperErrorPage(markdown)) {
-            throw new Error("Developer documentation error page detected.");
+            throw new apiErrors_1.ArticleNotFoundError();
         }
         const normalizedMarkdown = normalizeMarkdown(markdown);
         const markdownTitle = extractMarkdownTitle(normalizedMarkdown);

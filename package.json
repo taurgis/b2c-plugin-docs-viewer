@@ -1,6 +1,6 @@
 {
   "name": "b2c-plugin-help-docs-viewer",
-  "version": "0.4.5",
+  "version": "0.4.6",
   "description": "B2C CLI plugin for Salesforce Help search and article details.",
   "homepage": "https://github.com/taurgis/b2c-plugin-docs-viewer#readme",
   "bugs": {
@@ -12,13 +12,31 @@
   },
   "license": "MIT",
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./index.mjs",
+      "require": "./dist/index.js",
+      "default": "./index.mjs"
+    },
+    "./api": {
+      "types": "./dist/api.d.ts",
+      "import": "./api.mjs",
+      "require": "./dist/api.js",
+      "default": "./api.mjs"
+    },
+    "./package.json": "./package.json"
+  },
   "files": [
-    "dist"
+    "dist",
+    "index.mjs",
+    "api.mjs"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "clean": "rm -rf dist",
-    "test": "vitest run",
+    "test": "npm run build && vitest run",
     "test:watch": "vitest",
     "regression:suite": "node testing/regression/run-suite.mjs",
     "regression:promote": "node testing/regression/run-suite.mjs --promote",

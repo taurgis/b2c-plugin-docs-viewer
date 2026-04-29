@@ -1,7 +1,7 @@
 import { Args, Command, Flags } from "@oclif/core";
-import { getHelpDetails } from "../../lib/helpScraper";
+import { getHelpDocsErrorCode } from "../../apiErrors";
+import { readHelpDoc, resolveHelpDoc } from "../../api";
 import { loadLatestSearch } from "../../lib/latestSearch";
-import { normalizeAndValidateDocUrl } from "../../lib/urlPolicy";
 import { getErrorMessage } from "../../lib/errorUtils";
 import { writeTextFile } from "../../lib/fileOutput";
 import {
@@ -87,49 +87,50 @@ export default class DocsHelpSiteArticle extends Command {
     }
 
     try {
-      targetUrl = normalizeAndValidateDocUrl(targetUrl);
-    } catch (error) {
-      this.error(getErrorMessage(error));
-    }
+      targetUrl = resolveHelpDoc(targetUrl).url;
 
-    if (flags.rawHtml && !flags.json && !flags.out) {
-      this.error("--raw-html requires --json or --out to avoid flooding terminal output.");
-    }
+      if (flags.rawHtml && !flags.json && !flags.out) {
+        this.error("--raw-html requires --json or --out to avoid flooding terminal output.");
+      }
 
-    const result = await getHelpDetails({
-      url: targetUrl,
-      timeoutMs: flags.timeout,
-      waitMs: flags.wait,
-      headed: flags.headed,
-      useCache: flags.cache,
-      includeRawHtml: flags.rawHtml,
-      debug: flags.debug,
-    });
+      const result = await readHelpDoc(targetUrl, {
+        timeoutMs: flags.timeout,
+        waitMs: flags.wait,
+        headed: flags.headed,
+        cache: flags.cache,
+        includeRawHtml: flags.rawHtml,
+        debug: flags.debug,
+      });
 
-    if (flags.json) {
-      const output = JSON.stringify(result, null, 2) + "\n";
-      if (flags.out) {
-        await writeTextFile(flags.out, output);
-        this.log(`Saved JSON to ${flags.out}`);
+      if (flags.json) {
+        const output = JSON.stringify(result, null, 2) + "\n";
+        if (flags.out) {
+          await writeTextFile(flags.out, output);
+          this.log(`Saved JSON to ${flags.out}`);
+          return;
+        }
+        this.log(output.trimEnd());
         return;
       }
-      this.log(output.trimEnd());
-      return;
-    }
 
-    if (flags.out) {
-      await writeTextFile(flags.out, result.markdown + "\n");
-      this.log(`Saved markdown to ${flags.out}`);
+      if (flags.out) {
+        await writeTextFile(flags.out, result.markdown + "\n");
+        this.log(`Saved markdown to ${flags.out}`);
 
-      if (flags.rawHtml) {
-        const htmlOut = `${flags.out}.raw.html`;
-        await writeTextFile(htmlOut, (result.rawHtml || "") + "\n");
-        this.log(`Saved raw HTML to ${htmlOut}`);
+        if (flags.rawHtml) {
+          const htmlOut = `${flags.out}.raw.html`;
+          await writeTextFile(htmlOut, (result.rawHtml || "") + "\n");
+          this.log(`Saved raw HTML to ${htmlOut}`);
+        }
+
+        return;
       }
 
-      return;
+      this.log(result.markdown);
+    } catch (error) {
+      this.error(getErrorMessage(error), {
+        code: getHelpDocsErrorCode(error),
+      });
     }
-
-    this.log(result.markdown);
   }
 }

@@ -17,6 +17,12 @@ Highlights:
 b2c plugins install b2c-plugin-help-docs-viewer
 ```
 
+For Node.js consumers that want to call the library directly:
+
+```bash
+npm install b2c-plugin-help-docs-viewer
+```
+
 If the Playwright headless browser is not installed yet:
 
 ```bash
@@ -75,6 +81,116 @@ Search and immediately fetch details:
 b2c docs fetch-results-help-site "b2c commerce roles" --limit 3
 b2c docs fetch-results-help-site "b2c commerce roles" --limit 6 --concurrency 3
 ```
+
+## Programmatic API
+
+Supported imports:
+
+```js
+import {
+	readHelpDoc,
+	searchHelpDocs,
+} from "b2c-plugin-help-docs-viewer";
+```
+
+```js
+import {
+	readHelpDoc,
+	searchHelpDocs,
+} from "b2c-plugin-help-docs-viewer/api";
+```
+
+Search Salesforce Help and Developer docs:
+
+```js
+import { searchHelpDocs } from "b2c-plugin-help-docs-viewer";
+
+const searchResult = await searchHelpDocs({
+	query: "b2c commerce roles",
+	limit: 5,
+	language: "en_US",
+	cache: true,
+	timeoutMs: 45_000,
+	headed: false,
+});
+
+console.log(searchResult.results.map((item) => ({
+	id: item.id,
+	title: item.title,
+	source: item.source,
+	url: item.url,
+})));
+```
+
+Read an article as markdown:
+
+```js
+import { readHelpDoc } from "b2c-plugin-help-docs-viewer/api";
+
+const article = await readHelpDoc(
+	"https://help.salesforce.com/s/articleView?id=cc.b2c_roles_and_permissions.htm&type=5",
+	{
+		cache: true,
+		timeoutMs: 45_000,
+		waitMs: 2500,
+		includeRawHtml: true,
+	}
+);
+
+console.log(article.title);
+console.log(article.markdown);
+console.log(article.rawHtml);
+```
+
+Error handling with stable codes:
+
+```js
+import {
+	HelpDocsApiError,
+	HELP_DOCS_ERROR_CODES,
+	readHelpDoc,
+} from "b2c-plugin-help-docs-viewer";
+
+try {
+	await readHelpDoc("https://example.com/not-allowed");
+} catch (error) {
+	if (error instanceof HelpDocsApiError) {
+		switch (error.code) {
+			case HELP_DOCS_ERROR_CODES.INVALID_URL:
+			case HELP_DOCS_ERROR_CODES.UNSUPPORTED_PROTOCOL:
+			case HELP_DOCS_ERROR_CODES.UNSUPPORTED_HOST:
+			case HELP_DOCS_ERROR_CODES.ARTICLE_NOT_FOUND:
+			case HELP_DOCS_ERROR_CODES.SEARCH_FAILED:
+			case HELP_DOCS_ERROR_CODES.EXTRACTED_CONTENT_TOO_SHORT:
+			case HELP_DOCS_ERROR_CODES.BROWSER_LAUNCH_FAILED:
+				console.error(error.code, error.message);
+				break;
+			default:
+				throw error;
+		}
+	}
+
+	throw error;
+}
+```
+
+The public API is intended for MCP-style consumers and other automation. Search results always include a normalized URL plus source metadata (`help` or `developer`), and article reads always return markdown.
+
+Advanced helper:
+
+```js
+import { resolveHelpDoc } from "b2c-plugin-help-docs-viewer";
+
+const resolved = resolveHelpDoc("https://developer.salesforce.com/docs/commerce/example");
+console.log(resolved);
+```
+
+Playwright/browser requirements:
+
+- The library depends on Playwright at runtime.
+- Install a browser binary before first use: `npx playwright install --only-shell chromium` for headless automation or `npx playwright install chromium` for headed debugging.
+- On Linux, you may also need `sudo npx playwright install-deps chromium`.
+- A `BROWSER_LAUNCH_FAILED` error usually means the browser binaries or system libraries are missing.
 
 ## Examples
 

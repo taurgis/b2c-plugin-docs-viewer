@@ -1,20 +1,15 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import DocsFetchResultsHelpSite from "./fetch-results-help-site";
-import { searchHelp } from "../../lib/helpSearch";
-import { createScraperSession, getHelpDetails } from "../../lib/helpScraper";
-import { normalizeAndValidateDocUrl } from "../../lib/urlPolicy";
+import {
+  createHelpDocsSession,
+  readHelpDoc,
+  searchHelpDocs,
+} from "../../api";
 
-vi.mock("../../lib/helpSearch", () => ({
-  searchHelp: vi.fn(),
-}));
-
-vi.mock("../../lib/helpScraper", () => ({
-  createScraperSession: vi.fn(),
-  getHelpDetails: vi.fn(),
-}));
-
-vi.mock("../../lib/urlPolicy", () => ({
-  normalizeAndValidateDocUrl: vi.fn(),
+vi.mock("../../api", () => ({
+  createHelpDocsSession: vi.fn(),
+  readHelpDoc: vi.fn(),
+  searchHelpDocs: vi.fn(),
 }));
 
 type RunContext = {
@@ -38,23 +33,45 @@ function createContext(parseResult: unknown): RunContext {
 describe("docs fetch-results-help-site", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(normalizeAndValidateDocUrl).mockImplementation((value: string) => value);
-    vi.mocked(createScraperSession).mockResolvedValue({
+    vi.mocked(createHelpDocsSession).mockResolvedValue({
       context: {} as never,
       close: vi.fn().mockResolvedValue(undefined),
     });
   });
 
   it("reports partial failures and keeps successful markdown output", async () => {
-    vi.mocked(searchHelp).mockResolvedValue([
-      { title: "Doc A", url: "https://help.salesforce.com/s/articleView?id=a&type=5" },
-      { title: "Doc B", url: "https://developer.salesforce.com/docs/commerce/example" },
-    ]);
+    vi.mocked(searchHelpDocs).mockResolvedValue({
+      query: "roles",
+      language: "en_US",
+      count: 2,
+      results: [
+        {
+          id: 1,
+          rank: 1,
+          title: "Doc A",
+          url: "https://help.salesforce.com/s/articleView?id=a&type=5",
+          source: "help",
+          hostname: "help.salesforce.com",
+          label: "Doc A",
+        },
+        {
+          id: 2,
+          rank: 2,
+          title: "Doc B",
+          url: "https://developer.salesforce.com/docs/commerce/example",
+          source: "developer",
+          hostname: "developer.salesforce.com",
+          label: "Doc B",
+        },
+      ],
+    });
 
-    vi.mocked(getHelpDetails)
+    vi.mocked(readHelpDoc)
       .mockResolvedValueOnce({
         url: "https://help.salesforce.com/s/articleView?id=a&type=5",
         title: "Doc A",
+        source: "help",
+        hostname: "help.salesforce.com",
         markdown: "# Doc A\ncontent",
       })
       .mockRejectedValueOnce(new Error("fetch failed"));
@@ -85,11 +102,24 @@ describe("docs fetch-results-help-site", () => {
   });
 
   it("emits JSON failure details then exits non-zero when all fetches fail", async () => {
-    vi.mocked(searchHelp).mockResolvedValue([
-      { title: "Doc A", url: "https://help.salesforce.com/s/articleView?id=a&type=5" },
-    ]);
+    vi.mocked(searchHelpDocs).mockResolvedValue({
+      query: "roles",
+      language: "en_US",
+      count: 1,
+      results: [
+        {
+          id: 1,
+          rank: 1,
+          title: "Doc A",
+          url: "https://help.salesforce.com/s/articleView?id=a&type=5",
+          source: "help",
+          hostname: "help.salesforce.com",
+          label: "Doc A",
+        },
+      ],
+    });
 
-    vi.mocked(getHelpDetails).mockRejectedValue(new Error("network down"));
+    vi.mocked(readHelpDoc).mockRejectedValue(new Error("network down"));
 
     const ctx = createContext({
       args: { query: "roles" },
@@ -122,7 +152,12 @@ describe("docs fetch-results-help-site", () => {
   });
 
   it("returns JSON with count 0 when search has no hits", async () => {
-    vi.mocked(searchHelp).mockResolvedValue([]);
+    vi.mocked(searchHelpDocs).mockResolvedValue({
+      query: "nope",
+      language: "en_US",
+      count: 0,
+      results: [],
+    });
 
     const ctx = createContext({
       args: { query: "nope" },
@@ -142,7 +177,7 @@ describe("docs fetch-results-help-site", () => {
 
     await DocsFetchResultsHelpSite.prototype.run.call(ctx as never);
 
-    expect(getHelpDetails).not.toHaveBeenCalled();
+    expect(readHelpDoc).not.toHaveBeenCalled();
     const output = String(ctx.log.mock.calls[0][0]);
     const parsed = JSON.parse(output) as {
       query: string;
@@ -158,7 +193,12 @@ describe("docs fetch-results-help-site", () => {
   });
 
   it("prints a friendly message when search has no hits in non-JSON mode", async () => {
-    vi.mocked(searchHelp).mockResolvedValue([]);
+    vi.mocked(searchHelpDocs).mockResolvedValue({
+      query: "nope",
+      language: "en_US",
+      count: 0,
+      results: [],
+    });
 
     const ctx = createContext({
       args: { query: "nope" },
@@ -178,7 +218,7 @@ describe("docs fetch-results-help-site", () => {
 
     await DocsFetchResultsHelpSite.prototype.run.call(ctx as never);
 
-    expect(getHelpDetails).not.toHaveBeenCalled();
+    expect(readHelpDoc).not.toHaveBeenCalled();
     const lastLog = String(ctx.log.mock.calls[ctx.log.mock.calls.length - 1][0]);
     expect(lastLog).toBe("No results found.");
   });

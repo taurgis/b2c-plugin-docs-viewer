@@ -1,9 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const core_1 = require("@oclif/core");
-const helpSearch_1 = require("../../lib/helpSearch");
-const helpScraper_1 = require("../../lib/helpScraper");
-const urlPolicy_1 = require("../../lib/urlPolicy");
+const api_1 = require("../../api");
+const apiErrors_1 = require("../../apiErrors");
 const errorUtils_1 = require("../../lib/errorUtils");
 const fileOutput_1 = require("../../lib/fileOutput");
 const commandFlags_1 = require("../../lib/commandFlags");
@@ -38,28 +37,110 @@ class DocsFetchResultsHelpSite extends core_1.Command {
     async run() {
         const { args, flags } = await this.parse(DocsFetchResultsHelpSite);
         const showStatus = !flags.json;
-        if (showStatus) {
-            this.log(`-> Searching Help for "${args.query}"...`);
-        }
-        const results = await (0, helpSearch_1.searchHelp)({
-            query: args.query,
-            language: flags.language,
-            limit: flags.limit,
-            timeoutMs: flags.timeout,
-            useCache: flags.cache,
-            headed: flags.headed,
-            debug: flags.debug,
-        });
-        if (showStatus) {
-            this.log(`-> Found ${results.length} result${results.length === 1 ? "" : "s"}.`);
-        }
-        if (results.length === 0) {
+        try {
+            if (showStatus) {
+                this.log(`-> Searching Help for "${args.query}"...`);
+            }
+            const searchResult = await (0, api_1.searchHelpDocs)({
+                query: args.query,
+                language: flags.language,
+                limit: flags.limit,
+                timeoutMs: flags.timeout,
+                cache: flags.cache,
+                headed: flags.headed,
+                debug: flags.debug,
+            });
+            const results = searchResult.results;
+            if (showStatus) {
+                this.log(`-> Found ${results.length} result${results.length === 1 ? "" : "s"}.`);
+            }
+            if (results.length === 0) {
+                if (flags.json) {
+                    const output = JSON.stringify({
+                        query: args.query,
+                        language: searchResult.language,
+                        count: 0,
+                        results: [],
+                        errors: [],
+                    }, null, 2) + "\n";
+                    if (flags.out) {
+                        await (0, fileOutput_1.writeTextFile)(flags.out, output);
+                        this.log(`Saved JSON to ${flags.out}`);
+                    }
+                    else {
+                        this.log(output.trimEnd());
+                    }
+                }
+                else if (flags.out) {
+                    await (0, fileOutput_1.writeTextFile)(flags.out, "No results found.\n");
+                    this.log(`Saved output to ${flags.out}`);
+                }
+                else {
+                    this.log("No results found.");
+                }
+                return;
+            }
+            const concurrency = Math.max(1, Math.min(flags.concurrency, 6));
+            if (showStatus) {
+                this.log(`-> Fetching ${results.length} article(s) with concurrency ${concurrency}...`);
+            }
+            const scraperSession = await (0, api_1.createHelpDocsSession)({ headed: flags.headed });
+            const settled = await mapWithConcurrency(results, concurrency, async (item, index) => {
+                if (showStatus) {
+                    this.log(`-> Fetching article ${index + 1}/${results.length}...`);
+                }
+                try {
+                    const detail = await (0, api_1.readHelpDoc)(item, {
+                        timeoutMs: flags.timeout,
+                        waitMs: flags.wait,
+                        cache: flags.cache,
+                        debug: flags.debug,
+                        session: scraperSession,
+                    });
+                    return {
+                        ok: true,
+                        item: {
+                            url: detail.url,
+                            title: detail.title || item.title,
+                            source: detail.source,
+                            markdown: detail.markdown,
+                        },
+                    };
+                }
+                catch (error) {
+                    return {
+                        ok: false,
+                        item: {
+                            url: item.url,
+                            title: item.title,
+                            code: (0, apiErrors_1.getHelpDocsErrorCode)(error),
+                            error: (0, errorUtils_1.getErrorMessage)(error),
+                        },
+                    };
+                }
+            }).finally(async () => {
+                await scraperSession.close();
+            });
+            const detailed = [];
+            const failures = [];
+            for (const entry of settled) {
+                if (entry.ok) {
+                    detailed.push(entry.item);
+                }
+                else {
+                    failures.push(entry.item);
+                }
+            }
+            if (showStatus) {
+                this.log(`-> Completed: ${detailed.length} succeeded, ${failures.length} failed.`);
+            }
             if (flags.json) {
                 const output = JSON.stringify({
                     query: args.query,
-                    count: 0,
-                    results: [],
-                    errors: [],
+                    language: searchResult.language,
+                    count: detailed.length,
+                    results: detailed,
+                    errors: failures,
                 }, null, 2) + "\n";
                 if (flags.out) {
                     await (0, fileOutput_1.writeTextFile)(flags.out, output);
@@ -68,111 +149,39 @@ class DocsFetchResultsHelpSite extends core_1.Command {
                 else {
                     this.log(output.trimEnd());
                 }
+                if (results.length > 0 && detailed.length === 0) {
+                    this.error("Failed to fetch all articles.", { code: "ALL_FETCHES_FAILED" });
+                }
+                return;
             }
-            else if (flags.out) {
-                await (0, fileOutput_1.writeTextFile)(flags.out, "No results found.\n");
-                this.log(`Saved output to ${flags.out}`);
-            }
-            else {
-                this.log("No results found.");
-            }
-            return;
-        }
-        const concurrency = Math.max(1, Math.min(flags.concurrency, 6));
-        if (showStatus) {
-            this.log(`-> Fetching ${results.length} article(s) with concurrency ${concurrency}...`);
-        }
-        const scraperSession = await (0, helpScraper_1.createScraperSession)({ headed: flags.headed });
-        const settled = await mapWithConcurrency(results, concurrency, async (item, index) => {
-            if (showStatus) {
-                this.log(`-> Fetching article ${index + 1}/${results.length}...`);
-            }
-            try {
-                const validatedUrl = (0, urlPolicy_1.normalizeAndValidateDocUrl)(item.url);
-                const detail = await (0, helpScraper_1.getHelpDetails)({
-                    url: validatedUrl,
-                    timeoutMs: flags.timeout,
-                    waitMs: flags.wait,
-                    useCache: flags.cache,
-                    debug: flags.debug,
-                    session: scraperSession,
-                });
-                return {
-                    ok: true,
-                    item: {
-                        url: validatedUrl,
-                        title: detail.title || item.title,
-                        markdown: detail.markdown,
-                    },
-                };
-            }
-            catch (error) {
-                return {
-                    ok: false,
-                    item: {
-                        url: item.url,
-                        title: item.title,
-                        error: (0, errorUtils_1.getErrorMessage)(error),
-                    },
-                };
-            }
-        }).finally(async () => {
-            await scraperSession.close();
-        });
-        const detailed = [];
-        const failures = [];
-        for (const entry of settled) {
-            if (entry.ok) {
-                detailed.push(entry.item);
-            }
-            else {
-                failures.push(entry.item);
-            }
-        }
-        if (showStatus) {
-            this.log(`-> Completed: ${detailed.length} succeeded, ${failures.length} failed.`);
-        }
-        if (flags.json) {
-            const output = JSON.stringify({
-                query: args.query,
-                count: detailed.length,
-                results: detailed,
-                errors: failures,
-            }, null, 2) + "\n";
+            const blocks = detailed.map((item, index) => {
+                const heading = item.title ? `${index + 1}. ${item.title}` : `${index + 1}. ${item.url}`;
+                return `${heading}\n${item.url}\n\n${item.markdown}`.trim();
+            });
+            const output = blocks.join("\n\n-----\n\n");
+            const failureSection = buildFailureSection(failures);
+            const fullOutput = `${output}${failureSection}`;
             if (flags.out) {
-                await (0, fileOutput_1.writeTextFile)(flags.out, output);
-                this.log(`Saved JSON to ${flags.out}`);
+                await (0, fileOutput_1.writeTextFile)(flags.out, fullOutput + "\n");
+                this.log(`Saved output to ${flags.out}`);
+                if (failures.length > 0) {
+                    this.warn(`Completed with ${failures.length} failed article fetch(es).`);
+                }
             }
             else {
-                this.log(output.trimEnd());
+                this.log(fullOutput);
+                if (failures.length > 0) {
+                    this.warn(`Completed with ${failures.length} failed article fetch(es).`);
+                }
             }
             if (results.length > 0 && detailed.length === 0) {
                 this.error("Failed to fetch all articles.", { code: "ALL_FETCHES_FAILED" });
             }
-            return;
         }
-        const blocks = detailed.map((item, index) => {
-            const heading = item.title ? `${index + 1}. ${item.title}` : `${index + 1}. ${item.url}`;
-            return `${heading}\n${item.url}\n\n${item.markdown}`.trim();
-        });
-        const output = blocks.join("\n\n-----\n\n");
-        const failureSection = buildFailureSection(failures);
-        const fullOutput = `${output}${failureSection}`;
-        if (flags.out) {
-            await (0, fileOutput_1.writeTextFile)(flags.out, fullOutput + "\n");
-            this.log(`Saved output to ${flags.out}`);
-            if (failures.length > 0) {
-                this.warn(`Completed with ${failures.length} failed article fetch(es).`);
-            }
-        }
-        else {
-            this.log(fullOutput);
-            if (failures.length > 0) {
-                this.warn(`Completed with ${failures.length} failed article fetch(es).`);
-            }
-        }
-        if (results.length > 0 && detailed.length === 0) {
-            this.error("Failed to fetch all articles.", { code: "ALL_FETCHES_FAILED" });
+        catch (error) {
+            this.error((0, errorUtils_1.getErrorMessage)(error), {
+                code: (0, apiErrors_1.getHelpDocsErrorCode)(error),
+            });
         }
     }
 }

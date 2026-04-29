@@ -1,20 +1,16 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import DocsHelpSiteArticle from "./help-site-article";
-import { getHelpDetails } from "../../lib/helpScraper";
+import { readHelpDoc, resolveHelpDoc } from "../../api";
 import { loadLatestSearch } from "../../lib/latestSearch";
-import { normalizeAndValidateDocUrl } from "../../lib/urlPolicy";
 import { writeTextFile } from "../../lib/fileOutput";
 
-vi.mock("../../lib/helpScraper", () => ({
-  getHelpDetails: vi.fn(),
+vi.mock("../../api", () => ({
+  readHelpDoc: vi.fn(),
+  resolveHelpDoc: vi.fn(),
 }));
 
 vi.mock("../../lib/latestSearch", () => ({
   loadLatestSearch: vi.fn(),
-}));
-
-vi.mock("../../lib/urlPolicy", () => ({
-  normalizeAndValidateDocUrl: vi.fn(),
 }));
 
 vi.mock("../../lib/fileOutput", () => ({
@@ -50,10 +46,16 @@ describe("docs help-site-article", () => {
         { title: "Doc B", url: "https://developer.salesforce.com/docs/commerce/example" },
       ],
     });
-    vi.mocked(normalizeAndValidateDocUrl).mockImplementation((value: string) => value);
-    vi.mocked(getHelpDetails).mockResolvedValue({
+    vi.mocked(resolveHelpDoc).mockImplementation((value: { url: string } | string) => ({
+      url: typeof value === "string" ? value : value.url,
+      source: "developer",
+      hostname: "developer.salesforce.com",
+    }));
+    vi.mocked(readHelpDoc).mockResolvedValue({
       url: "https://developer.salesforce.com/docs/commerce/example",
       title: "Doc B",
+      source: "developer",
+      hostname: "developer.salesforce.com",
       markdown: "# Doc B\ncontent",
     });
 
@@ -73,22 +75,25 @@ describe("docs help-site-article", () => {
 
     await DocsHelpSiteArticle.prototype.run.call(ctx as never);
 
-    expect(normalizeAndValidateDocUrl).toHaveBeenCalledWith(
+    expect(resolveHelpDoc).toHaveBeenCalledWith(
       "https://developer.salesforce.com/docs/commerce/example"
     );
-    expect(getHelpDetails).toHaveBeenCalledWith({
-      url: "https://developer.salesforce.com/docs/commerce/example",
+    expect(readHelpDoc).toHaveBeenCalledWith("https://developer.salesforce.com/docs/commerce/example", {
       timeoutMs: 45000,
       waitMs: 2500,
       headed: false,
-      useCache: false,
+      cache: false,
       includeRawHtml: false,
       debug: true,
     });
   });
 
   it("rejects --raw-html without --json or --out", async () => {
-    vi.mocked(normalizeAndValidateDocUrl).mockImplementation((value: string) => value);
+    vi.mocked(resolveHelpDoc).mockImplementation((value: { url: string } | string) => ({
+      url: typeof value === "string" ? value : value.url,
+      source: "help",
+      hostname: "help.salesforce.com",
+    }));
 
     const ctx = createContext({
       args: { reference: "https://help.salesforce.com/s/articleView?id=a&type=5" },
@@ -110,10 +115,16 @@ describe("docs help-site-article", () => {
   });
 
   it("writes JSON file when --json and --out are used", async () => {
-    vi.mocked(normalizeAndValidateDocUrl).mockImplementation((value: string) => value);
-    vi.mocked(getHelpDetails).mockResolvedValue({
+    vi.mocked(resolveHelpDoc).mockImplementation((value: { url: string } | string) => ({
+      url: typeof value === "string" ? value : value.url,
+      source: "help",
+      hostname: "help.salesforce.com",
+    }));
+    vi.mocked(readHelpDoc).mockResolvedValue({
       url: "https://help.salesforce.com/s/articleView?id=a&type=5",
       title: "Doc A",
+      source: "help",
+      hostname: "help.salesforce.com",
       markdown: "# Doc A\ncontent",
     });
 

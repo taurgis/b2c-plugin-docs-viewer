@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.normalizeHelpDocContentUrl = exports.extractResults = void 0;
 exports.searchHelp = searchHelp;
 const playwright_1 = require("playwright");
+const apiErrors_1 = require("../apiErrors");
 const cache_1 = require("./cache");
 const browserLaunch_1 = require("./browserLaunch");
 const latestSearch_1 = require("./latestSearch");
@@ -50,7 +51,13 @@ var helpSearchResults_2 = require("./helpSearchResults");
 Object.defineProperty(exports, "extractResults", { enumerable: true, get: function () { return helpSearchResults_2.extractResults; } });
 Object.defineProperty(exports, "normalizeHelpDocContentUrl", { enumerable: true, get: function () { return helpSearchResults_2.normalizeHelpDocContentUrl; } });
 async function searchViaBrowser(query, language, limit, timeoutMs, headed, debug) {
-    const browser = await playwright_1.chromium.launch((0, browserLaunch_1.buildChromiumLaunchOptions)({ headed }));
+    let browser;
+    try {
+        browser = await playwright_1.chromium.launch((0, browserLaunch_1.buildChromiumLaunchOptions)({ headed }));
+    }
+    catch (error) {
+        throw new apiErrors_1.BrowserLaunchError(undefined, { cause: error });
+    }
     const context = await browser.newContext();
     const page = await context.newPage();
     let captured = null;

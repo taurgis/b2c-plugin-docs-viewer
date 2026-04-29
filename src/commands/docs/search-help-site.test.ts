@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import DocsSearchHelpSite from "./search-help-site";
-import { searchHelp } from "../../lib/helpSearch";
+import { searchHelpDocs } from "../../api";
 
-vi.mock("../../lib/helpSearch", () => ({
-  searchHelp: vi.fn(),
+vi.mock("../../api", () => ({
+  searchHelpDocs: vi.fn(),
 }));
 
 type RunContext = {
@@ -24,9 +24,22 @@ describe("docs search-help-site", () => {
   });
 
   it("prints JSON output in --json mode", async () => {
-    vi.mocked(searchHelp).mockResolvedValue([
-      { title: "Doc A", url: "https://help.salesforce.com/s/articleView?id=a&type=5" },
-    ]);
+    vi.mocked(searchHelpDocs).mockResolvedValue({
+      query: "roles",
+      language: "en_US",
+      count: 1,
+      results: [
+        {
+          id: 1,
+          rank: 1,
+          title: "Doc A",
+          url: "https://help.salesforce.com/s/articleView?id=a&type=5",
+          source: "help",
+          hostname: "help.salesforce.com",
+          label: "Doc A",
+        },
+      ],
+    });
 
     const ctx = createContext({
       args: { query: "roles" },
@@ -43,12 +56,12 @@ describe("docs search-help-site", () => {
 
     await DocsSearchHelpSite.prototype.run.call(ctx as never);
 
-    expect(searchHelp).toHaveBeenCalledWith({
+    expect(searchHelpDocs).toHaveBeenCalledWith({
       query: "roles",
       language: "en_US",
       limit: 10,
       timeoutMs: 45000,
-      useCache: true,
+      cache: true,
       headed: false,
       debug: false,
     });
@@ -61,10 +74,31 @@ describe("docs search-help-site", () => {
   });
 
   it("prints a boxed table in non-JSON mode", async () => {
-    vi.mocked(searchHelp).mockResolvedValue([
-      { title: "Doc A", url: "https://help.salesforce.com/s/articleView?id=a&type=5" },
-      { title: "Doc B", url: "https://developer.salesforce.com/docs/commerce/example" },
-    ]);
+    vi.mocked(searchHelpDocs).mockResolvedValue({
+      query: "roles",
+      language: "en_US",
+      count: 2,
+      results: [
+        {
+          id: 1,
+          rank: 1,
+          title: "Doc A",
+          url: "https://help.salesforce.com/s/articleView?id=a&type=5",
+          source: "help",
+          hostname: "help.salesforce.com",
+          label: "Doc A",
+        },
+        {
+          id: 2,
+          rank: 2,
+          title: "Doc B",
+          url: "https://developer.salesforce.com/docs/commerce/example",
+          source: "developer",
+          hostname: "developer.salesforce.com",
+          label: "Doc B",
+        },
+      ],
+    });
 
     const ctx = createContext({
       args: { query: "roles" },
@@ -89,7 +123,12 @@ describe("docs search-help-site", () => {
   });
 
   it("treats zero results as a valid non-error outcome", async () => {
-    vi.mocked(searchHelp).mockResolvedValue([]);
+    vi.mocked(searchHelpDocs).mockResolvedValue({
+      query: "nothing",
+      language: "en_US",
+      count: 0,
+      results: [],
+    });
 
     const ctx = createContext({
       args: { query: "nothing" },

@@ -1,5 +1,6 @@
 import { chromium } from "playwright";
 import type { Response as PlaywrightResponse } from "playwright";
+import { BrowserLaunchError } from "../apiErrors";
 import { buildCachePath, readCache, writeCache } from "./cache";
 import { buildChromiumLaunchOptions } from "./browserLaunch";
 import { storeLatestSearch } from "./latestSearch";
@@ -76,7 +77,14 @@ async function searchViaBrowser(
   headed: boolean,
   debug: boolean
 ): Promise<SearchResult[]> {
-  const browser = await chromium.launch(buildChromiumLaunchOptions({ headed }));
+  let browser;
+
+  try {
+    browser = await chromium.launch(buildChromiumLaunchOptions({ headed }));
+  } catch (error) {
+    throw new BrowserLaunchError(undefined, { cause: error });
+  }
+
   const context = await browser.newContext();
   const page = await context.newPage();
   let captured: { data: any | null; requestPayload: any | null } | null = null;

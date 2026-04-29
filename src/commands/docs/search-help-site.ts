@@ -1,5 +1,7 @@
 import { Args, Command, Flags } from "@oclif/core";
-import { searchHelp } from "../../lib/helpSearch";
+import { searchHelpDocs } from "../../api";
+import { getHelpDocsErrorCode } from "../../apiErrors";
+import { getErrorMessage } from "../../lib/errorUtils";
 import { renderSearchResultsTable } from "../../lib/searchTable";
 import {
   cacheFlag,
@@ -52,34 +54,40 @@ export default class DocsSearchHelpSite extends Command {
     const { args, flags } = await this.parse(DocsSearchHelpSite);
     const showStatus = !flags.json;
 
-    if (showStatus) {
-      this.log(`-> Searching Help for "${args.query}"...`);
+    try {
+      if (showStatus) {
+        this.log(`-> Searching Help for "${args.query}"...`);
+      }
+
+      const result = await searchHelpDocs({
+        query: args.query,
+        language: flags.language,
+        limit: flags.limit,
+        timeoutMs: flags.timeout,
+        cache: flags.cache,
+        headed: flags.headed,
+        debug: flags.debug,
+      });
+
+      if (showStatus) {
+        this.log(`-> Found ${result.count} result${result.count === 1 ? "" : "s"}.`);
+      }
+
+      if (flags.json) {
+        this.log(JSON.stringify(result, null, 2));
+        return;
+      }
+
+      if (result.results.length === 0) {
+        this.log("No results found.");
+        return;
+      }
+
+      this.log(renderSearchResultsTable(result.results));
+    } catch (error) {
+      this.error(getErrorMessage(error), {
+        code: getHelpDocsErrorCode(error),
+      });
     }
-
-    const results = await searchHelp({
-      query: args.query,
-      language: flags.language,
-      limit: flags.limit,
-      timeoutMs: flags.timeout,
-      useCache: flags.cache,
-      headed: flags.headed,
-      debug: flags.debug,
-    });
-
-    if (showStatus) {
-      this.log(`-> Found ${results.length} result${results.length === 1 ? "" : "s"}.`);
-    }
-
-    if (flags.json) {
-      this.log(JSON.stringify({ query: args.query, count: results.length, results }, null, 2));
-      return;
-    }
-
-    if (results.length === 0) {
-      this.log("No results found.");
-      return;
-    }
-
-    this.log(renderSearchResultsTable(results));
   }
 }

@@ -2,6 +2,11 @@ import { chromium } from "playwright";
 import type { Browser, BrowserContext, Page } from "playwright";
 import { Readability } from "@mozilla/readability";
 import { JSDOM } from "jsdom";
+import {
+  ArticleNotFoundError,
+  BrowserLaunchError,
+  ExtractedContentTooShortError,
+} from "../apiErrors";
 import { buildCachePath, readCache, writeCache } from "./cache";
 import { normalizeAndValidateDocUrl } from "./urlPolicy";
 import { acceptOneTrust } from "./browserConsent";
@@ -135,7 +140,14 @@ export type ScraperSession = {
 
 export async function createScraperSession(options?: { headed?: boolean }): Promise<ScraperSession> {
   const headed = options?.headed ?? false;
-  const browser = await chromium.launch(buildChromiumLaunchOptions({ headed }));
+  let browser: Browser;
+
+  try {
+    browser = await chromium.launch(buildChromiumLaunchOptions({ headed }));
+  } catch (error) {
+    throw new BrowserLaunchError(undefined, { cause: error });
+  }
+
   const context = await browser.newContext();
   let closed = false;
 
@@ -288,7 +300,7 @@ async function scrapeHelpMarkdown(
 
     const bodyText = await page.innerText("body");
     if (await isAuraErrorVisible(page) || looksLikeErrorPage(bodyText)) {
-      throw new Error("Help article error page detected.");
+      throw new ArticleNotFoundError();
     }
 
     const html = await page.content();
@@ -321,7 +333,7 @@ async function scrapeHelpMarkdown(
     }
 
     if (markdown.length < MIN_CONTENT_LENGTH) {
-      throw new Error("Extracted content was too short.");
+      throw new ExtractedContentTooShortError();
     }
 
     const normalizedMarkdown = normalizeMarkdown(markdown);
@@ -1190,7 +1202,7 @@ async function scrapeDeveloperMarkdown(
       return "";
     });
     if (looksLikeDeveloperErrorPage(bodyText)) {
-      throw new Error("Developer documentation error page detected.");
+      throw new ArticleNotFoundError();
     }
 
     const html = await page.content();
@@ -1335,11 +1347,11 @@ async function scrapeDeveloperMarkdown(
     }
 
     if (markdown.length < MIN_CONTENT_LENGTH) {
-      throw new Error("Extracted content was too short.");
+      throw new ExtractedContentTooShortError();
     }
 
     if (looksLikeDeveloperErrorPage(markdown)) {
-      throw new Error("Developer documentation error page detected.");
+      throw new ArticleNotFoundError();
     }
 
     const normalizedMarkdown = normalizeMarkdown(markdown);
